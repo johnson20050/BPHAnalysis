@@ -84,7 +84,6 @@ class BPHRecoCandidate: public virtual BPHKinematicFit {
                                                  double mass = -1,
                                                  double msig = -1 );
 
-
  protected:
 
   // template function called by "build" to allow

@@ -93,7 +93,7 @@ private:
     std::string LbToLam0Name;
     std::string LbToTkTkName;
 
-    enum recoType { Onia, JPsi, Psi2, Lam0, TkTk, LbToLam0, LbToTkTk };
+    enum recoType { Onia, Psi1, Psi2, Lam0, TkTk, LbToLam0, LbToTkTk };
     enum  parType { ptMin, etaMax,
                     mPsiMin, mPsiMax, mLam0Min, mLam0Max,
                     massMin, massMax, probMin, mFitMin, mFitMax,

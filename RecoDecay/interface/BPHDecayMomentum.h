@@ -100,8 +100,6 @@ class BPHDecayMomentum {
 
  protected:
 
-
-// 
   struct Component {
     const reco::Candidate* cand;
     double mass;
@@ -128,7 +126,6 @@ class BPHDecayMomentum {
                      const BPHRecoConstCandPtr& comp );
 
   // utility function used to cash reconstruction results
- public:
   virtual void setNotUpdated() const;
 
  private:
