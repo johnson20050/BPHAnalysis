@@ -19,10 +19,15 @@
 //------------------------------------
 #include "BPHAnalysis/RecoDecay/interface/BPHDecayVertex.h"
 #include "TMath.h"
+#include <vector>
 
-//---------------
-// C++ Headers --
-//---------------
+//--------------------------------
+// Jack's code used in accept() --
+//--------------------------------
+#include "RecoVertex/KinematicFitPrimitives/interface/VirtualKinematicParticleFactory.h"
+#include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
+#include "RecoVertex/KinematicFit/interface/KinematicParticleVertexFitter.h"
+#include "RecoVertex/KinematicFit/interface/KinematicConstrainedVertexFitter.h"
 
 
 //              ---------------------
@@ -48,7 +53,31 @@ class BPHChi2Select: public BPHVertexSelect {
     const reco::Vertex& v = cand.vertex();
     if ( v.isFake() ) return false;
     if ( !v.isValid() ) return false;
+    if ( probMin == -1.0 ) return true;
     return ( TMath::Prob( v.chi2(), lround( v.ndof() ) ) > probMin );
+  }
+
+  // from Jack's code. added in Dec 1 2016
+  // Specifically used in lambda0, because it has defferent vertex point.
+  // e.g. Lambda0_b -> J/psi + lambda0
+  // J/psi has very short lifetime, you can regard the vertex point of J/psi and Lambda0_b as the same.
+  // But lambda0 has long life time(about 0.4cm). Thus you need to assign for different vertex point and recalculate the momentum
+  virtual bool accept( const BPHRecoCandidate* cand ) const {
+    // perform vertex fit
+    std::vector<RefCountedKinematicParticle> kComp = cand->kinParticles();
+
+    KinematicParticleVertexFitter vtxFitter;
+    RefCountedKinematicTree compTree = vtxFitter.fit( kComp );
+    if (compTree->isEmpty()) return false;
+    compTree->movePointerToTheTop();
+    const RefCountedKinematicParticle kPart = compTree->currentParticle();
+    const RefCountedKinematicVertex   kVtx  = compTree->currentDecayVertex();
+    const KinematicState& kState = kPart->currentState();
+    if (!kState.isValid()) return false;
+
+    if ( probMin == -1.0 ) return true;
+    double vtxProb = TMath::Prob( kVtx->chiSquared(), kVtx->degreesOfFreedom() );
+    return ( vtxProb > probMin );
   }
 
   /// set prob min

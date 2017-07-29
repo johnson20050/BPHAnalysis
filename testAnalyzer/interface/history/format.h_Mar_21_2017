@@ -1,0 +1,434 @@
+#ifndef __FORMAT_H__
+#define __FORMAT_H__
+#include "TTree.h"
+
+// Modified :
+// 21/March/2017
+
+
+class JpsiBranches // {{{
+{
+public:
+    double mass, vtxprob;
+    double pt, eta, phi;
+  //  double pvToposX, pvToposY, pvToposZ;
+
+    void RegTree(TTree *root)
+    {
+        root->Branch("mass"    ,&mass     ,"mass/D"    );
+        root->Branch("vtxprob" ,&vtxprob  ,"vtxprob/D" );
+        root->Branch("pt"      ,&pt       ,"pt/D"      );
+        root->Branch("eta"     ,&eta      ,"eta/D"     );
+        root->Branch("phi"     ,&phi      ,"phi/D"     );
+  //      root->Branch("pvToposX",&pvToposX ,"pvToposX/D");
+  //      root->Branch("pvToposY",&pvToposY ,"pvToposY/D");
+  //      root->Branch("pvToposZ",&pvToposZ ,"pvToposZ/D");
+    }
+    void SetBranchAddress(TTree *root)
+    {
+        root->SetBranchAddress("mass"    ,&mass     );
+        root->SetBranchAddress("vtxprob" ,&vtxprob  );
+        root->SetBranchAddress("pt"      ,&pt       );
+        root->SetBranchAddress("eta"     ,&eta      );
+        root->SetBranchAddress("phi"     ,&phi      );
+  //      root->SetBranchAddress("pvToposX",&pvToposX );
+  //      root->SetBranchAddress("pvToposY",&pvToposY );
+  //      root->SetBranchAddress("pvToposZ",&pvToposZ );
+    }
+};// }}}
+
+class Lam0Branches// {{{
+{
+public:
+    double mass, pt, eta, phi;
+    double vtxmass, vtxprob, fl2d, cosa2d;
+    double ppt, pipt;
+
+    void RegTree(TTree *root)
+    {
+        root->Branch("mass"    ,&mass     ,"mass/D"    );
+        root->Branch("pt"      ,&pt       ,"pt/D"      );
+        root->Branch("eta"     ,&eta      ,"eta/D"     );
+        root->Branch("phi"     ,&phi      ,"phi/D"     );
+        root->Branch("vtxmass" ,&vtxmass  ,"vtxmass/D" );
+        root->Branch("vtxprob" ,&vtxprob  ,"vtxprob/D" );
+        root->Branch("fl2d"    ,&fl2d     ,"fl2d/D"    );
+        root->Branch("cosa2d"  ,&cosa2d   ,"cosa2d/D"  );
+        root->Branch("ppt"     ,&ppt      ,"ppt/D"     );
+        root->Branch("pipt"    ,&pipt     ,"pipt/D"    );
+    }
+    void SetBranchAddress(TTree *root)
+    {
+        root->SetBranchAddress("mass"    ,&mass     );
+        root->SetBranchAddress("pt"      ,&pt       );
+        root->SetBranchAddress("eta"     ,&eta      );
+        root->SetBranchAddress("phi"     ,&phi      );
+        root->SetBranchAddress("vtxmass" ,&vtxmass  );
+        root->SetBranchAddress("vtxprob" ,&vtxprob  );
+        root->SetBranchAddress("fl2d"    ,&fl2d     );
+        root->SetBranchAddress("cosa2d"  ,&cosa2d   );
+        root->SetBranchAddress("ppt"     ,&ppt      );
+        root->SetBranchAddress("pipt"    ,&pipt     );
+    }
+};// }}}
+
+class PentaQuarkBranches // {{{
+{
+public:
+    double mass, pt, eta, phi;
+    double charge;
+    double vtxmass, vtxprob, fl2d, cosa2d;
+    double jpsimass, jpsipt, jpsivtxprob;
+    double tTpt, tTeta, tTphi;  // thridTrack
+    double PosX, PosY, vtxPosX, vtxPosY, jpsiPosX, jpsiPosY;
+    double Px, Py, vtxPx, vtxPy;
+
+
+    void RegTree(TTree *root)
+    {
+        root->Branch("mass"         ,&mass         ,"mass/D"         );
+        root->Branch("pt"           ,&pt           ,"pt/D"           );
+        root->Branch("eta"          ,&eta          ,"eta/D"          );
+        root->Branch("phi"          ,&phi          ,"phi/D"          );
+        root->Branch("charge"       ,&charge       ,"charge/D"       );
+        root->Branch("vtxmass"      ,&vtxmass      ,"vtxmass/D"      );
+        root->Branch("vtxprob"      ,&vtxprob      ,"vtxprob/D"      );
+        root->Branch("fl2d"         ,&fl2d         ,"fl2d/D"         );
+        root->Branch("cosa2d"       ,&cosa2d       ,"cosa2d/D"       );
+        root->Branch("jpsimass"     ,&jpsimass     ,"jpsimass/D"     );
+        root->Branch("jpsipt"       ,&jpsipt       ,"jpsipt/D"       );
+        root->Branch("jpsivtxprob"  ,&jpsivtxprob  ,"jpsivtxprob/D"  );
+        root->Branch("tTpt"         ,&tTpt         ,"tTpt/D"         );
+        root->Branch("tTeta"        ,&tTeta        ,"tTeta/D"        );
+        root->Branch("tTphi"        ,&tTphi        ,"tTphi/D"        );
+
+        root->Branch("PosX"         ,&PosX         ,"PosX/D"         );
+        root->Branch("PosY"         ,&PosY         ,"PosY/D"         );
+        root->Branch("vtxPosX"      ,&vtxPosX      ,"vtxPosX/D"      );
+        root->Branch("vtxPosY"      ,&vtxPosY      ,"vtxPosY/D"      );
+        root->Branch("jpsiPosX"     ,&jpsiPosX     ,"jpsiPosX/D"     );
+        root->Branch("jpsiPosY"     ,&jpsiPosY     ,"jpsiPosY/D"     );
+
+        root->Branch("Px"           ,&Px           ,"Px/D"           );
+        root->Branch("Py"           ,&Py           ,"Py/D"           );
+        root->Branch("vtxPx"        ,&vtxPx        ,"vtxPx/D"        );
+        root->Branch("vtxPy"        ,&vtxPy        ,"vtxPy/D"        );
+    }
+    void SetBranchAddress(TTree *root)
+    {
+        root->SetBranchAddress("mass"         ,&mass         );
+        root->SetBranchAddress("pt"           ,&pt           );
+        root->SetBranchAddress("eta"          ,&eta          );
+        root->SetBranchAddress("phi"          ,&phi          );
+        root->SetBranchAddress("charge"       ,&charge       );
+        root->SetBranchAddress("vtxmass"      ,&vtxmass      );
+        root->SetBranchAddress("vtxprob"      ,&vtxprob      );
+        root->SetBranchAddress("fl2d"         ,&fl2d         );
+        root->SetBranchAddress("cosa2d"       ,&cosa2d       );
+        root->SetBranchAddress("jpsimass"     ,&jpsimass     );
+        root->SetBranchAddress("jpsipt"       ,&jpsipt       );
+        root->SetBranchAddress("jpsivtxprob"  ,&jpsivtxprob  );
+        root->SetBranchAddress("tTpt"         ,&tTpt         );
+        root->SetBranchAddress("tTeta"        ,&tTeta        );
+        root->SetBranchAddress("tTphi"        ,&tTphi        );
+
+        root->SetBranchAddress("PosX"         ,&PosX         );
+        root->SetBranchAddress("PosY"         ,&PosY         );
+        root->SetBranchAddress("vtxPosX"      ,&vtxPosX      );
+        root->SetBranchAddress("vtxPosY"      ,&vtxPosY      );
+        root->SetBranchAddress("jpsiPosX"     ,&jpsiPosX     );
+        root->SetBranchAddress("jpsiPosY"     ,&jpsiPosY     );
+
+        root->SetBranchAddress("Px"           ,&Px           );
+        root->SetBranchAddress("Py"           ,&Py           );
+        root->SetBranchAddress("vtxPx"        ,&vtxPx        );
+        root->SetBranchAddress("vtxPy"        ,&vtxPy        );
+    }
+}; // }}}
+
+
+
+class LambToLam0Branches // {{{
+{
+public:
+
+    double pvposX,       pvposY,       pvposZ;
+
+    double mass,         pt,           eta,          phi;          
+
+    double vtxmass,      vtxprob;      
+    double vtxpt,        vtxeta,       vtxphi;       
+    double vtxposX,      vtxposY,      vtxposZ;      
+
+    double jpsimass,     jpsivtxprob;  
+    double jpsipt,       jpsieta,      jpsiphi;      
+    double jpsiposX,     jpsiposY,     jpsiposZ;     
+
+    double lam0mass,     lam0vtxprob;  
+    double lam0pt,       lam0eta,      lam0phi;      
+    double lam0posX,     lam0posY,     lam0posZ;     
+
+    double protonCharge, protonPt;     
+    double pionCharge,   pionPt;       
+    
+    void RegTree(TTree *root)
+    {
+        root->Branch("pvposX"      ,&pvposX         ,"pvposX/D"         ); 
+        root->Branch("pvposY"      ,&pvposY         ,"pvposY/D"         ); 
+        root->Branch("pvposZ"      ,&pvposZ         ,"pvposZ/D"         ); 
+                                                                
+        root->Branch("mass"        ,&mass           ,"mass/D"           ); 
+        root->Branch("pt"          ,&pt             ,"pt/D"             ); 
+        root->Branch("eta"         ,&eta            ,"eta/D"            ); 
+        root->Branch("phi"         ,&phi            ,"phi/D"            ); 
+                                                                
+        root->Branch("vtxmass"     ,&vtxmass        ,"vtxmass/D"        ); 
+        root->Branch("vtxprob"     ,&vtxprob        ,"vtxprob/D"        ); 
+        root->Branch("vtxpt"       ,&vtxpt          ,"vtxpt/D"          ); 
+        root->Branch("vtxeta"      ,&vtxeta         ,"vtxeta/D"         ); 
+        root->Branch("vtxphi"      ,&vtxphi         ,"vtxphi/D"         ); 
+                                                                
+        root->Branch("vtxposX"     ,&vtxposX        ,"vtxposX/D"        ); 
+        root->Branch("vtxposY"     ,&vtxposY        ,"vtxposY/D"        ); 
+        root->Branch("vtxposZ"     ,&vtxposZ        ,"vtxposZ/D"        ); 
+                                                                
+        root->Branch("jpsimass"    ,&jpsimass       ,"jpsimass/D"       ); 
+        root->Branch("jpsivtxprob" ,&jpsivtxprob    ,"jpsivtxprob/D"    );     
+        root->Branch("jpsipt"      ,&jpsipt         ,"jpsipt/D"         ); 
+        root->Branch("jpsieta"     ,&jpsieta        ,"jpsieta/D"        ); 
+        root->Branch("jpsiphi"     ,&jpsiphi        ,"jpsiphi/D"        ); 
+                                                                
+        root->Branch("jpsiposX"    ,&jpsiposX       ,"jpsiposX/D"       ); 
+        root->Branch("jpsiposY"    ,&jpsiposY       ,"jpsiposY/D"       ); 
+        root->Branch("jpsiposZ"    ,&jpsiposZ       ,"jpsiposZ/D"       ); 
+
+
+        root->Branch("lam0mass"    ,&lam0mass       ,"lam0mass/D"       ); 
+        root->Branch("lam0vtxprob" ,&lam0vtxprob    ,"lam0vtxprob/D"    );
+        root->Branch("lam0pt"      ,&lam0pt         ,"lam0pt/D"         ); 
+        root->Branch("lam0eta"     ,&lam0eta        ,"lam0eta/D"        ); 
+        root->Branch("lam0phi"     ,&lam0phi        ,"lam0phi/D"        ); 
+
+        root->Branch("lam0posX"    ,&lam0posX       ,"lam0posX/D"       );      
+        root->Branch("lam0posY"    ,&lam0posY       ,"lam0posY/D"       );     
+        root->Branch("lam0posZ"    ,&lam0posZ       ,"lam0posZ/D"       );     
+                                                                 
+        root->Branch("protonCharge",&protonCharge   ,"protonCharge/D"   );     
+        root->Branch("protonPt"    ,&protonPt       ,"protonPt/D"       );     
+        root->Branch("pionCharge"  ,&pionCharge     ,"pionCharge/D"     );     
+        root->Branch("pionPt"      ,&pionPt         ,"pionPt/D"         );     
+
+
+    }                          
+    void SetBranchAddress(TTree *root)
+    {
+        root->SetBranchAddress("pvposX"      ,&pvposX         ); 
+        root->SetBranchAddress("pvposY"      ,&pvposY         ); 
+        root->SetBranchAddress("pvposZ"      ,&pvposZ         ); 
+
+        root->SetBranchAddress("mass"        ,&mass           ); 
+        root->SetBranchAddress("pt"          ,&pt             ); 
+        root->SetBranchAddress("eta"         ,&eta            ); 
+        root->SetBranchAddress("phi"         ,&phi            ); 
+
+        root->SetBranchAddress("vtxmass"     ,&vtxmass        ); 
+        root->SetBranchAddress("vtxprob"     ,&vtxprob        ); 
+        root->SetBranchAddress("vtxpt"       ,&vtxpt          ); 
+        root->SetBranchAddress("vtxeta"      ,&vtxeta         ); 
+        root->SetBranchAddress("vtxphi"      ,&vtxphi         ); 
+
+        root->SetBranchAddress("vtxposX"     ,&vtxposX        ); 
+        root->SetBranchAddress("vtxposY"     ,&vtxposY        ); 
+        root->SetBranchAddress("vtxposZ"     ,&vtxposZ        ); 
+
+        root->SetBranchAddress("jpsimass"    ,&jpsimass       ); 
+        root->SetBranchAddress("jpsivtxprob" ,&jpsivtxprob    ); 
+        root->SetBranchAddress("jpsipt"      ,&jpsipt         ); 
+        root->SetBranchAddress("jpsieta"     ,&jpsieta        ); 
+        root->SetBranchAddress("jpsiphi"     ,&jpsiphi        ); 
+
+        root->SetBranchAddress("jpsiposX"    ,&jpsiposX       ); 
+        root->SetBranchAddress("jpsiposY"    ,&jpsiposY       ); 
+        root->SetBranchAddress("jpsiposZ"    ,&jpsiposZ       ); 
+
+        root->SetBranchAddress("lam0mass"    ,&lam0mass       ); 
+        root->SetBranchAddress("lam0vtxprob" ,&lam0vtxprob    ); 
+        root->SetBranchAddress("lam0pt"      ,&lam0pt         ); 
+        root->SetBranchAddress("lam0eta"     ,&lam0eta        ); 
+        root->SetBranchAddress("lam0phi"     ,&lam0phi        );     
+
+        root->SetBranchAddress("lam0posX"    ,&lam0posX       ); 
+        root->SetBranchAddress("lam0posY"    ,&lam0posY       ); 
+        root->SetBranchAddress("lam0posZ"    ,&lam0posZ       ); 
+
+        root->SetBranchAddress("protonCharge",&protonCharge   );     
+        root->SetBranchAddress("protonPt"    ,&protonPt       );     
+        root->SetBranchAddress("pionCharge"  ,&pionCharge     );     
+        root->SetBranchAddress("pionPt"      ,&pionPt         );     
+    }
+}; // }}}
+class LambToTkTkBranches // {{{
+{
+public:
+
+    double pvposX,       pvposY,       pvposZ;       
+
+    double mass,         pt,           eta,          phi;          
+
+    double vtxmass,      vtxprob;      
+    double vtxpt,        vtxeta,       vtxphi;       
+    double vtxposX,      vtxposY,      vtxposZ;      
+
+    double jpsimass,     jpsivtxprob;  
+    double jpsipt,       jpsieta,      jpsiphi;      
+    double jpsiposX,     jpsiposY,     jpsiposZ;     
+
+    double penQmass,     penQvtxprob;  
+    double penQpt,       penQeta,      penQphi;      
+    double penQposX,     penQposY,     penQposZ;     
+
+    double protonCharge, protonPt;     
+    double kaonCharge,   kaonPt;       
+    
+    void RegTree(TTree *root)
+    {
+        root->Branch("pvposX"      ,&pvposX         ,"pvposX/D"         ); 
+        root->Branch("pvposY"      ,&pvposY         ,"pvposY/D"         ); 
+        root->Branch("pvposZ"      ,&pvposZ         ,"pvposZ/D"         ); 
+                                                                
+        root->Branch("mass"        ,&mass           ,"mass/D"           ); 
+        root->Branch("pt"          ,&pt             ,"pt/D"             ); 
+        root->Branch("eta"         ,&eta            ,"eta/D"            ); 
+        root->Branch("phi"         ,&phi            ,"phi/D"            ); 
+                                                                
+        root->Branch("vtxmass"     ,&vtxmass        ,"vtxmass/D"        ); 
+        root->Branch("vtxprob"     ,&vtxprob        ,"vtxprob/D"        ); 
+        root->Branch("vtxpt"       ,&vtxpt          ,"vtxpt/D"          ); 
+        root->Branch("vtxeta"      ,&vtxeta         ,"vtxeta/D"         ); 
+        root->Branch("vtxphi"      ,&vtxphi         ,"vtxphi/D"         ); 
+                                                                
+        root->Branch("vtxposX"     ,&vtxposX        ,"vtxposX/D"        ); 
+        root->Branch("vtxposY"     ,&vtxposY        ,"vtxposY/D"        ); 
+        root->Branch("vtxposZ"     ,&vtxposZ        ,"vtxposZ/D"        ); 
+                                                                
+        root->Branch("jpsimass"    ,&jpsimass       ,"jpsimass/D"       ); 
+        root->Branch("jpsivtxprob" ,&jpsivtxprob    ,"jpsivtxprob/D"    );     
+        root->Branch("jpsipt"      ,&jpsipt         ,"jpsipt/D"         ); 
+        root->Branch("jpsieta"     ,&jpsieta        ,"jpsieta/D"        ); 
+        root->Branch("jpsiphi"     ,&jpsiphi        ,"jpsiphi/D"        ); 
+                                                                
+        root->Branch("jpsiposX"    ,&jpsiposX       ,"jpsiposX/D"       ); 
+        root->Branch("jpsiposY"    ,&jpsiposY       ,"jpsiposY/D"       ); 
+        root->Branch("jpsiposZ"    ,&jpsiposZ       ,"jpsiposZ/D"       ); 
+
+
+        root->Branch("penQmass"    ,&penQmass       ,"penQmass/D"       ); 
+        root->Branch("penQvtxprob" ,&penQvtxprob    ,"penQvtxprob/D"    );
+        root->Branch("penQpt"      ,&penQpt         ,"penQpt/D"         ); 
+        root->Branch("penQeta"     ,&penQeta        ,"penQeta/D"        ); 
+        root->Branch("penQphi"     ,&penQphi        ,"penQphi/D"        ); 
+
+        root->Branch("penQposX"    ,&penQposX       ,"penQposX/D"       );      
+        root->Branch("penQposY"    ,&penQposY       ,"penQposY/D"       );     
+        root->Branch("penQposZ"    ,&penQposZ       ,"penQposZ/D"       );     
+                                                                 
+        root->Branch("protonCharge",&protonCharge   ,"protonCharge/D"   );     
+        root->Branch("protonPt"    ,&protonPt       ,"protonPt/D"       );     
+        root->Branch("kaonCharge"  ,&kaonCharge     ,"kaonCharge/D"     );     
+        root->Branch("kaonPt"      ,&kaonPt         ,"kaonPt/D"         );     
+
+
+    }                          
+    void SetBranchAddress(TTree *root)
+    {
+        root->SetBranchAddress("pvposX"      ,&pvposX         ); 
+        root->SetBranchAddress("pvposY"      ,&pvposY         ); 
+        root->SetBranchAddress("pvposZ"      ,&pvposZ         ); 
+
+        root->SetBranchAddress("mass"        ,&mass           ); 
+        root->SetBranchAddress("pt"          ,&pt             ); 
+        root->SetBranchAddress("eta"         ,&eta            ); 
+        root->SetBranchAddress("phi"         ,&phi            ); 
+
+        root->SetBranchAddress("vtxmass"     ,&vtxmass        ); 
+        root->SetBranchAddress("vtxprob"     ,&vtxprob        ); 
+        root->SetBranchAddress("vtxpt"       ,&vtxpt          ); 
+        root->SetBranchAddress("vtxeta"      ,&vtxeta         ); 
+        root->SetBranchAddress("vtxphi"      ,&vtxphi         ); 
+
+        root->SetBranchAddress("vtxposX"     ,&vtxposX        ); 
+        root->SetBranchAddress("vtxposY"     ,&vtxposY        ); 
+        root->SetBranchAddress("vtxposZ"     ,&vtxposZ        ); 
+
+        root->SetBranchAddress("jpsimass"    ,&jpsimass       ); 
+        root->SetBranchAddress("jpsivtxprob" ,&jpsivtxprob    ); 
+        root->SetBranchAddress("jpsipt"      ,&jpsipt         ); 
+        root->SetBranchAddress("jpsieta"     ,&jpsieta        ); 
+        root->SetBranchAddress("jpsiphi"     ,&jpsiphi        ); 
+
+        root->SetBranchAddress("jpsiposX"    ,&jpsiposX       ); 
+        root->SetBranchAddress("jpsiposY"    ,&jpsiposY       ); 
+        root->SetBranchAddress("jpsiposZ"    ,&jpsiposZ       ); 
+
+        root->SetBranchAddress("penQmass"    ,&penQmass       ); 
+        root->SetBranchAddress("penQvtxprob" ,&penQvtxprob    ); 
+        root->SetBranchAddress("penQpt"      ,&penQpt         ); 
+        root->SetBranchAddress("penQeta"     ,&penQeta        ); 
+        root->SetBranchAddress("penQphi"     ,&penQphi        );     
+
+        root->SetBranchAddress("penQposX"    ,&penQposX       ); 
+        root->SetBranchAddress("penQposY"    ,&penQposY       ); 
+        root->SetBranchAddress("penQposZ"    ,&penQposZ       ); 
+
+        root->SetBranchAddress("protonCharge",&protonCharge   );     
+        root->SetBranchAddress("protonPt"    ,&protonPt       );     
+        root->SetBranchAddress("kaonCharge"  ,&kaonCharge     );     
+        root->SetBranchAddress("kaonPt"      ,&kaonPt         );     
+    }
+}; // }}}
+
+#endif
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      

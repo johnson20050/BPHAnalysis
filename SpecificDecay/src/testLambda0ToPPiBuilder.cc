@@ -1,0 +1,242 @@
+/*
+ *  See header file for a description of this class.
+ *
+ *  \author Paolo Ronchese INFN Padova
+ *
+ */
+
+//-----------------------
+// This Class' Header --
+//-----------------------
+#include "BPHAnalysis/SpecificDecay/interface/testLambda0ToPPiBuilder.h"
+
+//-------------------------------
+// Collaborating Class Headers --
+//-------------------------------
+#include "BPHAnalysis/RecoDecay/interface/BPHRecoBuilder.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHPlusMinusCandidate.h"
+
+//-----------------------
+// Selections -----------
+// ----------------------
+#include "BPHAnalysis/SpecificDecay/interface/BPHParticlePtSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHParticleEtaSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHMassSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHMassSymSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHChi2Select.h"
+
+//-----------------------
+// Record Masses --------
+// ----------------------
+#include "BPHAnalysis/SpecificDecay/interface/BPHParticleMasses.h"
+
+#include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/Math/interface/LorentzVector.h"
+
+//---------------
+// C++ Headers --
+//---------------
+#include <iostream>
+using namespace std;
+
+//-------------------
+// Initializations --
+//-------------------
+
+
+//----------------
+// Constructors --
+//----------------
+testLambda0ToPPiBuilder::testLambda0ToPPiBuilder(
+    const edm::EventSetup& es,
+    const BPHRecoBuilder::BPHGenericCollection* protCollection,
+    const BPHRecoBuilder::BPHGenericCollection* pionCollection ):
+    protName( "Proton" ),
+    pionName( "Pion" ),
+    evSetup( &es ),
+    kCollection( protCollection ),
+    pCollection( pionCollection )
+{
+    ptSel = new BPHParticlePtSelect (  0.7 );
+    etaSel = new BPHParticleEtaSelect( 10.0 );
+    massSel = new BPHMassSelect( 0.90, 1.50 );
+    chi2Sel = new BPHChi2Select( 0.0 );
+    updated = false;
+}
+
+//--------------
+// Destructor --
+//--------------
+testLambda0ToPPiBuilder::~testLambda0ToPPiBuilder()
+{
+    delete   ptSel;
+    delete  etaSel;
+    delete massSel;
+    delete chi2Sel;
+}
+
+//--------------
+// Operations --
+//--------------
+vector<BPHPlusMinusConstCandPtr> testLambda0ToPPiBuilder::build()
+{
+
+    if ( updated ) return lam0List;
+
+    BPHRecoBuilder bLam0( *evSetup );
+    bLam0.add( protName, kCollection, BPHParticleMasses::protonMass,
+                                      BPHParticleMasses::protonMSigma );
+    bLam0.add( pionName, pCollection, BPHParticleMasses::  pionMass,
+                                      BPHParticleMasses::  pionMSigma );
+    bLam0.filter( protName, *ptSel );
+    bLam0.filter( pionName, *ptSel );
+    bLam0.filter( protName, *etaSel );
+    bLam0.filter( pionName, *etaSel );
+    BPHMassSymSelect mTmpSel( protName, pionName, massSel );
+    bLam0.filter( mTmpSel );
+
+    vector<BPHPlusMinusConstCandPtr>
+    tmpList = BPHPlusMinusCandidate::build( bLam0, protName, pionName );
+
+    unsigned int ikx;
+    unsigned int nkx = tmpList.size();
+    lam0List.clear();
+    lam0List.reserve( nkx );
+    BPHPlusMinusConstCandPtr pxt( 0 );
+    for ( ikx = 0; ikx < nkx; ++ikx )
+    {
+        // from Jack
+        const BPHRecoCandidate* cand;
+
+
+        BPHPlusMinusConstCandPtr& px0 = tmpList[ikx];
+        BPHPlusMinusCandidatePtr  pxb( new BPHPlusMinusCandidate( evSetup ) );
+        const
+        BPHPlusMinusCandidate* lam0 = px0.get();
+        BPHPlusMinusCandidate* lam0b= pxb.get();
+        lam0b->add( pionName, lam0->originalReco( lam0->getDaug( protName ) ),
+                    BPHParticleMasses::  pionMass );
+        lam0b->add( protName, lam0->originalReco( lam0->getDaug( pionName ) ),
+                    BPHParticleMasses::protonMass );
+        if ( fabs( lam0 ->composite().mass() - BPHParticleMasses::lambda0Mass ) <
+             fabs( lam0b->composite().mass() - BPHParticleMasses::lambda0Mass ) )
+        {
+            pxt  = px0;
+            cand = dynamic_cast<const BPHRecoCandidate*>(lam0);
+        }
+        else 
+        {
+            pxt  = pxb;
+            cand = dynamic_cast<const BPHRecoCandidate*>(lam0b);
+        }
+
+        if ( !massSel->accept( *pxt ) ) continue;
+
+        // from Jack
+        if ( !chi2Sel->accept( cand ) ) continue;
+        
+        lam0List.push_back( pxt );
+    }
+
+    updated = true;
+    return lam0List;
+
+}
+
+/// set cuts
+void testLambda0ToPPiBuilder::setPtMin( double pt )
+{
+    updated = false;
+    ptSel->setPtMin( pt );
+
+    return;
+}
+
+
+void testLambda0ToPPiBuilder::setEtaMax( double eta )
+{
+    updated = false;
+    etaSel->setEtaMax( eta );
+
+    return;
+}
+
+
+void testLambda0ToPPiBuilder::setMassMin( double m )
+{
+    updated = false;
+    massSel->setMassMin( m );
+
+    return;
+}
+
+
+void testLambda0ToPPiBuilder::setMassMax( double m )
+{
+    updated = false;
+    massSel->setMassMax( m );
+
+    return;
+}
+
+
+void testLambda0ToPPiBuilder::setProbMin( double p )
+{
+    updated = false;
+    chi2Sel->setProbMin( p );
+
+    return;
+}
+
+
+void testLambda0ToPPiBuilder::setConstr( double mass, double sigma )
+{
+    updated = false;
+    cMass  = mass;
+    cSigma = sigma;
+
+    return;
+}
+
+/// get current cuts
+double testLambda0ToPPiBuilder::getPtMin() const
+{
+    return ptSel->getPtMin();
+}
+
+
+double testLambda0ToPPiBuilder::getEtaMax() const
+{
+    return etaSel->getEtaMax();
+}
+
+
+double testLambda0ToPPiBuilder::getMassMin() const
+{
+    return massSel->getMassMin();
+}
+
+
+double testLambda0ToPPiBuilder::getMassMax() const
+{
+    return massSel->getMassMax();
+}
+
+
+double testLambda0ToPPiBuilder::getProbMin() const
+{
+    return chi2Sel->getProbMin();
+}
+
+
+double testLambda0ToPPiBuilder::getConstrMass() const
+{
+    return cMass;
+}
+
+
+double testLambda0ToPPiBuilder::getConstrSigma() const
+{
+    return cSigma;
+}
+

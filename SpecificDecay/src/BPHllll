@@ -1,0 +1,216 @@
+/*
+ *  See header file for a description of this class.
+ *
+ *  $Date: 2015-07-24 11:29:20 $
+ *  $Revision: 1.1 $
+ *  \author Paolo Ronchese INFN Padova
+ *
+ */
+
+//-----------------------
+// This Class' Header --
+//-----------------------
+#include "BPHAnalysis/SpecificDecay/interface/BPHLambda0ToPPiBuilder.h"
+
+//-------------------------------
+// Collaborating Class Headers --
+//-------------------------------
+#include "BPHAnalysis/RecoDecay/interface/BPHRecoBuilder.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHPlusMinusCandidate.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHParticlePtSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHParticleEtaSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHMassSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHMassSymSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHChi2Select.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHParticleMasses.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/Math/interface/LorentzVector.h"
+
+//---------------
+// C++ Headers --
+//---------------
+#include <iostream>
+using namespace std;
+
+//-------------------
+// Initializations --
+//-------------------
+
+
+//----------------
+// Constructors --
+//----------------
+BPHLambda0ToPPiBuilder::BPHLambda0ToPPiBuilder(
+               const edm::EventSetup& es,
+               const BPHRecoBuilder::BPHGenericCollection* ProtonCollection,
+               const BPHRecoBuilder::BPHGenericCollection*   PionCollection ):
+  //protonName( "Proton" ),
+  protonName(   "Kaon" ),
+    pionName(   "Pion" ),
+  evSetup( &es ),
+  protonCollection( ProtonCollection ),
+    pionCollection(   PionCollection ) {
+    ptSel = new BPHParticlePtSelect (  0.7 );
+   etaSel = new BPHParticleEtaSelect( 10.0 );
+  massSel = new BPHMassSelect( 1.05, 1.25 );
+  chi2Sel = new BPHChi2Select( 0.0 );
+  updated = false;
+}
+
+//--------------
+// Destructor --
+//--------------
+BPHLambda0ToPPiBuilder::~BPHLambda0ToPPiBuilder() {
+  delete   ptSel;
+  delete  etaSel;
+  delete massSel;
+  delete chi2Sel;
+}
+
+//--------------
+// Operations --
+//--------------
+vector<BPHPlusMinusConstCandPtr> BPHLambda0ToPPiBuilder::build() {
+
+  if ( updated ) return lam0List;
+
+  BPHRecoBuilder bLambda0( *evSetup );
+  //bLambda0.add( protonName, protonCollection, BPHParticleMasses::protonMass,
+  //                                            BPHParticleMasses::protonMSigma );
+  bLambda0.add( protonName, protonCollection, BPHParticleMasses::  kaonMass,
+                                              BPHParticleMasses::  kaonMSigma );
+  bLambda0.add(   pionName,   pionCollection, BPHParticleMasses::  pionMass,
+                                              BPHParticleMasses::  pionMSigma );
+
+  //std::cout << "proton collection size: " << protonCollection->size() << std::endl;
+  //std::cout << "pion   collection size: " <<   pionCollection->size() << std::endl;
+  bLambda0.filter( protonName, *ptSel  );
+  bLambda0.filter(   pionName, *ptSel  );
+  bLambda0.filter( protonName, *etaSel );
+  bLambda0.filter(   pionName, *etaSel );
+
+  BPHMassSymSelect massTmpSel( protonName, pionName, massSel );
+  bLambda0.filter( massTmpSel );
+
+  vector<BPHPlusMinusConstCandPtr>
+  tmpList = BPHPlusMinusCandidate::build( bLambda0, protonName, pionName );
+
+  int ilam;
+  int nlam = tmpList.size();
+  lam0List.clear();
+  lam0List.reserve( nlam );
+  BPHPlusMinusConstCandPtr ptrTempParticle( 0 );
+  for ( ilam = 0; ilam < nlam; ++ilam ) 
+  {
+    BPHPlusMinusConstCandPtr& ptrlam00 = tmpList[ilam];
+    BPHPlusMinusCandidatePtr  ptrlam0b ( new BPHPlusMinusCandidate(evSetup) );
+    const
+    BPHPlusMinusCandidate* lam0 = ptrlam00.get();
+    BPHPlusMinusCandidate* lamB = ptrlam0b.get();
+    // Search for anti lambda0_bar->p_bar + pi+
+    lamB->add(   pionName, lam0->originalReco( lam0->getDaug( protonName ) ),
+              BPHParticleMasses::  pionMass );
+    lamB->add( protonName, lam0->originalReco( lam0->getDaug(   pionName ) ),
+              BPHParticleMasses::  kaonMass );
+    //lamB->add(   pionName, lam0->originalReco( lam0->getDaug( protonName ) ),
+    //          BPHParticleMasses::  pionMass );
+    //lamB->add( protonName, lam0->originalReco( lam0->getDaug(   pionName ) ),
+    //          BPHParticleMasses::protonMass );
+
+    // select for particle with smaller mass difference 
+    if ( fabs( lam0->composite().mass() - BPHParticleMasses::lambda0Mass ) <
+         fabs( lamB->composite().mass() - BPHParticleMasses::lambda0Mass ) ) 
+        ptrTempParticle = ptrlam00;
+    else
+        ptrTempParticle = ptrlam0b;
+
+    if ( !massSel->accept(*ptrTempParticle) ) continue;
+    if ( !chi2Sel->accept(*ptrTempParticle) ) continue;
+    lam0List.push_back(ptrTempParticle);
+
+
+  }
+
+  updated = true;
+  return lam0List;
+
+}
+
+/// set cuts
+void BPHLambda0ToPPiBuilder::setPtMin( double pt ) {
+  updated = false;
+  ptSel->setPtMin( pt );
+  return;
+}
+
+
+void BPHLambda0ToPPiBuilder::setEtaMax( double eta ) {
+  updated = false;
+  etaSel->setEtaMax( eta );
+  return;
+}
+
+
+void BPHLambda0ToPPiBuilder::setMassMin( double m ) {
+  updated = false;
+  massSel->setMassMin( m );
+  return;
+}
+
+
+void BPHLambda0ToPPiBuilder::setMassMax( double m ) {
+  updated = false;
+  massSel->setMassMax( m );
+  return;
+}
+
+
+void BPHLambda0ToPPiBuilder::setProbMin( double p ) {
+  updated = false;
+  chi2Sel->setProbMin( p );
+  return;
+}
+
+
+void BPHLambda0ToPPiBuilder::setConstr( double mass, double sigma ) {
+  updated = false;
+  cMass  = mass;
+  cSigma = sigma;
+  return;
+}
+
+/// get current cuts
+double BPHLambda0ToPPiBuilder::getPtMin() const {
+  return ptSel->getPtMin();
+}
+
+
+double BPHLambda0ToPPiBuilder::getEtaMax() const {
+  return etaSel->getEtaMax();
+}
+
+
+double BPHLambda0ToPPiBuilder::getMassMin() const {
+  return massSel->getMassMin();
+}
+
+
+double BPHLambda0ToPPiBuilder::getMassMax() const {
+  return massSel->getMassMax();
+}
+
+
+double BPHLambda0ToPPiBuilder::getProbMin() const {
+  return chi2Sel->getProbMin();
+}
+
+
+double BPHLambda0ToPPiBuilder::getConstrMass() const {
+  return cMass;
+}
+
+
+double BPHLambda0ToPPiBuilder::getConstrSigma() const {
+  return cSigma;
+}
+

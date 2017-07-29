@@ -46,7 +46,7 @@ class BPHOniaToMuMuBuilder {
 
  public:
 
-  enum oniaType { Phi , Psi1, Psi2, Ups , Ups1, Ups2, Ups3 };
+  enum oniaType { Phi , JPsi, Psi2, Ups , Ups1, Ups2, Ups3 };
 
   /** Constructor
    */
@@ -69,8 +69,7 @@ class BPHOniaToMuMuBuilder {
   std::vector<BPHPlusMinusConstCandPtr> getList( oniaType type,
                                         BPHRecoSelect    * dSel = 0,
                                         BPHMomentumSelect* mSel = 0,
-                                        BPHVertexSelect  * vSel = 0,
-                                        BPHFitSelect     * kSel = 0 );
+                                        BPHVertexSelect  * vSel = 0 );
 
   /// retrieve original candidate from a copy with the same daughters
   /// obtained through "getList"
