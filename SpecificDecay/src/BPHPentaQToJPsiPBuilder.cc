@@ -54,8 +54,8 @@ BPHPentaQToJPsiPBuilder::BPHPentaQToJPsiPBuilder( const edm::EventSetup& es,
   massSel = new BPHMassSelect       ( 3.50, 5.50 );
   chi2Sel = new BPHChi2Select       ( 0.02 );
   mFitSel = new BPHMassFitSelect    ( jPsiName,
-                                      BPHParticleMasses::Psi1Mass,
-                                      BPHParticleMasses::Psi1MWidth,
+                                      BPHParticleMasses::jPsiMass,
+                                      BPHParticleMasses::jPsiMWidth,
                                       5.00, 6.00 );
   massConstr = true;
   minPDiff = 1.0e-4;

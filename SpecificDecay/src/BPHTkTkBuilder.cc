@@ -98,7 +98,8 @@ vector<BPHPlusMinusConstCandPtr> BPHTkTkBuilder::build() {
     if ( !massSel->accept( *pxt ) ) continue;
     if ( !chi2Sel->accept( *pxt ) ) continue;
 
-    pxt->UpdateMomentum();
+    pxt->updateMom();
+    pxt->composite();
     tktkList.push_back( pxt );
   }
 

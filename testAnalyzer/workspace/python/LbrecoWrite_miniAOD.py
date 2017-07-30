@@ -36,7 +36,7 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')             # MC
 #process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_ICHEP16_repro_v0', '')             # 8_0_10  DATA
 
-from BPHAnalysis.testAnalyzer.LbrecoSelectForWrite_forMC_cfi import recoSelect
+from BPHAnalysis.testAnalyzer.LbrecoSelectForWrite_cfi import recoSelect
 process.TFileService = cms.Service("TFileService",
     #fileName = cms.string('result_MCminiAOD.root')
     fileName = cms.string('result_DATAminiAOD.root')

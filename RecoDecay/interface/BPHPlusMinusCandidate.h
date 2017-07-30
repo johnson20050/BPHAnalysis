@@ -77,6 +77,8 @@ class BPHPlusMinusCandidate: public BPHRecoCandidate,
   bool isCowboy() const;
   bool isSailor() const;
 
+  void updateMom() const 
+  { setNotUpdated(); }
  protected:
 
   // utility function used to cash reconstruction results

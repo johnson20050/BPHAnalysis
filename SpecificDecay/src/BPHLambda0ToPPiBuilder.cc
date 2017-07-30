@@ -109,7 +109,8 @@ vector<BPHPlusMinusConstCandPtr> BPHLambda0ToPPiBuilder::build() {
     if ( !massSel->accept( *pxt ) ) continue;
     if ( !chi2Sel->accept( *pxt ) ) continue;
 
-    pxt->UpdateMomentum();
+    pxt->updateMom();
+    pxt->composite();
     kx0List.push_back( pxt );
   }
 

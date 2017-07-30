@@ -70,7 +70,7 @@ LbSpecificDecay::LbSpecificDecay( const edm::ParameterSet& ps )
     SET_PAR( bool  ,writeVertex  , ps );
 
     rMap["Onia"    ] = Onia;
-    rMap["JPsi"    ] = JPsi;
+    rMap["JPsi"    ] = Psi1;
     rMap["Psi2"    ] = Psi2;
     rMap["Lam0"    ] = Lam0;
     rMap["TkTk"    ] = TkTk;
@@ -375,7 +375,7 @@ void LbSpecificDecay::fill( const edm::Event& ev,
             switch( rType )
             {
                 //case Pmm : type = BPHOniaToMuMuBuilder::Phi ; break;
-                case JPsi: type = BPHOniaToMuMuBuilder::JPsi; break;
+                case Psi1: type = BPHOniaToMuMuBuilder::Psi1; break;
                 case Psi2: type = BPHOniaToMuMuBuilder::Psi2; break;
                 //case Ups : type = BPHOniaToMuMuBuilder::Ups ; break;
                 //case Ups1: type = BPHOniaToMuMuBuilder::Ups1; break;
@@ -513,7 +513,7 @@ void LbSpecificDecay::fill( const edm::Event& ev,
 
     // get JPsi subsample and associate JPsi candidate to original
     // generic onia candidate
-    if ( nFull ) lJPsi = onia->getList( BPHOniaToMuMuBuilder::JPsi );
+    if ( nFull ) lJPsi = onia->getList( BPHOniaToMuMuBuilder::Psi1 );
 
     int nJPsi = lJPsi.size();
     delete onia; // chk pV end }}}
@@ -1186,7 +1186,7 @@ void LbSpecificDecay::setRecoParameters( const edm::ParameterSet& ps )
     switch( rMap[name] )
     {
         case Onia     : recoOnia      = true; writeOnia       = writeCandidate; break;
-        case JPsi     :
+        case Psi1     :
         case Psi2     : recoOnia      = true;                                   break;
         case Lam0     : recoLam0      = true; writeLam0       = writeCandidate; break;
         case TkTk     : recoTkTk      = true; writeTkTk       = writeCandidate; break;

@@ -133,7 +133,7 @@ vector<BPHPlusMinusConstCandPtr> testLambda0ToPPiBuilder::build()
         if ( !massSel->accept( *pxt ) ) continue;
 
         // from Jack
-        if ( !chi2Sel->accept( cand ) ) continue;
+        if ( !chi2Sel->accept( *cand ) ) continue;
         
         lam0List.push_back( pxt );
     }

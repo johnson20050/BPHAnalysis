@@ -32,7 +32,8 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
-'file:///home/ltsai/Data/2016C_Apr2017v1_BPHSkim/22DA8CC1-C53D-E711-B88F-0025905A48D6.root'
+#'file:///home/ltsai/Data/2016C_Apr2017v1_BPHSkim/22DA8CC1-C53D-E711-B88F-0025905A48D6.root'
+'file:///home/ltsai/Data/8_0_20/001E3B7A-E784-E611-B6C8-008CFA05E8EC.root'
 ))
 
 
