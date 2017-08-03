@@ -16,7 +16,7 @@ recoSelect = cms.VPSet(
         massMin = cms.double(  0.80  ),
         massMax = cms.double(  1.80  ),
         probMin = cms.double( 0.002 ),
-        constrMass  = cms.double( -1.0 ),
+        constrMass  = cms.double(  1.115683 ),
         constrSigma = cms.double( -1.0 )
     ),
     cms.PSet( name = cms.string( 'LbToLam0' ),

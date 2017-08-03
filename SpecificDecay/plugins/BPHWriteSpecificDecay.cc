@@ -200,6 +200,7 @@ void BPHWriteSpecificDecay::beginJob() {
 void BPHWriteSpecificDecay::produce( edm::Event& ev,
                                      const edm::EventSetup& es ) {
   fill( ev, es );
+
   if ( writeOnia ) write( ev, lFull, oniaName );
   if ( writeKx0  ) write( ev, lSd  ,   sdName );
   if ( writePkk  ) write( ev, lSs  ,   ssName );

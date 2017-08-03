@@ -9,6 +9,8 @@ namespace
 {
   namespace
   {
+    // declare the template class you have used.
+    // see which template classes should have dictionaries
 
     pat::UserHolder< bool > UHbool;
 

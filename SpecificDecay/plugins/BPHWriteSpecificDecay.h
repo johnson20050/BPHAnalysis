@@ -159,6 +159,18 @@ class BPHWriteSpecificDecay:
           if ( cref.isNonnull() ) cc.addUserData ( "refTo" + compName, cref );
         }
       }
+      
+      //const std::vector<std::string>& dNames = ptr->daugNames();
+      //j = 0;
+      //m = dNames.size();
+      //while ( j < m ) {
+      //  const std::string& daugName = dNames[j++];
+      //  const reco::Candidate* dptr = ptr->getDaug( daugName ).get();
+        
+
+
+
+
       const BPHPlusMinusCandidate* pmp =
             dynamic_cast<const BPHPlusMinusCandidate*>( ptr.get() );
       if ( pmp != 0 ) cc.addUserData( "cowboy", pmp->isCowboy() );
