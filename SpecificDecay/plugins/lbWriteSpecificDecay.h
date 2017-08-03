@@ -199,22 +199,17 @@ class lbWriteSpecificDecay:
                 ParticleMass jpsi_mass = 3.096916;
                 TwoTrackMassKinematicConstraint *jpsi_const = new TwoTrackMassKinematicConstraint(jpsi_mass);
                 RefCountedKinematicTree compTree = ptr.get()->kinematicTree("JPsi", jpsi_const);
+                if ( !ptr->isValidFit() ) continue;
+                if ( compTree->isEmpty() ) continue;
+                compTree->movePointerToTheTop();
+                const RefCountedKinematicParticle kinPart = compTree->currentParticle();
+                const           KinematicState    kinStat = kinPart->currentState();
+                if ( !kinStat.isValid() ) continue;
+
                 if ( writeVertex ) cc.addUserData( "fitVertex", reco::Vertex( *compTree->currentDecayVertex() ) );
-                if ( ptr->isValidFit() )
-                {
-                    const RefCountedKinematicParticle kinPart = compTree->currentParticle();
-                    const           KinematicState    kinStat = kinPart->currentState();
-                    cc.addUserFloat( "fitMass", kinStat.mass() );
-                    cc.addUserData ( "fitMomentum",
-                                     kinStat.kinematicParameters().momentum() );
-                }
-
-                // store transient track to fit at further analysis
-                
-
-
-
-                bool approveSecondaryReconstruction = true;
+                cc.addUserFloat( "fitMass", kinStat.mass() );
+                cc.addUserData ( "fitMomentum",
+                                 kinStat.kinematicParameters().momentum() );
                 if ( approveSecondaryReconstruction )
                 {
                     const BPHRecoCandidate* cand = ptr.get();
@@ -240,17 +235,17 @@ class lbWriteSpecificDecay:
                                   BPHParticleMasses::protonMass,
                                   BPHParticleMasses::protonMSigma );
                         compTree = nSecFit.kinematicTree( "JPsi", jpsi_const );
-                        RefCountedKinematicTree compTree = ptr.get()->kinematicTree("JPsi", jpsi_const);
-                        if ( writeVertex ) cc.addUserData( "secfitVertex", reco::Vertex( *compTree->currentDecayVertex() ) );
-                        if ( ptr->isValidFit() )
-                        {
-                            //printf("secondary vertex fit processed\n");
-                            const RefCountedKinematicParticle kinPart = compTree->currentParticle();
-                            const           KinematicState    kinStat = kinPart->currentState();
-                            cc.addUserFloat( "secfitMass", kinStat.mass() );
-                            cc.addUserData ( "secfitMomentum",
-                                             kinStat.kinematicParameters().momentum() );
-                        }
+                        RefCountedKinematicTree _compTree = ptr.get()->kinematicTree("JPsi", jpsi_const);
+                        if ( !ptr->isValidFit() ) continue;
+                        if ( _compTree->isEmpty() ) continue;
+                        compTree->movePointerToTheTop();
+                        const RefCountedKinematicParticle _kinPart = _compTree->currentParticle();
+                        const           KinematicState    _kinStat = _kinPart->currentState();
+                        if ( !_kinStat.isValid() ) continue;
+                        if ( writeVertex ) cc.addUserData( "secfitVertex", reco::Vertex( *_compTree->currentDecayVertex() ) );
+                        cc.addUserFloat( "secfitMass", _kinStat.mass() );
+                        cc.addUserData ( "secfitMomentum",
+                                         _kinStat.kinematicParameters().momentum() );
                     }
                 }
             }// if(useJpsiConstrVertexFit) end}}}
