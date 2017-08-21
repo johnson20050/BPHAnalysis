@@ -20,6 +20,7 @@
 #include "BPHAnalysis/SpecificDecay/interface/BPHChi2Select.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHMassFitSelect.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHParticleMasses.h"
+#include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
 
 //---------------
 // C++ Headers --
@@ -46,9 +47,10 @@ BPHBsToJPsiPhiBuilder::BPHBsToJPsiPhiBuilder( const edm::EventSetup& es,
   mphiSel = new BPHMassSelect   ( 1.005, 1.035 );
   massSel = new BPHMassSelect   ( 3.50, 8.00 );
   chi2Sel = new BPHChi2Select   ( 0.02 );
-  mFitSel = new BPHMassFitSelect( jPsiName,
-                                  BPHParticleMasses::jPsiMass,
-                                  BPHParticleMasses::jPsiMWidth,
+  ParticleMass _jpsiMass = 3.096916;
+  jpsiConstr = new TwoTrackMassKinematicConstraint(_jpsiMass);
+  mFitSel = new BPHMassFitSelect( phiName,
+                                  jpsiConstr,
                                   5.00, 6.00 );
   massConstr = true;
   minPDiff = 1.0e-4;
@@ -59,6 +61,7 @@ BPHBsToJPsiPhiBuilder::BPHBsToJPsiPhiBuilder( const edm::EventSetup& es,
 // Destructor --
 //--------------
 BPHBsToJPsiPhiBuilder::~BPHBsToJPsiPhiBuilder() {
+  delete jpsiConstr;
   delete jpsiSel;
   delete mphiSel;
   delete massSel;

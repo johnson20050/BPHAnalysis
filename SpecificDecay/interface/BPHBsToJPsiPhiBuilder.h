@@ -20,6 +20,7 @@
 #include "BPHAnalysis/RecoDecay/interface/BPHRecoBuilder.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHRecoCandidate.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHPlusMinusCandidate.h"
+#include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
 
 #include "FWCore/Framework/interface/Event.h"
 
@@ -105,6 +106,8 @@ class BPHBsToJPsiPhiBuilder {
   bool updated;
 
   std::vector<BPHRecoConstCandPtr> bsList;
+
+  TwoTrackMassKinematicConstraint* jpsiConstr;
 
 };
 
