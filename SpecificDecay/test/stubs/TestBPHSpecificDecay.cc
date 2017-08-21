@@ -99,6 +99,7 @@ void TestBPHSpecificDecay::beginJob() {
   createHisto( "mcstJPsi"  , 60, 2.95, 3.25 ); // JPsi mass, with constraint
   createHisto( "massKx0"   , 50, 0.80, 1.05 ); // Kx0  mass
   createHisto( "massPhi"   , 40, 1.01, 1.03 ); // Phi  mass
+  createHisto( "mcstPhi"   , 40, 1.01, 1.03 ); // Phi  mass
   createHisto( "massBu"    , 20, 5.00, 5.50 ); // Bu   mass
   createHisto( "mcstBu"    , 20, 5.00, 5.50 ); // Bu   mass, with constraint
   createHisto( "massBd"    , 20, 5.00, 5.50 ); // Bd   mass
@@ -106,6 +107,7 @@ void TestBPHSpecificDecay::beginJob() {
   createHisto( "massBs"    , 20, 5.10, 5.60 ); // Bs   mass
   createHisto( "mcstBs"    , 20, 5.10, 5.60 ); // Bs   mass, with constraint
   createHisto( "massBsPhi" , 50, 1.01, 1.03 ); // Phi  mass in Bs decay
+  createHisto( "mcstBsPhi" , 50, 1.01, 1.03 ); // Phi  mass in Bs decay
   createHisto( "massBdKx0" , 50, 0.80, 1.05 ); // Kx0  mass in Bd decay
 
   createHisto( "massFull"  , 200,  2.00, 12.00  ); // Full mass
@@ -422,7 +424,7 @@ void TestBPHSpecificDecay::analyze( const edm::Event& ev,
   int iPkk;
   int nPkk = lPkk.size();
   outF << nPkk << " PhiKK cand found" << endl;
-  for ( iPkk = 0; iPkk < nPkk; ++iPkk ) dumpRecoCand( "PhiKK",
+  for ( iPkk = 0; iPkk < nPkk; ++iPkk ) dumpRecoCand( "Phi",
                                                       lPkk[iPkk].get() );
 
   delete phi;
