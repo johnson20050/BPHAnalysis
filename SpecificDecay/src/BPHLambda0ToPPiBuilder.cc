@@ -76,9 +76,8 @@ vector<BPHPlusMinusConstCandPtr> BPHLambda0ToPPiBuilder::build() {
                                    BPHParticleMasses::protonMSigma );
   bKx0.add( pionName, pCollection, BPHParticleMasses::pionMass,
                                    BPHParticleMasses::pionMSigma );
-  BPHParticlePtSelect*  ptSel2 = new BPHParticlePtSelect (  0.8 );
   bKx0.filter( kaonName, *ptSel );
-  bKx0.filter( pionName, *ptSel2 );
+  bKx0.filter( pionName, *ptSel );
   bKx0.filter( kaonName, *etaSel );
   bKx0.filter( pionName, *etaSel );
   BPHMassSymSelect mTmpSel( kaonName, pionName, massSel );

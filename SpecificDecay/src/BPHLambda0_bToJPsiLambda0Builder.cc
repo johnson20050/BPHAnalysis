@@ -48,9 +48,10 @@ BPHLambda0_bToJPsiLambda0Builder::BPHLambda0_bToJPsiLambda0Builder( const edm::E
   mlam0Sel= new BPHMassSelect   ( 1.05, 1.20 );
   massSel = new BPHMassSelect   ( 4.50, 6.50 );
   chi2Sel = new BPHChi2Select   ( 0.02 );
-  mFitSel = new BPHMassFitSelect( jPsiName,
-                                  BPHParticleMasses::jPsiMass,
-                                  BPHParticleMasses::jPsiMWidth,
+  ParticleMass jpsiMass( 3.0916 ); 
+  jpsiConstr = new TwoTrackMassKinematicConstraint( jpsiMass );
+  mFitSel = new BPHMassFitSelect( lam0Name,
+                                  jpsiConstr,
                                   5.00, 6.00 );
   massConstr = true;
   minPDiff = 1.0e-4;
@@ -61,6 +62,7 @@ BPHLambda0_bToJPsiLambda0Builder::BPHLambda0_bToJPsiLambda0Builder( const edm::E
 // Destructor --
 //--------------
 BPHLambda0_bToJPsiLambda0Builder::~BPHLambda0_bToJPsiLambda0Builder() {
+  delete jpsiConstr;
   delete  jpsiSel;
   delete mlam0Sel;
   delete  massSel;
@@ -83,7 +85,7 @@ vector<BPHRecoConstCandPtr> BPHLambda0_bToJPsiLambda0Builder::build() {
   bLb.filter( lam0Name, *mlam0Sel );
 
   bLb.filter( *massSel );
-  //bLb.filter( *chi2Sel );
+  bLb.filter( *chi2Sel );
   if ( massConstr ) bLb.filter( *mFitSel );
 
   lbList = BPHRecoCandidate::build( bLb );
@@ -102,7 +104,7 @@ vector<BPHRecoConstCandPtr> BPHLambda0_bToJPsiLambda0Builder::build() {
 //    double jMass = jpsi->constrMass();
 //    if ( jMass < 0 ) continue;
 //    double sigma = jpsi->constrSigma();
-//    cptr->kinematicTree( jPsiName, jMass, sigma );
+//    cptr->kinematicTree( virtualParticleName, jpsiMass, jpsisigma );
 //  }
   updated = true;
 

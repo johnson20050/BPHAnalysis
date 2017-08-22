@@ -32,24 +32,11 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
-#
-### use this to access the nearest copy of the input file, querying the catalog
-#
-    #'/store/data/Run2016E/Charmonium/USER/BPHSkim-PromptReco-v2/000/276/831/00000/00FD1519-714D-E611-B686-FA163E321AE0.root'
-    #'file:/wk_cms/ltsai/ReceivedFile/BPHanalysisTest.root'
-    #'file:/home/ltsai/ReceivedFile/DATA/testDATA.root'                                      # 8_0_10  DATA
-    #'file:/home/ltsai/ReceivedFile/DATA/7_4_15/04916A37-CF26-E511-8DCD-02163E013406.root'   # 7_4_15  DATA
-### use this to access the input file if by any reason you want to specify 
-### the data server
-#    'root://xrootd-cms.infn.it//store/data/Run2016E/Charmonium/USER/BPHSkim-PromptReco-v2/000/276/831/00000/00FD1519-714D-E611-B686-FA163E321AE0.root'
-#
-### use this to access an input file locally available
-#    'file:/...complete_file_path.../XXXX.root'
+    '',
 ))
 
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_v2', '')             # 8_0_10  DATA
-#process.GlobalTag = GlobalTag(process.GlobalTag, '74X_dataRun2_Prompt_v0', '')              # 7_4_15  DATA
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
 from BPHAnalysis.SpecificDecay.LbrecoSelectForWrite_cfi import recoSelect
 
@@ -84,7 +71,7 @@ process.patTrackCands.embedTrack = True
 
 
 
-process.lbWriteSpecificDecay = cms.EDProducer('LbWriteSpecificDecay',
+process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
 
 # the label used in calling data
     pVertexLabel = cms.string('offlinePrimaryVertices::RECO'),
@@ -97,10 +84,9 @@ process.lbWriteSpecificDecay = cms.EDProducer('LbWriteSpecificDecay',
     oniaName      = cms.string('oniaFitted'),
     Lam0Name      = cms.string('Lam0Cand'),
     LamxName      = cms.string('LamxCand'),
-    PenQName      = cms.string('PenQFitted'),
+    TkTkName      = cms.string('TkTkFitted'),
     LbToLam0Name  = cms.string('LbToLam0Fitted'),
-    LbToLamxName  = cms.string('LbToLamxFitted'),
-    LbToPenQName  = cms.string('LbToPenQFitted'),
+    LbToTkTkName  = cms.string('LbToTkTkFitted'),
     writeVertex   = cms.bool( True ),
     writeMomentum = cms.bool( True ),
     recoSelect    = cms.VPSet(recoSelect)
@@ -108,20 +94,18 @@ process.lbWriteSpecificDecay = cms.EDProducer('LbWriteSpecificDecay',
 
 process.out = cms.OutputModule(
     "PoolOutputModule",
-    fileName = cms.untracked.string('reco.root'),
+    fileName = cms.untracked.string('recoWriteSpecificDecay.root'),
     outputCommands = cms.untracked.vstring(
       "keep *",
-      #"keep *_writeBPHSpecificDecay_*_*",
-      #"drop *_patSelectedTracks_*_*",
-      #"drop *_CandidateSelectedTracks_*_*",
-      #"drop *_TriggerResults_*_bphAnalysis",
-      #"drop *_random*_*_bphAnalysis"
+      "keep *_lbWriteSpecificDecay_*_bphAnalysis",
+      "drop *_patSelectedTracks_*_*",
+      "drop *_CandidateSelectedTracks_*_*",
+      "drop *_TriggerResults_*_bphAnalysis",
+      "drop *_random*_*_bphAnalysis"
     ),
 )
 
 process.p = cms.Path(
-    #process.selectedPatMuons *
-    #process.CandidateSelectedTracks *
     process.lbWriteSpecificDecay
 )
 

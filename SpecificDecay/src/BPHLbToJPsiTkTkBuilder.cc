@@ -60,9 +60,11 @@ BPHLbToJPsiTkTkBuilder::BPHLbToJPsiTkTkBuilder( const edm::EventSetup& es,
     massSel = new BPHMassSelect           ( 4.50, 6.50 );
  massTmpSel = new BPHMassSymSelect_jpsi   ( pName, nName, massSel );
     chi2Sel = new BPHChi2Select           ( 0.02 );
-    mFitSel = new BPHMassFitSelect( jPsiName,
-                                    BPHParticleMasses::jPsiMass,
-                                    BPHParticleMasses::jPsiMSigma,
+
+    ParticleMass jpsiMass( 3.0916 );
+    jpsiConstr = new TwoTrackMassKinematicConstraint( jpsiMass );
+    mFitSel = new BPHMassFitSelect( "",
+                                    jpsiConstr,
                                     5.00, 6.00 );
     massConstr = false;
     minPDiff = 1.0e-4;
@@ -73,6 +75,7 @@ BPHLbToJPsiTkTkBuilder::BPHLbToJPsiTkTkBuilder( const edm::EventSetup& es,
 // Destructor --
 //--------------
 BPHLbToJPsiTkTkBuilder::~BPHLbToJPsiTkTkBuilder() {
+  delete jpsiConstr;
   delete     jpsiSel;
   delete       ptSel;
   delete      etaSel;
@@ -124,31 +127,14 @@ vector<BPHRecoConstCandPtr> BPHLbToJPsiTkTkBuilder::build() {
             nLb1->add( jPsiName, njp );
             nLb1->add( pName, pTk, pMass, pSigma );
             nLb1->add( nName, nTk, nMass, nSigma );
-            nLb1->kinematicTree( jPsiName,
-                                 BPHParticleMasses::jPsiMass,
-                                 BPHParticleMasses::jPsiMWidth );
-            ////nLb1.setNotUpdated();
-            //// change the order of tk1 and tk2 to find anti-particle
-            //BPHRecoCandidatePtr nLb2( new BPHRecoCandidate( evSetup ) );
-            //nLb2->add( jPsiName, njp );
-            //nLb2->add( pName, nTk, pMass, pSigma );
-            //nLb2->add( nName, pTk, nMass, nSigma );
-            //nLb2->kinematicTree( jPsiName,
-            //                     BPHParticleMasses::jPsiMass,
-            //                     BPHParticleMasses::jPsiMWidth );
-            ////nLb2.setNotUpdated();
-            //if ( fabs( nLb1->composite().mass() - BPHParticleMasses::Lambda0_bMass ) <
-            //     fabs( nLb2->composite().mass() - BPHParticleMasses::Lambda0_bMass ) )
-            //    pxt = nLb1;
-            //else 
-            //    pxt = nLb2;
             pxt = nLb1;
 
 
-            if ( !   massSel->accept( *pxt ) ) continue;
-            //if ( !massTmpSel->accept( *pxt ) ) continue; // asdf disableed when I don't need to change ptk and ntk
-            if ( !   chi2Sel->accept( *pxt ) ) continue;
-            if ( massConstr ) if ( ! mFitSel->accept( *pxt ) ) continue;
+            if ( !massSel->accept( *nLb1 ) ) continue;
+            if ( !chi2Sel->accept( *nLb1 ) ) continue;
+            if ( massConstr ) 
+                if ( !mFitSel->accept( *pxt ) ) continue;
+                else printf("kinematicFit set but not used! \n");
             tmpList.push_back(pxt);
         }
     }

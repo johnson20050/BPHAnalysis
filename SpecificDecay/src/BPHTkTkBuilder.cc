@@ -50,7 +50,7 @@ BPHTkTkBuilder::BPHTkTkBuilder(
   pName( ptkName ), pMass( ptkMass ), pSigma( ptkSigma ), 
   nName( ntkName ), nMass( ntkMass ), nSigma( ntkSigma ) 
 {
-    ptSel = new BPHParticlePtSelect (  0.8 );
+    ptSel = new BPHParticlePtSelect (  0.7 );
    etaSel = new BPHParticleEtaSelect(  2.5 );
   massSel = new BPHMassSelect( 1.00, 2.20 );
   chi2Sel = new BPHChi2Select( 0.00005 );
@@ -98,8 +98,6 @@ vector<BPHPlusMinusConstCandPtr> BPHTkTkBuilder::build() {
     if ( !massSel->accept( *pxt ) ) continue;
     if ( !chi2Sel->accept( *pxt ) ) continue;
 
-    pxt->updateMom();
-    pxt->composite();
     tktkList.push_back( pxt );
   }
 

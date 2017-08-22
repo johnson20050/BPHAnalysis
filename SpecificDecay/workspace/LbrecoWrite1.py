@@ -31,13 +31,12 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
-#process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
-#    #'file:/home/ltsai/ReceivedFile/BPHanalysis/BPHanalysisTest.root'                   # 8_0_8 BPHSkim
-#     'file:/home/ltsai/ReceivedFile/DATA/BPHSkim_Charmonium.root'                       # 8_0_8 BPHSkim Charmonium
-#))
+process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
+     'file:/home/ltsai/ReceivedFile/DATA/BPHSkim_Charmonium.root'                       # 8_0_8 BPHSkim Charmonium
+))
 
-from BPHAnalysis.SpecificDecay.fileLinkv1 import readFiles
-process.source = cms.Source("PoolSource", fileNames = readFiles)
+#from BPHAnalysis.SpecificDecay.fileLinkv1 import readFiles
+#process.source = cms.Source("PoolSource", fileNames = readFiles)
 
 
 
