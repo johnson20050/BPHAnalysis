@@ -8,8 +8,8 @@
 #include "TLegend.h"
 #include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/format.h"
 #include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/cutFuncs.h"
-//#include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/filePath_20170630.h"
-#include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/filePath.h"
+//#include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/filePath.h"
+#include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/filePathmc.h"
 #include <map>
 using namespace std;
 void clearHistoMap( map<string, TH1*>& inHistos );
@@ -69,11 +69,14 @@ int main()
     }
 
 
+    string anyCommand = "withCut";
     string plotCommand = "";
-    plotCommand += ".LogPlot";
+    //plotCommand += ".LogPlot";
     TCanvas c("", "", 1600, 1000);
     iter = totMap.begin();
-    c.SetFillColor(39);
+    //c.SetFillColor(39);
+    //c.GetSelectedPad()->SetFillColor(39);
+    
     // draw all histograms in the map
     while ( iter != iend )
     {
@@ -81,7 +84,8 @@ int main()
         iter->second->Draw();
         if ( !plotCommand.empty() )
             c.SetLogy();
-        c.SaveAs( ("parFigure_"+branchName+"."+iter->first+plotCommand+".png").c_str() );
+      //c.SaveAs( ("parFigure_"+branchName+"."+iter->first+plotCommand+".png").c_str() );
+        c.SaveAs( ("parFigure_"+branchName+"."+iter->first+plotCommand+"_"+anyCommand+"_mc.png").c_str() );
         ++iter;
     }
 } // main() 
@@ -102,15 +106,32 @@ void plotParameterFigure(map<string, TH1*>& inHistos, TTree* tree, const myDataB
     while( i != n )
     {
         tree->GetEntry(i++);
+        bool fillTag = true;
+        if (  emptyMom(root.refitMom) ) fillTag = false;
+        if (  emptyPos(root.refitPos) ) fillTag = false;
+        if (  emptyPos(root.primaryV) ) fillTag = false;
+
+        //if ( !mmassCut(root.lam0Mom, 1.100 ) ) fillTag = false;
+        //if ( !MmassCut(root.lam0Mom, 1.130 ) ) fillTag = false;
+        if ( !mmassCut(root.refitMom, 5.0  ) ) fillTag = false;
+        if ( !MmassCut(root.refitMom, 6.0  ) ) fillTag = false;
+        //if ( !mptCut(root.refitMom, 15) ) fillTag = false;
+        if ( !mvtxprobCut(root.refitPos, 0.15) ) fillTag = false;
+        if ( !mcosa2d(root.refitPos, root.refitMom, root.primaryV, 0.99) ) fillTag = false;
+        if ( !mflightDist2DCut(root.refitPos, root.primaryV, 0.2) ) fillTag = false;
+        if ( !MflightDist2DCut(root.refitPos, root.primaryV, 0.6) ) fillTag = false;
         if ( emptyMom( root.refitMom ) ) continue;
         if ( emptyPos( root.refitPos ) ) continue;
         if ( emptyPos( root.primaryV ) ) continue;
-        inHistos["vtxprob"]        ->Fill( root.refitPos.vtxprob );
-        inHistos["properTime"]     ->Fill( properTime(root.refitPos, root.refitMom, root.primaryV) );  
-        inHistos["flightDist2D"]   ->Fill( flightDist2D(root.refitPos, root.primaryV) );
-        inHistos["cosa2d"]         ->Fill( cosa2d(root.refitPos, root.refitMom, root.primaryV) );
-        inHistos["eta"]            ->Fill( root.refitMom.eta );
-        //h["lam0TolambDist"] ->Fill( flightDist2D(root.refitPos, root.lam0Pos) );
+        if ( fillTag )
+        {
+            inHistos["vtxprob"]        ->Fill( root.refitPos.vtxprob );
+            inHistos["properTime"]     ->Fill( properTime(root.refitPos, root.refitMom, root.primaryV) );  
+            inHistos["flightDist2D"]   ->Fill( flightDist2D(root.refitPos, root.primaryV) );
+            inHistos["cosa2d"]         ->Fill( cosa2d(root.refitPos, root.refitMom, root.primaryV) );
+            inHistos["eta"]            ->Fill( root.refitMom.eta );
+            //h["lam0TolambDist"] ->Fill( flightDist2D(root.refitPos, root.lam0Pos) );
+        }
     }
 }
 

@@ -37,7 +37,7 @@ int main()
     string branchName[2] = { "LbToTkTree", "LbTotkTree" };
     string dirName[2] = { "particle", "antiparticle" };
     string anyCommand = "withCut";
-    string fileName = "cut.refitMom.mass_"+anyCommand+".root";
+    string fileName = "parFigure_"+anyCommand+".root";
 
     LambToTkTkBranches* root = new LambToTkTkBranches();
     // cuts applied
@@ -54,9 +54,11 @@ int main()
     for ( int i=0; i<2; ++i )
     {
         map<string, TH1D*> totMap;
-        createHisto( totMap, "Lambda0_b_Mass" , 300, 5.0 , 6.0 );
-        createHisto( totMap, "jpsi_Mass"      , 120, 2.9 , 3.3 );
-        createHisto( totMap, "pentaQuark_Mass", 300, 4.0 , 5.5 );
+        createHisto( totMap, "vtxprob"      , 100, 0.003, 1.003);
+        createHisto( totMap, "properTime"   ,  95, 0.005, 0.1  );
+        createHisto( totMap, "flightDist2D" , 100, 0.01 , 2.00 );
+        createHisto( totMap, "cosa2d"       , 500, 1.001 - 500*0.00001, 1.001);
+        createHisto( totMap, "eta"          , 100,-2.5  , 2.5  );
 
         histoMAP tmpHistos;
         tmpHistos.copyHisto( totMap );
@@ -80,12 +82,15 @@ int main()
     fStore->Close();
 } 
 
+
 template<typename myDataBranch>
 void sthToFill(histoMAP& inHistos, const myDataBranch* root)
 {
-    inHistos.fillHisto("Lambda0_b_Mass" , root->refitMom.mass);
-    inHistos.fillHisto("jpsi_Mass"      , root->jpsiMom.mass );
-    inHistos.fillHisto("pentaQuark_Mass", root->penQMom.mass );
+    inHistos.fillHisto("vtxprob"        , root->refitPos.vtxprob );
+    inHistos.fillHisto("properTime"     , properTime(root->refitPos, root->refitMom, root->primaryV) );  
+    inHistos.fillHisto("flightDist2D"   , flightDist2D(root->refitPos, root->primaryV) );
+    inHistos.fillHisto("cosa2d"         , cosa2d(root->refitPos, root->refitMom, root->primaryV) );
+    inHistos.fillHisto("eta"            , root->refitMom.eta );
 }
 template<typename myDataBranch>
 void plotWithCuts(histoMAP& inHistos, const myDataBranch* root, TTree* tree, const vector<CutList*>& cuts, unsigned numberToFill)

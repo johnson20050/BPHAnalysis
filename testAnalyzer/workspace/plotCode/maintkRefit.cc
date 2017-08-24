@@ -14,6 +14,7 @@
 #include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/cutFuncs.h"
 #include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/histoMAP.h"
 #include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/cutLists.h"
+#include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/fourMom.h"
 #include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/vtxprobCollection.h"
 #include <map>
 using namespace std;
@@ -31,13 +32,18 @@ void plotFromFile(histoMAP& inHistos, myDataBranch* root, vector<CutList*>& cuts
 void outputFigure( map<string, TH1D*>& hMap, const string& branchName, const string& plotCommand="", const string& anyCommand="");
 // output a root file contains lots of histograms.
 void outputFigure_rootFile( map<string, TH1D*>& hMap, TFile* fStore,  const string& dirName );
+
+const double   jPsiMass =  3.096916;
+const double protonMass = 0.938272046;
+const double   pionMass =  0.13957018;
+const double   kaonMass =  0.493667;
 // funcs end }}}
 int main() 
 {
     string branchName[2] = { "LbToTkTree", "LbTotkTree" };
     string dirName[2] = { "particle", "antiparticle" };
     string anyCommand = "withCut";
-    string fileName = "cut.refitMom.mass_"+anyCommand+".root";
+    string fileName = "reassignMass_"+anyCommand+".root";
 
     LambToTkTkBranches* root = new LambToTkTkBranches();
     // cuts applied
@@ -54,9 +60,18 @@ int main()
     for ( int i=0; i<2; ++i )
     {
         map<string, TH1D*> totMap;
-        createHisto( totMap, "Lambda0_b_Mass" , 300, 5.0 , 6.0 );
-        createHisto( totMap, "jpsi_Mass"      , 120, 2.9 , 3.3 );
-        createHisto( totMap, "pentaQuark_Mass", 300, 4.0 , 5.5 );
+        createHisto( totMap, "daughter_JPsi",  80  , 0.00, 10.0);
+        createHisto( totMap, "daughter_KK"  , 110*2, 0.90, 2.00);
+        createHisto( totMap, "daughter_Kp"  , 110*2, 1.40, 2.50);
+        createHisto( totMap, "daughter_KPi" , 140*2, 0.60, 2.00);
+        createHisto( totMap, "daughter_pPi" , 120*2, 1.00, 2.20);
+        createHisto( totMap, "daughter_PiPi", 180*2, 0.20, 2.00);
+        createHisto( totMap, "BToJPsiKK"    , 250  , 4.00, 6.50);
+        createHisto( totMap, "BToJPsiKp"    , 250  , 4.50, 7.00);
+        createHisto( totMap, "BToJPsipK"    , 250  , 4.50, 7.00);
+        createHisto( totMap, "BToJPsiKPi"   , 330  , 3.70, 7.00);
+        createHisto( totMap, "BToJPsipPi"   , 270  , 4.30, 7.00);
+        createHisto( totMap, "BToJPsiPiPi"  , 350  , 3.50, 7.00);
 
         histoMAP tmpHistos;
         tmpHistos.copyHisto( totMap );
@@ -83,9 +98,42 @@ int main()
 template<typename myDataBranch>
 void sthToFill(histoMAP& inHistos, const myDataBranch* root)
 {
-    inHistos.fillHisto("Lambda0_b_Mass" , root->refitMom.mass);
-    inHistos.fillHisto("jpsi_Mass"      , root->jpsiMom.mass );
-    inHistos.fillHisto("pentaQuark_Mass", root->penQMom.mass );
+    fourMom jpsi( root->jpsiMom,   jPsiMass );
+    fourMom   ptkK( root->    pTk,   kaonMass );
+    fourMom   ptkp( root->    pTk, protonMass );
+    fourMom   ptkP( root->    pTk,   pionMass );
+    fourMom   ntkK( root->    nTk,   kaonMass );
+    fourMom   ntkP( root->    nTk,   pionMass );
+    fourMom   ntkp( root->    nTk, protonMass );
+    fourMom  KK  ,  Kp  ,  pK  ,  KPi ,  pPi ,  PiPi;
+    fourMom jKK  , jKp  , jpK  , jKPi , jpPi , jPiPi;
+    KK   = ptkK+ntkK;
+    Kp   = ptkK+ntkp;
+    pK   = ptkp+ntkK;
+    KPi  = ptkK+ntkP;
+    pPi  = ptkp+ntkP;
+    PiPi = ptkP+ntkP;
+    jKK  = jpsi+KK;
+    jKp  = jpsi+Kp;
+    jpK  = jpsi+pK;
+    jKPi = jpsi+KPi;
+    jpPi = jpsi+pPi;
+    jPiPi= jpsi+PiPi;
+
+
+    inHistos.fillHisto( "daughter_JPsi", jpsi .Mag() );
+    inHistos.fillHisto( "daughter_KK"  , KK   .Mag() );
+    inHistos.fillHisto( "daughter_Kp"  , Kp   .Mag() );
+    inHistos.fillHisto( "daughter_pK"  , pK   .Mag() );
+    inHistos.fillHisto( "daughter_KPi" , KPi  .Mag() );
+    inHistos.fillHisto( "daughter_pPi" , pPi  .Mag() );
+    inHistos.fillHisto( "daughter_PiPi", PiPi .Mag() );
+    inHistos.fillHisto( "BToJPsiKK"    , jKK  .Mag() );
+    inHistos.fillHisto( "BToJPsiKp"    , jKp  .Mag() );
+    inHistos.fillHisto( "BToJPsipK"    , jpK  .Mag() );
+    inHistos.fillHisto( "BToJPsiKPi"   , jKPi .Mag() );
+    inHistos.fillHisto( "BToJPsipPi"   , jpPi .Mag() );
+    inHistos.fillHisto( "BToJPsiPiPi"  , jPiPi.Mag() );
 }
 template<typename myDataBranch>
 void plotWithCuts(histoMAP& inHistos, const myDataBranch* root, TTree* tree, const vector<CutList*>& cuts, unsigned numberToFill)
