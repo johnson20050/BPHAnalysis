@@ -23,7 +23,7 @@
 #include "BPHAnalysis/SpecificDecay/interface/BPHKx0ToKPiBuilder.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHLambda0_bToJPsiLambda0Builder.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHTkTkBuilder.h"
-#include "BPHAnalysis/SpecificDecay/interface/BPHLbToJPsiTkTkBuilder.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHLambda0_bToJPsiTkTkBuilder.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -720,19 +720,10 @@ void LbSpecificDecay::fill( const edm::Event& ev,
     // Build and dump Lb->Jpsi+TkTk {{{
     if ( nJPsi && nTkTk && recoLbToTkTk )
     {
-        BPHLbToJPsiTkTkBuilder* _lb = 0;
-        if ( usePF ) _lb = new BPHLbToJPsiTkTkBuilder( es, lJPsi, lTkTk,
-                    pName, pMass, pSigma,
-                    nName, nMass, nSigma
-                    );
-        else if ( usePC ) _lb = new BPHLbToJPsiTkTkBuilder( es, lJPsi, lTkTk,
-                    pName, pMass, pSigma,
-                    nName, nMass, nSigma
-                    );
-        else if ( useGP ) _lb = new BPHLbToJPsiTkTkBuilder( es, lJPsi, lTkTk,
-                    pName, pMass, pSigma,
-                    nName, nMass, nSigma
-                    );
+        BPHLambda0_bToJPsiTkTkBuilder* _lb = 0;
+        if ( usePF ) _lb = new BPHLambda0_bToJPsiTkTkBuilder( es, lJPsi, lTkTk );
+        else if ( usePC ) _lb = new BPHLambda0_bToJPsiTkTkBuilder( es, lJPsi, lTkTk );
+        else if ( useGP ) _lb = new BPHLambda0_bToJPsiTkTkBuilder( es, lJPsi, lTkTk );
         // Set cut value 
         // use "Name"(recorded in enum) to find particle, then there is a subMap
         // The subMap is list of the cuts used in  the particle
@@ -756,16 +747,12 @@ void LbSpecificDecay::fill( const edm::Event& ev,
                     {
                         case mPsiMin        : _lb->setJPsiMassMin ( _parValue ); break;
                         case mPsiMax        : _lb->setJPsiMassMax ( _parValue ); break;
-                        case ptMin          : _lb->setPtMin       ( _parValue ); break;
-                        case etaMax         : _lb->setEtaMax      ( _parValue ); break;
                         case massMin        : _lb->setMassMin     ( _parValue ); break;
                         case massMax        : _lb->setMassMax     ( _parValue ); break;
                         case probMin        : _lb->setProbMin     ( _parValue ); break;
     
                         case mFitMin        : _lb->setMassFitMin  ( _parValue ); break;
                         case mFitMax        : _lb->setMassFitMax  ( _parValue ); break;
-                        case constrMass     : _lb->setConstr      ( _parValue, _lb->getMassFitSigma() ); break;
-                        case constrSigma    : _lb->setConstr      ( _lb->getMassFitMass(), _parValue  ); break;
                         case writeCandidate : writeLbToTkTk =     ( _parValue > 0 ); break;
                         default:
                             break;
@@ -785,23 +772,14 @@ void LbSpecificDecay::fill( const edm::Event& ev,
     // Build and dump ant Lb->Jpsi+TkTk {{{
     if ( nJPsi && nTkTk && recoLbToTkTk )
     {
-        BPHLbToJPsiTkTkBuilder* _lb = 0;
+        BPHLambda0_bToJPsiTkTkBuilder* _lb = 0;
         // regard Proton track as Kaon mass and sigma.
         // That is to say, change the particle track and refit it.
         // finally, the "anti-Proton" with the name "Kaon"
         // and "anti-kaon" with the name "Proton"
-        if ( usePF ) _lb = new BPHLbToJPsiTkTkBuilder( es, lJPsi, lTkTk,
-                    pName, nMass, nSigma,
-                    nName, pMass, pSigma
-                    );
-        else if ( usePC ) _lb = new BPHLbToJPsiTkTkBuilder( es, lJPsi, lTkTk,
-                    pName, nMass, nSigma,
-                    nName, pMass, pSigma
-                    );
-        else if ( useGP ) _lb = new BPHLbToJPsiTkTkBuilder( es, lJPsi, lTkTk,
-                    pName, nMass, nSigma,
-                    nName, pMass, pSigma
-                    );
+        if ( usePF ) _lb = new BPHLambda0_bToJPsiTkTkBuilder( es, lJPsi, lTkTk);
+        else if ( usePC ) _lb = new BPHLambda0_bToJPsiTkTkBuilder( es, lJPsi, lTkTk);
+        else if ( useGP ) _lb = new BPHLambda0_bToJPsiTkTkBuilder( es, lJPsi, lTkTk);
         // Set cut value 
         // use "Name"(recorded in enum) to find particle, then there is a subMap
         // The subMap is list of the cuts used in  the particle
@@ -825,16 +803,12 @@ void LbSpecificDecay::fill( const edm::Event& ev,
                     {
                         case mPsiMin        : _lb->setJPsiMassMin ( _parValue ); break;
                         case mPsiMax        : _lb->setJPsiMassMax ( _parValue ); break;
-                        case ptMin          : _lb->setPtMin       ( _parValue ); break;
-                        case etaMax         : _lb->setEtaMax      ( _parValue ); break;
                         case massMin        : _lb->setMassMin     ( _parValue ); break;
                         case massMax        : _lb->setMassMax     ( _parValue ); break;
                         case probMin        : _lb->setProbMin     ( _parValue ); break;
     
                         case mFitMin        : _lb->setMassFitMin  ( _parValue ); break;
                         case mFitMax        : _lb->setMassFitMax  ( _parValue ); break;
-                        case constrMass     : _lb->setConstr      ( _parValue, _lb->getMassFitSigma() ); break;
-                        case constrSigma    : _lb->setConstr      ( _lb->getMassFitMass(), _parValue  ); break;
                         case writeCandidate : writeLbToTkTk =     ( _parValue > 0 ); break;
                         default:
                             break;
@@ -866,6 +840,7 @@ void LbSpecificDecay::fillTree( const edm::EventSetup& es )
     memset(&lbv1Br,0x00,sizeof(lbv1Br));
     memset(&lbv2Br,0x00,sizeof(lbv2Br));
 
+    std::cout << "writeOnia\n";
 
     if (writeOnia) // {{{
     {
@@ -890,6 +865,7 @@ void LbSpecificDecay::fillTree( const edm::EventSetup& es )
             jpsiTree->Fill();
         }
     } // writeOnia end }}}
+    std::cout << "writeLam0\n";
     if (writeLam0) // {{{
     {
         unsigned nLam0 = lLam0.size();
@@ -934,6 +910,7 @@ void LbSpecificDecay::fillTree( const edm::EventSetup& es )
             lam0Tree->Fill();
         }
     }// writeLam0 end }}}
+    std::cout << "writeLbL0\n";
     // LbToLam0 fill {{{
     unsigned int nLamb = lLbToLam0.size();
     for ( unsigned int iLamb = 0; iLamb < nLamb; ++iLamb )
@@ -1007,6 +984,7 @@ void LbSpecificDecay::fillTree( const edm::EventSetup& es )
             lambTree->Fill();
     } // LbToLam0 fill end }}}
 
+    std::cout << "writeLbTk\n";
     // LbToTkTk fill {{{
     if ( writeLbToTkTk )
     {
@@ -1017,12 +995,12 @@ void LbSpecificDecay::fillTree( const edm::EventSetup& es )
             const BPHRecoCandidate* cand = lLbToTkTk[iLamb].get();
             const BPHRecoCandidate* cand_jpsi = cand->getComp( "JPsi" ).get();
 
-            const std::vector<std::string> lambName = { "JPsi/MuPos", "JPsi/MuNeg", "Proton", "Kaon" };
+            const std::vector<std::string> lambName = { "JPsi/MuPos", "JPsi/MuNeg", "TkTk/Proton", "TkTk/Kaon" };
             ParticleMass jpsi_mass = 3.096916;
             TwoTrackMassKinematicConstraint *jpsi_const = new TwoTrackMassKinematicConstraint(jpsi_mass);
             const SecRecoResult lambReco = secondaryReconstruction(cand, &lambName, jpsi_const);
-            const std::vector<std::string> penQName = { "JPsi/MuPos", "JPsi/MuNeg", "Proton"};
-            const SecRecoResult penQReco = secondaryReconstruction(cand, &penQName);
+            //const std::vector<std::string> penQName = { "JPsi/MuPos", "JPsi/MuNeg", "Proton"};
+            //const SecRecoResult penQReco = secondaryReconstruction(cand, &penQName);
             const reco::Vertex* PVptr = findPrimaryVertex(cand_jpsi);
 
             if ( PVptr ) 
@@ -1030,6 +1008,21 @@ void LbSpecificDecay::fillTree( const edm::EventSetup& es )
                 lbv1Br.primaryV.x = PVptr->position().X();
                 lbv1Br.primaryV.y = PVptr->position().Y();
                 lbv1Br.primaryV.z = PVptr->position().Z();
+            }
+            if ( cand->isValidFit() )
+            {
+                    const RefCountedKinematicParticle kinPart = cand->currentParticle();
+                    const           KinematicState    kinStat = kinPart->currentState();
+                lbv1Br.momentum.mass    = kinStat.mass();
+                lbv1Br.momentum.pt      = kinStat.kinematicParameters().momentum().transverse();
+                lbv1Br.momentum.eta     = kinStat.kinematicParameters().momentum().eta();
+                lbv1Br.momentum.phi     = kinStat.kinematicParameters().momentum().phi();
+                lbv1Br.position.x       = cand->currentDecayVertex()->position().x();
+                lbv1Br.position.y       = cand->currentDecayVertex()->position().y();
+                lbv1Br.position.z       = cand->currentDecayVertex()->position().z();
+                //lbv1Br.refitPos.vtxprob = TMath::Prob( lambReco.vertex()->chi2(), lambReco.vertex()->ndof() );
+                //}
+
             }
 
             if( lambReco.isValid() )
@@ -1054,20 +1047,20 @@ void LbSpecificDecay::fillTree( const edm::EventSetup& es )
             lbv1Br.jpsiPos.z         = cand_jpsi->vertex().position().Z();
             lbv1Br.jpsiPos.vtxprob   = TMath::Prob( cand_jpsi->vertex().chi2(), cand_jpsi->vertex().ndof() );
 
-            if ( penQReco.isValid() )
-            {
-                lbv1Br.penQMom.mass    = penQReco.mass();
-                lbv1Br.penQMom.pt      = penQReco.momentum()->transverse();
-                lbv1Br.penQMom.eta     = penQReco.momentum()->eta();
-                lbv1Br.penQMom.phi     = penQReco.momentum()->phi();
-                lbv1Br.penQPos.x       = penQReco.vertex()->position().X();
-                lbv1Br.penQPos.y       = penQReco.vertex()->position().Y();
-                lbv1Br.penQPos.z       = penQReco.vertex()->position().Z();
-                lbv1Br.penQPos.vtxprob = TMath::Prob( penQReco.vertex()->chi2(), penQReco.vertex()->ndof() );
-            }
+            //if ( penQReco.isValid() )
+            //{
+            //    lbv1Br.penQMom.mass    = penQReco.mass();
+            //    lbv1Br.penQMom.pt      = penQReco.momentum()->transverse();
+            //    lbv1Br.penQMom.eta     = penQReco.momentum()->eta();
+            //    lbv1Br.penQMom.phi     = penQReco.momentum()->phi();
+            //    lbv1Br.penQPos.x       = penQReco.vertex()->position().X();
+            //    lbv1Br.penQPos.y       = penQReco.vertex()->position().Y();
+            //    lbv1Br.penQPos.z       = penQReco.vertex()->position().Z();
+            //    lbv1Br.penQPos.vtxprob = TMath::Prob( penQReco.vertex()->chi2(), penQReco.vertex()->ndof() );
+            //}
 
-            const reco::Candidate* pTk = cand->getDaug("Proton");
-            const reco::Candidate* nTk = cand->getDaug("Kaon"  );
+            const reco::Candidate* pTk = cand->getDaug("TkTk/Proton");
+            const reco::Candidate* nTk = cand->getDaug("TkTk/Kaon"  );
             lbv1Br.pTk.px     = pTk->px(); 
             lbv1Br.pTk.py     = pTk->py(); 
             lbv1Br.pTk.pz     = pTk->pz(); 
@@ -1077,96 +1070,97 @@ void LbSpecificDecay::fillTree( const edm::EventSetup& es )
             lbv1Br.nTk.pz     = nTk->pz();
             lbv1Br.nTk.charge = nTk->charge();
             lbv1Br.eventNumber= eventNo;
+            if ( pTk->charge() * nTk->charge() != -1 ) cout << "Lb is not neutral!\n";
 
             int tagInfo = 0;
-            if ( lambReco.isValid() )   tagInfo += 1 << 0;
-            if ( penQReco.isValid() )   tagInfo += 1 << 1;
-            if ( PVptr )                tagInfo += 1 << 2;
+            if ( PVptr )                tagInfo += 1 << 0;
+            if ( lambReco.isValid() )   tagInfo += 1 << 1;
+            //if ( penQReco.isValid() )   tagInfo += 1 << 1;
 
-            if ( tagInfo == (1<<3)-1 )
+            if ( tagInfo == (1<<2)-1 )
                 lbv1Tree->Fill();
         }
     } // LbToTkTk fill end }}}
-    // anti LbToTkTk fill {{{
-    if ( writeLbToTkTk )
-   {
-        nLamb = laLbToTkTk.size();
-        for ( unsigned int iLamb = 0; iLamb < nLamb; ++iLamb )
-        {
-            memset(&lbv2Br,0x00,sizeof(lbv2Br));
-            const BPHRecoCandidate* cand = laLbToTkTk[iLamb].get();
-            const BPHRecoCandidate* cand_jpsi = cand->getComp( "JPsi" ).get();
-
-            const std::vector<std::string> lambName = { "JPsi/MuPos", "JPsi/MuNeg", "Proton", "Kaon" };
-            ParticleMass jpsi_mass = 3.096916;
-            TwoTrackMassKinematicConstraint *jpsi_const = new TwoTrackMassKinematicConstraint(jpsi_mass);
-            const SecRecoResult lambReco = secondaryReconstruction(cand, &lambName, jpsi_const);
-            const std::vector<std::string> penQName = { "JPsi/MuPos", "JPsi/MuNeg", "Kaon" }; // "Kaon" is the name of "anti-Proton"
-            const SecRecoResult penQReco = secondaryReconstruction(cand, &penQName);
-            const reco::Vertex* PVptr = findPrimaryVertex(cand_jpsi);
-
-            if ( PVptr ) 
-            {
-                lbv2Br.primaryV.x = PVptr->position().X();
-                lbv2Br.primaryV.y = PVptr->position().Y();
-                lbv2Br.primaryV.z = PVptr->position().Z();
-            }
-
-            if( lambReco.isValid() )
-            {
-                lbv2Br.refitMom.mass    = lambReco.mass();
-                lbv2Br.refitMom.pt      = lambReco.momentum()->transverse();
-                lbv2Br.refitMom.eta     = lambReco.momentum()->eta();
-                lbv2Br.refitMom.phi     = lambReco.momentum()->phi();
-                lbv2Br.refitPos.x       = lambReco.vertex()->position().X();
-                lbv2Br.refitPos.y       = lambReco.vertex()->position().Y();
-                lbv2Br.refitPos.z       = lambReco.vertex()->position().Z();
-                lbv2Br.refitPos.vtxprob = TMath::Prob( lambReco.vertex()->chi2(), lambReco.vertex()->ndof() );
-            }
-
-
-            lbv2Br.jpsiMom.mass      = cand_jpsi->composite().mass();
-            lbv2Br.jpsiMom.pt        = cand_jpsi->composite().pt();
-            lbv2Br.jpsiMom.eta       = cand_jpsi->composite().eta();
-            lbv2Br.jpsiMom.phi       = cand_jpsi->composite().phi();
-            lbv2Br.jpsiPos.x         = cand_jpsi->vertex().position().X();
-            lbv2Br.jpsiPos.y         = cand_jpsi->vertex().position().Y();
-            lbv2Br.jpsiPos.z         = cand_jpsi->vertex().position().Z();
-            lbv2Br.jpsiPos.vtxprob   = TMath::Prob( cand_jpsi->vertex().chi2(), cand_jpsi->vertex().ndof() );
-
-            if ( penQReco.isValid() )
-            {
-                lbv2Br.penQMom.mass    = penQReco.mass();
-                lbv2Br.penQMom.pt      = penQReco.momentum()->transverse();
-                lbv2Br.penQMom.eta     = penQReco.momentum()->eta();
-                lbv2Br.penQMom.phi     = penQReco.momentum()->phi();
-                lbv2Br.penQPos.x       = penQReco.vertex()->position().X();
-                lbv2Br.penQPos.y       = penQReco.vertex()->position().Y();
-                lbv2Br.penQPos.z       = penQReco.vertex()->position().Z();
-                lbv2Br.penQPos.vtxprob = TMath::Prob( penQReco.vertex()->chi2(), penQReco.vertex()->ndof() );
-            }
-
-            const reco::Candidate* pTk = cand->getDaug("Kaon"  );
-            const reco::Candidate* nTk = cand->getDaug("Proton");
-            lbv2Br.pTk.px     = pTk->px(); 
-            lbv2Br.pTk.py     = pTk->py(); 
-            lbv2Br.pTk.pz     = pTk->pz(); 
-            lbv2Br.pTk.charge = pTk->charge();
-            lbv2Br.nTk.px     = nTk->px();
-            lbv2Br.nTk.py     = nTk->py();
-            lbv2Br.nTk.pz     = nTk->pz();
-            lbv2Br.nTk.charge = nTk->charge();
-            lbv2Br.eventNumber= eventNo;
-
-            int tagInfo = 0;
-            if ( lambReco.isValid() )   tagInfo += 1 << 0;
-            if ( penQReco.isValid() )   tagInfo += 1 << 1;
-            if ( PVptr )                tagInfo += 1 << 2;
-
-            if ( tagInfo == (1<<3)-1 )
-                lbv2Tree->Fill();
-        }
-    } // LbToTkTk fill end }}}
+//    // anti LbToTkTk fill {{{
+//    if ( writeLbToTkTk )
+//   {
+//        nLamb = laLbToTkTk.size();
+//        for ( unsigned int iLamb = 0; iLamb < nLamb; ++iLamb )
+//        {
+//            memset(&lbv2Br,0x00,sizeof(lbv2Br));
+//            const BPHRecoCandidate* cand = laLbToTkTk[iLamb].get();
+//            const BPHRecoCandidate* cand_jpsi = cand->getComp( "JPsi" ).get();
+//
+//            const std::vector<std::string> lambName = { "JPsi/MuPos", "JPsi/MuNeg", "Proton", "Kaon" };
+//            ParticleMass jpsi_mass = 3.096916;
+//            TwoTrackMassKinematicConstraint *jpsi_const = new TwoTrackMassKinematicConstraint(jpsi_mass);
+//            const SecRecoResult lambReco = secondaryReconstruction(cand, &lambName, jpsi_const);
+//            const std::vector<std::string> penQName = { "JPsi/MuPos", "JPsi/MuNeg", "Kaon" }; // "Kaon" is the name of "anti-Proton"
+//            const SecRecoResult penQReco = secondaryReconstruction(cand, &penQName);
+//            const reco::Vertex* PVptr = findPrimaryVertex(cand_jpsi);
+//
+//            if ( PVptr ) 
+//            {
+//                lbv2Br.primaryV.x = PVptr->position().X();
+//                lbv2Br.primaryV.y = PVptr->position().Y();
+//                lbv2Br.primaryV.z = PVptr->position().Z();
+//            }
+//
+//            if( lambReco.isValid() )
+//            {
+//                lbv2Br.refitMom.mass    = lambReco.mass();
+//                lbv2Br.refitMom.pt      = lambReco.momentum()->transverse();
+//                lbv2Br.refitMom.eta     = lambReco.momentum()->eta();
+//                lbv2Br.refitMom.phi     = lambReco.momentum()->phi();
+//                lbv2Br.refitPos.x       = lambReco.vertex()->position().X();
+//                lbv2Br.refitPos.y       = lambReco.vertex()->position().Y();
+//                lbv2Br.refitPos.z       = lambReco.vertex()->position().Z();
+//                lbv2Br.refitPos.vtxprob = TMath::Prob( lambReco.vertex()->chi2(), lambReco.vertex()->ndof() );
+//            }
+//
+//
+//            lbv2Br.jpsiMom.mass      = cand_jpsi->composite().mass();
+//            lbv2Br.jpsiMom.pt        = cand_jpsi->composite().pt();
+//            lbv2Br.jpsiMom.eta       = cand_jpsi->composite().eta();
+//            lbv2Br.jpsiMom.phi       = cand_jpsi->composite().phi();
+//            lbv2Br.jpsiPos.x         = cand_jpsi->vertex().position().X();
+//            lbv2Br.jpsiPos.y         = cand_jpsi->vertex().position().Y();
+//            lbv2Br.jpsiPos.z         = cand_jpsi->vertex().position().Z();
+//            lbv2Br.jpsiPos.vtxprob   = TMath::Prob( cand_jpsi->vertex().chi2(), cand_jpsi->vertex().ndof() );
+//
+//            if ( penQReco.isValid() )
+//            {
+//                lbv2Br.penQMom.mass    = penQReco.mass();
+//                lbv2Br.penQMom.pt      = penQReco.momentum()->transverse();
+//                lbv2Br.penQMom.eta     = penQReco.momentum()->eta();
+//                lbv2Br.penQMom.phi     = penQReco.momentum()->phi();
+//                lbv2Br.penQPos.x       = penQReco.vertex()->position().X();
+//                lbv2Br.penQPos.y       = penQReco.vertex()->position().Y();
+//                lbv2Br.penQPos.z       = penQReco.vertex()->position().Z();
+//                lbv2Br.penQPos.vtxprob = TMath::Prob( penQReco.vertex()->chi2(), penQReco.vertex()->ndof() );
+//            }
+//
+//            const reco::Candidate* pTk = cand->getDaug("Kaon"  );
+//            const reco::Candidate* nTk = cand->getDaug("Proton");
+//            lbv2Br.pTk.px     = pTk->px(); 
+//            lbv2Br.pTk.py     = pTk->py(); 
+//            lbv2Br.pTk.pz     = pTk->pz(); 
+//            lbv2Br.pTk.charge = pTk->charge();
+//            lbv2Br.nTk.px     = nTk->px();
+//            lbv2Br.nTk.py     = nTk->py();
+//            lbv2Br.nTk.pz     = nTk->pz();
+//            lbv2Br.nTk.charge = nTk->charge();
+//            lbv2Br.eventNumber= eventNo;
+//
+//            int tagInfo = 0;
+//            if ( lambReco.isValid() )   tagInfo += 1 << 0;
+//            if ( penQReco.isValid() )   tagInfo += 1 << 1;
+//            if ( PVptr )                tagInfo += 1 << 2;
+//
+//            if ( tagInfo == (1<<3)-1 )
+//                lbv2Tree->Fill();
+//        }
+//    } // LbToTkTk fill end }}}
 }
 void LbSpecificDecay::endJob()
 {

@@ -172,6 +172,8 @@ class LambToTkTkBranches // {{{
 {
 public:
     positionStore primaryV;
+    momentumStore momentum;
+    positionStore position;
     momentumStore refitMom;
     positionStore refitPos;
     momentumStore jpsiMom;
@@ -185,6 +187,8 @@ public:
     void RegTree(TTree *root)
     {
         primaryV.RegTree(root, "primaryV");
+        momentum.RegTree(root, "momentum");
+        position.RegTree(root, "position");
         refitMom.RegTree(root, "refitMom");
         refitPos.RegTree(root, "refitPos");
         jpsiMom .RegTree(root, "jpsiMom" );
@@ -199,6 +203,8 @@ public:
     void SetBranchAddress(TTree *root)
     {
         primaryV.SetBranchAddress(root, "primaryV");
+        momentum.SetBranchAddress(root, "momentum");
+        position.SetBranchAddress(root, "position");
         refitMom.SetBranchAddress(root, "refitMom");
         refitPos.SetBranchAddress(root, "refitPos");
         jpsiMom .SetBranchAddress(root, "jpsiMom" );

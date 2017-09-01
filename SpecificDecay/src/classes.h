@@ -11,6 +11,7 @@ namespace
   {
 
     pat::UserHolder< bool > UHbool;
+    pat::UserHolder<  int >  UHint;
 
     pat::UserHolder< Vector3DBase< float, GlobalTag > > UHV3B;
 

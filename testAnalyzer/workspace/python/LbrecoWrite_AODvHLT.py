@@ -33,11 +33,7 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
-    #'file:/home/ltsai/ReceivedFile/BPHanalysis/BPHanalysisTest.root'                   # 8_0_8 BPHSkim
-    'file:/home/ltsai/ReceivedFile/DATA/BPHSkim_Charmonium.root'                       # 8_0_8 BPHSkim Charmonium
-    #'file:///home/ltsai/Data/aod_LambdaBToLambdaMuMu_SoftQCDnonDTest_TuneCUEP8M1_13TeV-pythia8-evtgen.root'
-    #'file:///home/ltsai/Data/mcStep1_LbToJPsiLam0_170504/step3.root'
-    #'file:///home/ltsai/Data/mcStep1_LbToJPsiLam0_170527/step3.root'
+    'file:///afs/cern.ch/user/l/ltsai/BsToJpsiPhiV2_testFile.root'
 
 ))
 
@@ -63,8 +59,8 @@ from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
 process.hltHighLevel= hltHighLevel.clone(HLTPaths = cms.vstring(HLTName))
 
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_v2', '')             # 8_0_10  DATA
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')             # MC
+#process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_v2', '')             # 8_0_10  DATA
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')             # MC
 
 from BPHAnalysis.testAnalyzer.LbrecoSelectForWrite_cfi import recoSelect
 
@@ -89,12 +85,12 @@ process.lbSpecificDecay = cms.EDAnalyzer('LbSpecificDecay',
 )
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('result' + HLTName + '.root')
+    fileName = cms.string('result.root')
 )
 
 
 process.p = cms.Path(
-    process.hltHighLevel *
+    #process.hltHighLevel *
     process.CandidateSelectedTracks *
     process.lbSpecificDecay
 )

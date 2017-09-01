@@ -238,7 +238,9 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
     const string& name,
     KinematicConstraint* kc ) const
 {
+    constrName = name;
     kinTree = RefCountedKinematicTree( 0 );
+    kinTreeofConstrParticle = RefCountedKinematicTree( 0 );
     oldFit = false;
     kinParticles();
     if ( allParticles.size() != daughFull().size() ) return kinTree;
@@ -310,7 +312,9 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
     const string& name,
     MultiTrackKinematicConstraint* kc ) const
 {
+    constrName = name;
     kinTree = RefCountedKinematicTree( 0 );
+    kinTreeofConstrParticle = RefCountedKinematicTree( 0 );
     oldFit = false;
     kinParticles();
 
@@ -359,23 +363,17 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
         double chi2_prob_tktk = TMath::Prob(compPart_vtx->chiSquared(),
                                             compPart_vtx->degreesOfFreedom());
         if(chi2_prob_tktk < 0.01) return kinTree;
+        kinTreeofConstrParticle = compTree;
         if ( kTail.size() )
         {
-            //RefCountedKinematicParticle compPart     = compTree->currentParticle();
-            //RefCountedKinematicVertex   compPart_vtx = compTree->currentDecayVertex();
-
             VirtualKinematicParticleFactory vFactory;
 
             float chi_ = compPart_vtx->chiSquared();
             float ndf_ = compPart_vtx->degreesOfFreedom();
             kTail.push_back( vFactory.particle( compPart->currentState(), chi_, ndf_, compPart ) );
-            //if ( !compPart->currentState().isValid() ) return kinTree;
-            //kTail.push_back( compPart );
             kinTree = vtxFitter.fit( kTail );
             if ( kc != 0 )
             {
-                //KinematicParticleFitter kinFitter;
-                //compTree = kinFitter.fit( kc, compTree );
                 KinematicConstrainedVertexFitter kcvFitter;
                 compTree = kcvFitter.fit( kTail, kc );
                 if ( compTree->isEmpty() ) return kinTree;
@@ -383,10 +381,6 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
             }
             else
             {
-                //      KinematicConstrainedVertexFitter kcvFitter;
-                //      compTree = kcvFitter.fit( kTail );
-                //if ( compTree->isEmpty() ) return kinTree;
-                //      kinTree = compTree;
                 KinematicParticleVertexFitter   kpv_fitter;
                 compTree = kpv_fitter.fit( kTail );
                 if(!compTree->isValid()) return kinTree;
@@ -407,6 +401,15 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
     }
     return kinTree;
 }
+
+const  RefCountedKinematicTree& BPHKinematicFit::seckinematicTree() const
+{
+    if ( oldFit ) return kinematicTree( "", massConst, massSigma );
+    return kinTreeofConstrParticle;
+}
+
+std::string BPHKinematicFit::getConstrName() const
+{ return constrName; }
 
 
 void BPHKinematicFit::resetKinematicFit() const

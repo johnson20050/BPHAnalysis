@@ -6,184 +6,234 @@
 #include "TCanvas.h"
 #include "TH1D.h"
 #include "TLegend.h"
-
 #include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/format.h"
-//#include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/filePath.h"
-#include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/filePathmc.h"
-
 #include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/cutFuncs.h"
-#include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/histoMAP.h"
-#include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/cutLists.h"
-#include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/vtxprobCollection.h"
+#include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/filePath.h"
+//#include "/wk_cms/ltsai/LbFrame/TEST/CMSSW_8_0_21/src/BPHAnalysis/testAnalyzer/workspace/plotCode/filePath_20170630.h"
 #include <map>
 using namespace std;
-// funcs{{{
-// decide the content filled in histograms.
-template<typename myDataBranch>
-void sthToFill(histoMAP& inHistos, const myDataBranch* root);
-// load tree and cut lists, and execute sthToFill
-template<typename myDataBranch>
-void plotWithCuts(histoMAP& inHistos, const myDataBranch* root, TTree* tree, const vector<CutList*>& cuts, unsigned numberToFill=0);
-// load file by file, and execute plotWithCuts
-template<typename myDataBranch>
-void plotFromFile(histoMAP& inHistos, myDataBranch* root, vector<CutList*>& cuts, const string& branchName, const string& fileName, unsigned numberToFill=0);
-// output a png figure.
-void outputFigure( map<string, TH1D*>& hMap, const string& branchName, const string& plotCommand="", const string& anyCommand="");
-// output a root file contains lots of histograms.
-void outputFigure_rootFile( map<string, TH1D*>& hMap, TFile* fStore,  const string& dirName );
-// funcs end }}}
-int main() 
+
+string defaultFilePath = "/home/ltsai/Data/CRABdata/CRABdata_6_Jun_2017/result/";
+
+// input value need to change with tree Entry.
+// getMass {{{
+template<typename myDataValues>
+TH1D* getMass(TTree* tree, const myDataValues& val, int bin, double xmin = 0., double xmax = 10.)
 {
-    string branchName[2] = { "LbToTkTree", "LbTotkTree" };
-    string dirName[2] = { "particle", "antiparticle" };
-    string anyCommand = "withCut";
-    string fileName = "cut.refitMom.mass_"+anyCommand+".root";
-
-    LambToTkTkBranches* root = new LambToTkTkBranches();
-    // cuts applied
-    vector<CutList*> cutLists;
-    cutLists.push_back( new      vtxprobCut(0.15,-99. , root->refitPos.getAdd()) );
-    cutLists.push_back( new         massCut(5.0 ,  6.0, root->refitMom.getAdd()) );
-    cutLists.push_back( new       cosa2dCut(0.99,       root->refitPos.getAdd(), root->refitMom.getAdd(), root->primaryV.getAdd()) );
-    cutLists.push_back( new           ptCut(15  ,-99. , root->refitMom.getAdd()) );
-    cutLists.push_back( new flightDist2DCut(0.2 ,  0.6, root->refitPos.getAdd(), root->primaryV.getAdd()) );
-
-
-    TFile* fStore = new TFile( fileName.c_str(), "RECREATE" );
-
-    for ( int i=0; i<2; ++i )
+    TH1D* histo = new TH1D("", "", bin, xmin, xmax  );
+    unsigned i = 0;
+    unsigned n = tree->GetEntries();
+    while( i != n )
     {
-        map<string, TH1D*> totMap;
-        createHisto( totMap, "Lambda0_b_Mass" , 300, 5.0 , 6.0 );
-        createHisto( totMap, "jpsi_Mass"      , 120, 2.9 , 3.3 );
-        createHisto( totMap, "pentaQuark_Mass", 300, 4.0 , 5.5 );
-
-        histoMAP tmpHistos;
-        tmpHistos.copyHisto( totMap );
-        unsigned numToFill = 2;
-        // run over all files, totalFileName is declared in filePath.h
-        for ( const auto& fileName : totalFileName )
-        {
-            plotFromFile( tmpHistos, root, cutLists, branchName[i], fileName , numToFill );
-            tmpHistos.storeHistoInto( totMap );
-        }
-
-        outputFigure_rootFile( totMap, fStore, dirName[i] );
-        deleteHistoMap( totMap );
+        tree->GetEntry(i++);
+        histo->Fill(val);
+        //histo->Fill(root.refitMom.mass);
     }
-
-    printf( "created root file: %s \n", fileName.c_str() );
-    for ( auto& myCut : cutLists )
-        delete myCut;
-    delete root;
-
-    fStore->Close();
-} 
-
-template<typename myDataBranch>
-void sthToFill(histoMAP& inHistos, const myDataBranch* root)
+    return histo;
+} // getMass end }}}
+// setHistoPlot {{{
+void setHistoPlot(TH1* histo, short lineColor, short lineWidth, short fillColor, short fillStyle)
 {
-    inHistos.fillHisto("Lambda0_b_Mass" , root->refitMom.mass);
-    inHistos.fillHisto("jpsi_Mass"      , root->jpsiMom.mass );
-    inHistos.fillHisto("pentaQuark_Mass", root->penQMom.mass );
+    if(lineColor != 999) histo->SetLineColor(lineColor);
+    if(lineWidth != 999) histo->SetLineWidth(lineWidth);
+    if(fillColor != 999) histo->SetFillColor(fillColor);
+    if(fillStyle != 999) histo->SetFillStyle(fillStyle);
 }
-template<typename myDataBranch>
-void plotWithCuts(histoMAP& inHistos, const myDataBranch* root, TTree* tree, const vector<CutList*>& cuts, unsigned numberToFill)
+void setHistoYRange(TH1* histo, Double_t min, Double_t max = -1111.)
 {
-    inHistos.clearHisto();
-    tmpVtxprobCollection vtxprobCollection( numberToFill );
+    histo->SetMinimum(min);
+    histo->SetMaximum(max);
+} // setHistoPlot end }}}
+// plotMassWithCut {{{
+template<typename myDataBranch>
+TH1* plotMassWithCut(TTree* tree, const myDataBranch& root)
+{
+    //TH1D* histo = new TH1D("", "",  80, 1.1, 1.15 );
+    TH1D* histo = new TH1D("", "",  50, 5.0, 6.00 );
+    //TH1D* histo = new TH1D("pt", "",  50, 0, 25.00 );
     unsigned i = 0;
     unsigned n = tree->GetEntries();
     while( i != n )
     {
         tree->GetEntry(i++);
         bool fillTag = true;
+        if (  emptyMom(root.refitMom) ) fillTag = false;
+        if (  emptyPos(root.refitPos) ) fillTag = false;
+        if (  emptyPos(root.primaryV) ) fillTag = false;
 
-        if ( emptyMom( root->refitMom ) ) continue;
-        if ( emptyPos( root->refitPos ) ) continue;
-        if ( emptyPos( root->primaryV ) ) continue;
+        //if ( !mmassCut(root.lam0Mom, 1.100 ) ) fillTag = false;
+        //if ( !MmassCut(root.lam0Mom, 1.130 ) ) fillTag = false;
+        if ( !mmassCut(root.refitMom, 5.0  ) ) fillTag = false;
+        if ( !MmassCut(root.refitMom, 6.0  ) ) fillTag = false;
+        //if ( !mptCut(root.refitMom, 15) ) fillTag = false;
+        if ( !mvtxprobCut(root.refitPos, 0.1) ) fillTag = false;
+        if ( !mcosa2d(root.refitPos, root.refitMom, root.primaryV, 0.99) ) fillTag = false;
+        if ( !mflightDist2DCut(root.refitPos, root.primaryV, 0.1) ) fillTag = false;
+        //if ( !MflightDist2DCut(root.refitPos, root.primaryV, 0.012 ) ) fillTag = false;
+        //if ( !mproperTimeCut(root.refitPos, root.refitMom, root.primaryV, 0.04) ) fillTag = false;
+        //if ( !MproperTimeCut(root.refitPos, root.refitMom, root.primaryV, 0.13) ) fillTag = false;
+        //if ( !mproperTimeCut(root.refitPos, root.refitMom, root.primaryV, 0.03) ) fillTag = false;
+        //if ( !mflightDist2DCut(root.lam0Pos, root.refitPos, 20) ) fillTag = false;
 
-        // cuts are listed in main()
-        for ( const auto& cut : cuts )
-            if ( !cut->accept() ) fillTag = false;
-
-        if ( fillTag || i==n ) // i==n is for the last event. prevent to lost the last information
+        if ( fillTag )
         {
-            std::pair<double,unsigned> tmpPair( root->refitPos.vtxprob, i-1 );
-            vtxprobCollection.fillEntry( tmpPair, root->eventNumber );
-            if ( vtxprobCollection.startToFill() || i==n ) 
-            {
-                const map<double, unsigned,greater<double>>* entry = vtxprobCollection.getEntry();
-                map<double, unsigned>::const_iterator iter = entry->begin();
-                map<double, unsigned>::const_iterator iend = entry->end  ();
-                while ( iter != iend )
-                {
-                    unsigned _entry = iter->second;
-                    unsigned _numberToFill = 0;
-                    tree->GetEntry( _entry );
-
-                    sthToFill( inHistos, root );
-                    
-                    ++iter;
-                    if ( ++_numberToFill == vtxprobCollection.getFillNumber() ) break;
-                }
-                vtxprobCollection.clear();
-            }
+            histo->Fill(root.refitMom.mass);
+            //histo->Fill(root.lam0Mom.mass);
         }
+     
     }
-}
 
+    return histo;
+} // plotMassWithCut end }}}
+// plotParameterFigure {{{
 template<typename myDataBranch>
-void plotFromFile(histoMAP& inHistos, myDataBranch* root, vector<CutList*>& cuts, const string& branchName, const string& fileName, unsigned numberToFill)
+map<string, TH1*> plotParameterFigure(TTree* tree, const myDataBranch& root, const string& tag="")
+{
+
+    map<string, TH1*> h;
+    //h["vtxprob"]        = new TH1D("", "", 100, 0., 0.0000003);
+    h["vtxprob"]        = new TH1D("", "", 100, 0.0003, 0.3);
+    h["properTime"]     = new TH1D("", "", 150, 0.05, 0.2);
+    h["flightDist2D"]   = new TH1D("", "", 100, 0.0, 2.0);
+    //h["flightDist2D"]   = new TH1D("", "",  40, 0.11, 0.13);
+    h["cosa2d"]         = new TH1D("", "",  50,  0.996, 1.001);
+    //h["lam0TolambDist"] = new TH1D("", "",  80, 20 ,  60);
+
+    unsigned i = 0;
+    unsigned n = tree->GetEntries();
+    while( i != n )
+    {
+        tree->GetEntry(i++);
+        h["vtxprob"]        ->Fill( root.refitPos.vtxprob );
+        h["properTime"]     ->Fill( properTime(root.refitPos, root.refitMom, root.primaryV) );  
+        h["flightDist2D"]   ->Fill( flightDist2D(root.refitPos, root.primaryV) );
+        h["cosa2d"]         ->Fill( cosa2d(root.refitPos, root.refitMom, root.primaryV) );
+        //h["lam0TolambDist"] ->Fill( flightDist2D(root.refitPos, root.lam0Pos) );
+    }
+    return h;
+
+    //TCanvas c1("", "", 1600, 1000);
+    //map<string, TH1D*>::iterator iter = h.begin();
+    //map<string, TH1D*>::iterator iend = h.end  ();
+    //while( iter!=iend )
+    //{
+    //    //setHistoPlot(iter->second, ....);
+    //    iter->second->Draw();
+    //    c1.SaveAs( ("parFigure_"+tag+"."+iter++->first+".png").c_str() );
+    //}
+}// plotParameterFigure end }}}
+// plotFile {{{
+template<typename myDataBranch>
+TH1* plotFromFile(const string& branchName, const string& fileName)
 {
     TFile* f1 = TFile::Open( ("file:"+fileName).c_str() );
     TTree* tree = (TTree*)f1->Get( ("lbSpecificDecay/"+branchName).c_str() );
-    root->SetBranchAddress( tree );
-    plotWithCuts(inHistos, root, tree, cuts, numberToFill);
-    
-    inHistos.preventDeletedByTFile();
+    myDataBranch root;
+
+    root.SetBranchAddress(tree);
+    TH1* h = plotMassWithCut(tree, root);
+    h->SetDirectory(0);  // prevent histogram is deleted by TFile.
     f1->Close();
-    return;
-}
+    return h;
+} 
 
-void outputFigure( map<string, TH1D*>& hMap, const string& branchName, const string& plotCommand, const string& anyCommand)
+template<typename myDataBranch>
+map<string, TH1*> plotParFromFile(const string& branchName, const string& fileName)
 {
+    TFile* f1 = TFile::Open( ("file:"+fileName).c_str() );
+    TTree* tree = (TTree*)f1->Get( ("lbSpecificDecay/"+branchName).c_str() );
+    myDataBranch root;
+    root.SetBranchAddress(tree);
+    map<string, TH1*> hmap;
+    hmap["vtxprob"]        = new TH1D("", "", 100, 0.0003, 0.3);
+    hmap["properTime"]     = new TH1D("", "",  35, 0.05, 0.4);
+    hmap["flightDist2D"]   = new TH1D("", "", 100, 0.1, 0.2);
+    hmap["flightDist2D"]   = new TH1D("", "",  40, 0.11, 0.13);
+    hmap["cosa2d"]         = new TH1D("", "",  50,  0.996, 1.001);
+
+    hmap = plotParameterFigure( tree, root );
+    //size_t n = branchName.size();
+    //branchName.erase( n-4, 4); // remove "Tree"
+    //hmap = plotParameterFigure( tree, root, branchName );
+
+    map<string, TH1*>::const_iterator iter = hmap.begin();
+    map<string, TH1*>::const_iterator iend = hmap.end  ();
+    while ( iter != iend )
+    {
+        iter->second->SetDirectory(0);  // prevent histogram to be deleted by TFile::Close().
+        iter++;
+    }
+    f1->Close();
+    return hmap;
+} // plotFile end }}}
+// main() {{{
+int main() // mass with cuts plot
+{
+    string branchName  = "LbToTkTree";
+    //string branchName2 = "LbTotkTree";
+
+    vector<string>::const_iterator iterFileName = totalFileName.begin();
+    vector<string>::const_iterator iend         = totalFileName.end  ();
+
+    TH1D* hTot = new TH1D("", "",  50, 5.0, 6.00 );
+    //TH1D* hTot = new TH1D("pt", "",  50, 0, 25.00 );
+    while ( iterFileName != iend )
+    {
+        TH1* hTmp = plotFromFile<LambToTkTkBranches>(branchName, *iterFileName++);
+        hTot->Add(hTmp);
+        delete hTmp;
+    }
+    TLegend legend(0.15, 0.65, 0.5, 0.85, "HLT applied: ", "NDC");
+    legend.AddEntry(hTot, "test legend", "lepf");
+
+    legend.SetBorderSize(0);
+    legend.SetFillColor(39);
     TCanvas c("", "", 1600, 1000);
-    map<string, TH1D*>::iterator iter = hMap.begin();
-    map<string, TH1D*>::iterator iend = hMap.end  ();
-    //c.SetFillColor(39);
-    //c.GetSelectedPad()->SetFillColor(39);
-    
-    // draw all histograms in the map
-    while ( iter != iend )
-    {
-        const string& hName = iter->first;
-        TH1D*   histo = iter->second;
-        histo->SetTitle( (hName+plotCommand).c_str() );
-        histo->Draw();
-        if ( !plotCommand.empty() )
-            c.SetLogy();
-        c.SaveAs( ("parFigure_"+branchName+"."+hName+plotCommand+"_"+anyCommand+".png").c_str() );
-        ++iter;
-    }
-}
+    c.SetFillColor(39);
+    hTot->Draw();
+    c.SaveAs( ("cut."+branchName+".refitMom.mass_withCuts.png").c_str() );
 
-void outputFigure_rootFile( map<string, TH1D*>& hMap, TFile* fStore,  const string& dirName )
-{
-    TDirectory* myDir = fStore->mkdir( dirName.c_str() );
-    myDir->cd();
-    map<string, TH1D*>::iterator iter = hMap.begin();
-    map<string, TH1D*>::iterator iend = hMap.end  ();
-    
-    // draw all histograms in the map
-    while ( iter != iend )
-    {
-        const string& hName = iter->first;
-        TH1D*   histo = iter->second;
-        histo->SetTitle( hName.c_str() );
-        histo->Write();
-        ++iter;
-    }
-    fStore->cd();
-    // TDirectory will be deleted by TFile.
+    delete hTot;
 }
+//int main() // parFigure plot
+//{
+//    string branchName = "LbToTkTree";
+//
+//    vector<string>::const_iterator iterFileName = totalFileName.begin();
+//    vector<string>::const_iterator iendFileName = totalFileName.end  ();
+//
+//    map<string, TH1*> hmap;
+//    hmap["vtxprob"]        = new TH1D("", "", 100, 0.0003, 0.3);
+//    hmap["properTime"]     = new TH1D("", "", 150, 0.05, 0.2);
+//    hmap["flightDist2D"]   = new TH1D("", "", 100, 0.0, 2.0);
+//    hmap["cosa2d"]         = new TH1D("", "",  50,  0.996, 1.001);
+//    map<string, TH1*>::iterator iter;
+//    map<string, TH1*>::iterator iend = hmap.end();
+//    while ( iterFileName != iendFileName )
+//    {
+//        // get histograms from function.
+//        map<string, TH1*> tmpMap = plotParFromFile<LambToTkTkBranches>(branchName, *iterFileName++);
+//        map<string, TH1*>::const_iterator hIter = tmpMap.begin();
+//        map<string, TH1*>::const_iterator hIend = tmpMap.end  ();
+//        // sum up the histograms to final histograms
+//        while ( hIter != hIend )
+//            if ( (iter = hmap.find( hIter->first )) != iend )
+//            {
+//                iter++->second->Add(hIter->second);
+//                delete hIter++->second;
+//            }
+//            else delete hIter++->second;
+//    }
+//
+//
+//    TCanvas c("", "", 1600, 1000);
+//    iter = hmap.begin();
+//    // draw all histogram in the map
+//    while ( iter != iend )
+//    {
+//        iter->second->SetTitle( iter->first.c_str() );
+//        iter->second->Draw();
+//        c.SetLogy();
+//        c.SaveAs( ("parFigure_"+branchName+"."+iter++->first+".png").c_str() );
+//    }
+//} // main() end }}}

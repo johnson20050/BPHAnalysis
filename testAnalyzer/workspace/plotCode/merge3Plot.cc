@@ -65,7 +65,7 @@ int main()
     setHistoPlot(h[0], kBlack  , 2,     999,  999);
     setHistoPlot(h[1], kYellow , 2, kYellow,  999);
     setHistoPlot(h[2],    0    , 2, kRed   , 3244);
-    setHistoPlot(h[3], kBlue+1 , 2, kBlue+1, 3351);
+//    setHistoPlot(h[3], kBlue+1 , 2, kBlue+1, 3351);
 
     setHistoYRange(h[1], 0, 180);
 

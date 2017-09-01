@@ -1,4 +1,4 @@
-#include "BPHAnalysis/SpecificDecay/plugins/BPHHistoSpecificDecay.h"
+#include "BPHAnalysis/SpecificDecay/plugins/lbHistoSpecificDecay.h"
 
 #include "BPHAnalysis/SpecificDecay/interface/BPHParticleMasses.h"
 
@@ -35,6 +35,7 @@ using namespace std;
 // is equivalent to
 // xyz = ps.getParameter<string>( "xyx" )
 
+// useful classes {{{
 class BPHUserData {
  public:
   template<class T>
@@ -122,7 +123,7 @@ class BPHSoftMuonSelect {
 };
 
 
-class BPHDaughterSelect: public BPHHistoSpecificDecay::CandidateSelect {
+class BPHDaughterSelect: public lbHistoSpecificDecay::CandidateSelect {
  public:
   BPHDaughterSelect( float  ptMinLoose,
                      float  ptMinTight,
@@ -169,7 +170,7 @@ class BPHDaughterSelect: public BPHHistoSpecificDecay::CandidateSelect {
 };
 
 
-class BPHCompositeBasicSelect: public BPHHistoSpecificDecay::CandidateSelect {
+class BPHCompositeBasicSelect: public lbHistoSpecificDecay::CandidateSelect {
  public:
   BPHCompositeBasicSelect( float     massMin,
                            float     massMax,
@@ -208,7 +209,7 @@ class BPHCompositeBasicSelect: public BPHHistoSpecificDecay::CandidateSelect {
 };
 
 
-class BPHFittedBasicSelect: public BPHHistoSpecificDecay::CandidateSelect {
+class BPHFittedBasicSelect: public lbHistoSpecificDecay::CandidateSelect {
  public:
   BPHFittedBasicSelect( float     massMin,
                         float     massMax,
@@ -260,7 +261,7 @@ class BPHFittedBasicSelect: public BPHHistoSpecificDecay::CandidateSelect {
 };
 
 
-class BPHCompositeVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
+class BPHCompositeVertexSelect: public lbHistoSpecificDecay::CandidateSelect {
  public:
   BPHCompositeVertexSelect( float probMin,
                             float  cosMin = -1.0,
@@ -308,7 +309,7 @@ class BPHCompositeVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
 };
 
 
-class BPHFittedVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
+class BPHFittedVertexSelect: public lbHistoSpecificDecay::CandidateSelect {
  public:
   BPHFittedVertexSelect( float probMin,
                          float  cosMin = -1.0,
@@ -357,228 +358,69 @@ class BPHFittedVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
   float cMin;
   float sMin;
 };
+// useful classes end }}}
 
-
-BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
+lbHistoSpecificDecay::lbHistoSpecificDecay( const edm::ParameterSet& ps ) {
 
   useOnia = ( SET_LABEL( oniaCandsLabel, ps ) != "" );
-  useSd   = ( SET_LABEL(   sdCandsLabel, ps ) != "" );
-  useSs   = ( SET_LABEL(   ssCandsLabel, ps ) != "" );
-  useBu   = ( SET_LABEL(   buCandsLabel, ps ) != "" );
-  useBd   = ( SET_LABEL(   bdCandsLabel, ps ) != "" );
-  useBs   = ( SET_LABEL(   bsCandsLabel, ps ) != "" );
+  useLam0 = ( SET_LABEL( lam0CandsLabel, ps ) != "" );
+  useTkTk = ( SET_LABEL( tktkCandsLabel, ps ) != "" );
+  useLbL0 = ( SET_LABEL( LbL0CandsLabel, ps ) != "" );
+  useLbTk = ( SET_LABEL( LbTkCandsLabel, ps ) != "" );
   if ( useOnia ) consume< vector<pat::CompositeCandidate> >( oniaCandsToken,
                                                              oniaCandsLabel );
-  if ( useSd   ) consume< vector<pat::CompositeCandidate> >(   sdCandsToken,
-                                                               sdCandsLabel );
-  if ( useSs   ) consume< vector<pat::CompositeCandidate> >(   ssCandsToken,
-                                                               ssCandsLabel );
-  if ( useBu   ) consume< vector<pat::CompositeCandidate> >(   buCandsToken,
-                                                               buCandsLabel );
-  if ( useBd   ) consume< vector<pat::CompositeCandidate> >(   bdCandsToken,
-                                                               bdCandsLabel );
-  if ( useBs   ) consume< vector<pat::CompositeCandidate> >(   bsCandsToken,
-                                                               bsCandsLabel );
+  if ( useLam0 ) consume< vector<pat::CompositeCandidate> >( lam0CandsToken,
+                                                             lam0CandsLabel );
+  if ( useTkTk ) consume< vector<pat::CompositeCandidate> >( tktkCandsToken,
+                                                             tktkCandsLabel );
+  if ( useLbL0 ) consume< vector<pat::CompositeCandidate> >( LbL0CandsToken,
+                                                             LbL0CandsLabel );
+  if ( useLbTk ) consume< vector<pat::CompositeCandidate> >( LbTkCandsToken,
+                                                             LbTkCandsLabel );
 
   static const BPHSoftMuonSelect sms;
+}
 
-  double  phiMassMin =  0.85;
-  double  phiMassMax =  3.30;
-  double  phiPtMin   = 16.0;
-  double  phiEtaMax  = -1.0;
-  double  phiRMax    = -1.0;
-  double jPsiMassMin =  2.95;
-  double jPsiMassMax =  3.30;
-  double jPsiPtMin   = 16.0;
-  double jPsiEtaMax  = -1.0;
-  double jPsiRMax    = -1.0;
-  double psi2MassMin =  3.40;
-  double psi2MassMax =  4.00;
-  double psi2PtMin   = 13.0;
-  double psi2EtaMax  = -1.0;
-  double psi2RMax    = -1.0;
-  double upsMassMin  =  8.50;
-  double upsMassMax  = 11.0;
-  double upsPtMin    = 13.0;
-  double upsEtaMax   = -1.0;
-  double upsRMax     = -1.0;
 
-  double oniaProbMin =  0.005;
-  double oniaCosMin  = -1.0;
-  double oniaSigMin  = -1.0;
-
-  double oniaMuPtMinLoose  = -1.0;
-  double oniaMuPtMinTight  = -1.0;
-  double oniaMuEtaMaxLoose = -1.0;
-  double oniaMuEtaMaxTight = -1.0;
-
-   phiBasicSelect      = new BPHCompositeBasicSelect(
-                              phiMassMin,  phiMassMax,
-                              phiPtMin  ,  phiEtaMax ,  phiRMax );
-  jPsiBasicSelect      = new BPHCompositeBasicSelect(
-                             jPsiMassMin, jPsiMassMax,
-                             jPsiPtMin  , jPsiEtaMax , jPsiRMax );
-  psi2BasicSelect      = new BPHCompositeBasicSelect(
-                             psi2MassMin, psi2MassMax,
-                             psi2PtMin  , psi2EtaMax , psi2RMax );
-  upsBasicSelect       = new BPHCompositeBasicSelect(
-                              upsMassMin,  upsMassMax,
-                              upsPtMin  ,  upsEtaMax , upsRMax );
-  oniaVertexSelect     = new BPHCompositeVertexSelect(
-                             oniaProbMin, oniaCosMin, oniaSigMin );
-  oniaDaughterSelect   = new BPHDaughterSelect(
-                             oniaMuPtMinLoose , oniaMuPtMinTight ,
-                             oniaMuEtaMaxLoose, oniaMuEtaMaxTight, &sms );
-
-  double buJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
-  double buJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
-  double buJPsiPtMin     =  8.0;
-  double buJPsiEtaMax    = -1.0;
-  double buJPsiRMax      = -1.0;
-  double buProbMin       =  0.10;
-  double buCosMin        =  0.99;
-  double buSigMin        =  3.0;
-  double buMuPtMinLoose  =  4.0;
-  double buMuPtMinTight  =  4.0;
-  double buMuEtaMaxLoose =  2.2;
-  double buMuEtaMaxTight =  2.2;
-
-  buKPtMin = 1.6;
-
-  buJPsiBasicSelect    = new BPHCompositeBasicSelect(
-                             buJPsiMassMin, buJPsiMassMax,
-                             buJPsiPtMin  , buJPsiEtaMax , buJPsiRMax );
-  buVertexSelect       = new BPHFittedVertexSelect(
-                             buProbMin, buCosMin, buSigMin );
-  buJPsiDaughterSelect = new BPHDaughterSelect(
-                             buMuPtMinLoose , buMuPtMinTight ,
-                             buMuEtaMaxLoose, buMuEtaMaxTight, &sms );
-
-  double bdJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
-  double bdJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
-  double bdJPsiPtMin     =  8.0;
-  double bdJPsiEtaMax    = -1.0;
-  double bdJPsiRMax      = -1.0;
-  double bdKx0MassMin    = BPHParticleMasses::kx0Mass - 0.075;
-  double bdKx0MassMax    = BPHParticleMasses::kx0Mass + 0.075;
-  double bdKx0PtMin      = -1.0;
-  double bdKx0EtaMax     = -1.0;
-  double bdKx0RMax       = -1.0;
-  double bdProbMin       =  0.10;
-  double bdCosMin        =  0.99;
-  double bdSigMin        =  3.0;
-  double bdMuPtMinLoose  =  4.0;
-  double bdMuPtMinTight  =  4.0;
-  double bdMuEtaMaxLoose =  2.2;
-  double bdMuEtaMaxTight =  2.2;
-
-  bdJPsiBasicSelect    = new BPHCompositeBasicSelect(
-                             bdJPsiMassMin, bdJPsiMassMax,
-                             bdJPsiPtMin  , bdJPsiEtaMax , bdJPsiRMax );
-  bdKx0BasicSelect     = new BPHCompositeBasicSelect(
-                             bdKx0MassMin, bdKx0MassMax,
-                             bdKx0PtMin  , bdKx0EtaMax , bdKx0RMax );
-  bdVertexSelect       = new BPHFittedVertexSelect(
-                             bdProbMin, bdCosMin, bdSigMin );
-  bdJPsiDaughterSelect = new BPHDaughterSelect(
-                             bdMuPtMinLoose , bdMuPtMinTight ,
-                             bdMuEtaMaxLoose, bdMuEtaMaxTight, &sms );
-
-  double bsJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
-  double bsJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
-  double bsJPsiPtMin     =  8.0;
-  double bsJPsiEtaMax    = -1.0;
-  double bsJPsiRMax      = -1.0;
-  double bsPhiMassMin    = BPHParticleMasses::phiMass - 0.010;
-  double bsPhiMassMax    = BPHParticleMasses::phiMass + 0.010;
-  double bsPhiPtMin      = -1.0;
-  double bsPhiEtaMax     = -1.0;
-  double bsPhiRMax       = -1.0;
-  double bsProbMin       =  0.10;
-  double bsCosMin        =  0.99;
-  double bsSigMin        =  3.0;
-  double bsMuPtMinLoose  =  4.0;
-  double bsMuPtMinTight  =  4.0;
-  double bsMuEtaMaxLoose =  2.2;
-  double bsMuEtaMaxTight =  2.2;
-  bsJPsiBasicSelect    = new BPHCompositeBasicSelect(
-                             bsJPsiMassMin, bsJPsiMassMax,
-                             bsJPsiPtMin  , bsJPsiEtaMax , bsJPsiRMax );
-  bsPhiBasicSelect     = new BPHCompositeBasicSelect(
-                             bsPhiMassMin, bsPhiMassMax,
-                             bsPhiPtMin  , bsPhiEtaMax , bsPhiRMax );
-  bsVertexSelect       = new BPHFittedVertexSelect(
-                             bsProbMin, bsCosMin, bsSigMin );
-  bsJPsiDaughterSelect = new BPHDaughterSelect(
-                             bsMuPtMinLoose , bsMuPtMinTight ,
-                             bsMuEtaMaxLoose, bsMuEtaMaxTight, &sms );
+lbHistoSpecificDecay::~lbHistoSpecificDecay() {
 
 }
 
 
-BPHHistoSpecificDecay::~BPHHistoSpecificDecay() {
-
-  delete  phiBasicSelect;
-  delete jPsiBasicSelect;
-  delete psi2BasicSelect;
-  delete  upsBasicSelect;
-  delete oniaVertexSelect;
-  delete oniaDaughterSelect;
-
-  delete buJPsiBasicSelect;
-  delete buVertexSelect;
-  delete buJPsiDaughterSelect;
-
-  delete bdJPsiBasicSelect;
-  delete bdKx0BasicSelect;
-  delete bdVertexSelect;
-  delete bdJPsiDaughterSelect;
-
-  delete bsJPsiBasicSelect;
-  delete bsPhiBasicSelect;
-  delete bsVertexSelect;
-  delete bsJPsiDaughterSelect;
-
-}
-
-
-void BPHHistoSpecificDecay::fillDescriptions(
+void lbHistoSpecificDecay::fillDescriptions(
                             edm::ConfigurationDescriptions& descriptions ) {
    edm::ParameterSetDescription desc;
    desc.add<string>( "oniaCandsLabel", "" );
-   desc.add<string>(   "sdCandsLabel", "" );
-   desc.add<string>(   "ssCandsLabel", "" );
-   desc.add<string>(   "buCandsLabel", "" );
-   desc.add<string>(   "bdCandsLabel", "" );
-   desc.add<string>(   "bsCandsLabel", "" );
-   descriptions.add( "process.bphHistoSpecificDecay", desc );
+   desc.add<string>( "lam0CandsLabel", "" );
+   desc.add<string>( "tktkCandsLabel", "" );
+   desc.add<string>( "LbL0CandsLabel", "" );
+   desc.add<string>( "LbTkCandsLabel", "" );
+   descriptions.add( "process.lbHistoSpecificDecay", desc );
    return;
 }
 
 
-void BPHHistoSpecificDecay::beginJob() {
-  createHisto( "massPhi"    ,  35, 0.85, 1.20 ); // Phi  mass
+void lbHistoSpecificDecay::beginJob() {
+  createHisto( "massLam0"   ,  40, 1.10, 1.20 ); // Phi  mass
+  createHisto( "massTkTk"   , 150, 1.00, 2.50 ); // Phi  mass
   createHisto( "massJPsi"   ,  35, 2.95, 3.30 ); // JPsi mass
   createHisto( "massPsi2"   ,  60, 3.40, 4.00 ); // Psi2 mass
   createHisto( "massUps123" , 125, 8.50, 11.0 ); // Ups  mass
-  createHisto( "massBu"     ,  50, 5.00, 6.00 ); // Bu   mass
-  createHisto( "massBd"     ,  50, 5.00, 6.00 ); // Bd   mass
-  createHisto( "massBs"     ,  50, 5.00, 6.00 ); // Bs   mass
-  createHisto( "mfitBu"     ,  50, 5.00, 6.00 ); // Bu   mass, with constraint
-  createHisto( "mfitBd"     ,  50, 5.00, 6.00 ); // Bd   mass, with constraint
-  createHisto( "mfitBs"     ,  50, 5.00, 6.00 ); // Bs   mass, with constraint
-  createHisto( "massBuJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
-  createHisto( "massBdJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bd decay
-  createHisto( "massBsJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bs decay
-  createHisto( "massBsPhi"  ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
-  createHisto( "massBdKx0"  ,  50, 0.80, 1.05 ); // Kx0  mass in Bd decay
+  createHisto( "massLbL0"   , 100, 5.00, 6.00 ); // LbL0   mass
+  createHisto( "massLbTk"   , 100, 5.00, 6.00 ); // LbTk   mass
+  createHisto( "mfitLbL0"   , 100, 5.00, 6.00 ); // LbL0   mass, with constraint
+  createHisto( "mfitLbTk"   , 100, 5.00, 6.00 ); // LbTk   mass, with constraint
+  createHisto( "massLbL0JPsi",  35, 2.95, 3.30 ); // JPsi mass in LbL0 decay
+  createHisto( "massLbTkJPsi",  35, 2.95, 3.30 ); // JPsi mass in LbTk decay
+  createHisto( "massLbL0Lam0",  40, 1.10, 1.20 ); // Phi  mass in Bs decay
+  createHisto( "massLbL0TkTk", 150, 1.00, 2.50 ); // Kx0  mass in LbTk decay
 
   createHisto( "massFull"   , 200, 2.00, 12.0 ); // Full onia mass
 
   return;
 }
 
-void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
+void lbHistoSpecificDecay::analyze( const edm::Event& ev,
                                      const edm::EventSetup& es ) {
 
   // get magnetic field
@@ -597,6 +439,7 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
   if ( useOnia ) {
     oniaCandsToken.get( ev, oniaCands );
     nqo = oniaCands->size();
+    std::cout << "nqo = " << nqo << std::endl;
   }
 
   for ( iqo = 0; iqo < nqo; ++ iqo ) {
@@ -608,125 +451,110 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     //                                "primaryVertex" ) ) ) continue;
     //if ( !oniaDaughterSelect->accept( cand ) ) continue;
     fillHisto( "Full", cand );
-    if (  phiBasicSelect->accept( cand ) ) fillHisto( "Phi"   , cand );
-    if ( jPsiBasicSelect->accept( cand ) ) fillHisto( "JPsi"  , cand );
-    if ( psi2BasicSelect->accept( cand ) ) fillHisto( "Psi2"  , cand );
-    if (  upsBasicSelect->accept( cand ) ) fillHisto( "Ups123", cand );
+    fillHisto( "Phi"   , cand );
+    fillHisto( "JPsi"  , cand );
+    fillHisto( "Psi2"  , cand );
+    fillHisto( "Ups123", cand );
   }
 
-  //////////// Bu ////////////
+  //////////// LbL0 ////////////
 
-  edm::Handle< vector<pat::CompositeCandidate> > buCands;
-  int ibu;
-  int nbu = 0;
-  if ( useBu ) {
-    buCandsToken.get( ev, buCands );
-    nbu = buCands->size();
+  edm::Handle< vector<pat::CompositeCandidate> > lbLbCands;
+  int ilbLb;
+  int nlbLb = 0;
+  if ( useLbL0 ) {
+    LbL0CandsToken.get( ev, lbLbCands );
+    nlbLb = lbLbCands->size();
+    std::cout << "nlbLb = " << nlbLb  << std::endl;
   }
 
-  for ( ibu = 0; ibu < nbu; ++ ibu ) {
+  for ( ilbLb = 0; ilbLb < nlbLb; ++ ilbLb ) {
     LogTrace( "DataDump" )
-           << "*********** Bu " << ibu << "/" << nbu << " ***********";
-    const pat::CompositeCandidate& cand = buCands->at( ibu );
+           << "*********** LbL0 " << ilbLb << "/" << nlbLb << " ***********";
+    const pat::CompositeCandidate& cand = lbLbCands->at( ilbLb );
     const pat::CompositeCandidate* jPsi = BPHUserData::getByRef
          <pat::CompositeCandidate>( cand, "refToJPsi" );
     LogTrace( "DataDump" )
            << "JPsi: " << jPsi;
     if ( jPsi == 0 ) continue;
-    //if ( !buJPsiBasicSelect   ->accept( *jPsi ) ) continue;
-    //if ( !buJPsiDaughterSelect->accept( *jPsi ) ) continue;
-    //if ( !buVertexSelect->accept( cand,
-    //                              BPHUserData::getByRef<reco::Vertex>( *jPsi,
-    //                              "primaryVertex" ) ) ) continue;
-    const reco::Candidate* kptr = BPHDaughters::get( cand, 0.49, 0.50 ).front();
-    if ( kptr == 0 ) continue;
-    if ( kptr->pt() < buKPtMin ) continue;
-    fillHisto( "Bu"    ,  cand );
-    fillHisto( "BuJPsi", *jPsi );
-  }
-
-  //////////// Bd ////////////
-
-  edm::Handle< vector<pat::CompositeCandidate> > bdCands;
-  int ibd;
-  int nbd = 0;
-  if ( useBd ) {
-    bdCandsToken.get( ev, bdCands );
-    nbd = bdCands->size();
-  }
-
-  for ( ibd = 0; ibd < nbd; ++ ibd ) {
+    const pat::CompositeCandidate* lam0 = BPHUserData::getByRef
+         <pat::CompositeCandidate>( cand, "refToLam0" );
     LogTrace( "DataDump" )
-           << "*********** Bd " << ibd << "/" << nbd << " ***********";
-    const pat::CompositeCandidate& cand = bdCands->at( ibd );
+           << "Lam0: " << lam0;
+    if ( lam0 == 0 ) continue;
+    fillHisto( "LbL0"    ,  cand );
+    fillHisto( "LbL0JPsi", *jPsi );
+    fillHisto( "LbL0Lam0" , *lam0  );
+  }
+
+  //////////// LbTk ////////////
+
+  edm::Handle< vector<pat::CompositeCandidate> > lbTkCands;
+  int ilbTk;
+  int nlbTk = 0;
+  if ( useLbTk ) {
+    LbTkCandsToken.get( ev, lbTkCands );
+    nlbTk = lbTkCands->size();
+    std::cout << "nlbTk = " << nlbTk << std::endl;
+  }
+
+  for ( ilbTk = 0; ilbTk < nlbTk; ++ ilbTk ) {
+    LogTrace( "DataDump" )
+           << "*********** LbTk " << ilbTk << "/" << nlbTk << " ***********";
+    const pat::CompositeCandidate& cand = lbTkCands->at( ilbTk );
     const pat::CompositeCandidate* jPsi = BPHUserData::getByRef
          <pat::CompositeCandidate>( cand, "refToJPsi" );
     LogTrace( "DataDump" )
            << "JPsi: " << jPsi;
     if ( jPsi == 0 ) continue;
-    const pat::CompositeCandidate* kx0 = BPHUserData::getByRef
-         <pat::CompositeCandidate>( cand, "refToKx0" );
-    LogTrace( "DataDump" )
-           << "Kx0: " << kx0;
-    if ( kx0 == 0 ) continue;
-    //if ( !bdJPsiBasicSelect   ->accept( *jPsi ) ) continue;
-    //if ( !bdKx0BasicSelect    ->accept( * kx0 ) ) continue;
-    //if ( !bdJPsiDaughterSelect->accept( *jPsi ) ) continue;
-    //if ( !bdVertexSelect->accept( cand,
-    //                              BPHUserData::getByRef<reco::Vertex>( *jPsi,
-    //                              "primaryVertex" ) ) ) continue;
-    fillHisto( "Bd"    ,  cand );
-    fillHisto( "BdJPsi", *jPsi );
-    fillHisto( "BdKx0" , *kx0  );
+    fillHisto( "LbTk"    ,  cand );
+    fillHisto( "LbTkJPsi", *jPsi );
+  }
+  //////////// TkTk ////////////
+
+  edm::Handle< vector<pat::CompositeCandidate> > tktkCands;
+  int itktk;
+  int ntktk = 0;
+  if ( useTkTk ) {
+    tktkCandsToken.get( ev, tktkCands );
+    ntktk = tktkCands->size();
+    std::cout << "ntktk = " << ntktk << std::endl;
   }
 
-  //////////// Bs ////////////
+  for ( itktk = 0; itktk < ntktk; ++ itktk ) {
+    LogTrace( "DataDump" )
+           << "*********** TkTk " << itktk << "/" << ntktk << " ***********";
+    const pat::CompositeCandidate& cand = tktkCands->at( itktk );
+    fillHisto( "TkTk"    ,  cand );
+  }
+  //////////// Lam0 ////////////
 
-  edm::Handle< vector<pat::CompositeCandidate> > bsCands;
-  int ibs;
-  int nbs = 0;
-  if ( useBs ) {
-    bsCandsToken.get( ev, bsCands );
-    nbs = bsCands->size();
+  edm::Handle< vector<pat::CompositeCandidate> > lam0Cands;
+  int ilam0;
+  int nlam0 = 0;
+  if ( useLam0 ) {
+    lam0CandsToken.get( ev, lam0Cands );
+    nlam0 = lam0Cands->size();
+    std::cout << "nlam0 = " << nlam0 << std::endl;
   }
 
-  for ( ibs = 0; ibs < nbs; ++ ibs ) {
+  for ( ilam0 = 0; ilam0 < nlam0; ++ ilam0 ) {
     LogTrace( "DataDump" )
-           << "*********** Bs " << ibs << "/" << nbs << " ***********";
-    const pat::CompositeCandidate& cand = bsCands->at( ibs );
-    const pat::CompositeCandidate* jPsi = BPHUserData::getByRef
-         <pat::CompositeCandidate>( cand, "refToJPsi" );
-    LogTrace( "DataDump" )
-           << "JPsi: " << jPsi;
-    if ( jPsi == 0 ) continue;
-    const pat::CompositeCandidate* phi = BPHUserData::getByRef
-         <pat::CompositeCandidate>( cand, "refToPhi" );
-    LogTrace( "DataDump" )
-           << "Phi: " << phi;
-    if ( phi == 0 ) continue;
-    //if ( !bsJPsiBasicSelect   ->accept( *jPsi ) ) continue;
-    //if ( !bsPhiBasicSelect    ->accept( * phi ) ) continue;
-    //if ( !bsJPsiDaughterSelect->accept( *jPsi ) ) continue;
-    //if ( !bsVertexSelect->accept( cand,
-    //                              BPHUserData::getByRef<reco::Vertex>( *jPsi,
-    //                              "primaryVertex" ) ) ) continue;
-    fillHisto( "Bs"    ,  cand );
-    fillHisto( "BsJPsi", *jPsi );
-    fillHisto( "BsPhi" , *phi  );
+           << "*********** Lam0 " << ilam0 << "/" << nlam0 << " ***********";
+    const pat::CompositeCandidate& cand = lam0Cands->at( ilam0 );
+    fillHisto( "Lam0"    ,  cand );
   }
-
-
   return;
 
 }
 
 
-void BPHHistoSpecificDecay::endJob() {
+void lbHistoSpecificDecay::endJob() {
   return;
 }
 
 
-void BPHHistoSpecificDecay::fillHisto( const string& name,
+void lbHistoSpecificDecay::fillHisto( const string& name,
                                        const pat::CompositeCandidate& cand ) {
   float mass = ( cand.hasUserFloat( "fitMass" ) ?
                  cand.   userFloat( "fitMass" ) : -1 );
@@ -736,7 +564,7 @@ void BPHHistoSpecificDecay::fillHisto( const string& name,
 }
 
 
-void BPHHistoSpecificDecay::fillHisto( const string& name, float x ) {
+void lbHistoSpecificDecay::fillHisto( const string& name, float x ) {
   map<string,TH1F*>::iterator iter = histoMap.find( name );
   map<string,TH1F*>::iterator iend = histoMap.end();
   if ( iter == iend ) return;
@@ -745,7 +573,7 @@ void BPHHistoSpecificDecay::fillHisto( const string& name, float x ) {
 }
 
 
-void BPHHistoSpecificDecay::createHisto( const string& name,
+void lbHistoSpecificDecay::createHisto( const string& name,
                                          int nbin, float hmin, float hmax ) {
   histoMap[name] = fs->make<TH1F>( name.c_str(), name.c_str(),
                                    nbin, hmin, hmax );
@@ -754,4 +582,4 @@ void BPHHistoSpecificDecay::createHisto( const string& name,
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-DEFINE_FWK_MODULE( BPHHistoSpecificDecay );
+DEFINE_FWK_MODULE( lbHistoSpecificDecay );

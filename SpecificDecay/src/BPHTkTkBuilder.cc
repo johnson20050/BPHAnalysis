@@ -53,7 +53,7 @@ BPHTkTkBuilder::BPHTkTkBuilder(
     ptSel = new BPHParticlePtSelect (  0.7 );
    etaSel = new BPHParticleEtaSelect(  2.5 );
   massSel = new BPHMassSelect( 1.00, 2.20 );
-  chi2Sel = new BPHChi2Select( 0.00005 );
+  chi2Sel = new BPHChi2Select( 0.005 );
   updated = false;
 }
 
@@ -81,25 +81,10 @@ vector<BPHPlusMinusConstCandPtr> BPHTkTkBuilder::build() {
   bTkTk.filter( nName, * ptSel );
   bTkTk.filter( pName, *etaSel );
   bTkTk.filter( nName, *etaSel );
-  //BPHMassSymSelect mTmpSel( pName,   nName, massSel );
-  //bTkTk.filter( mTmpSel );
+  bTkTk.filter( *massSel );
+  bTkTk.filter( *chi2Sel );
 
-  vector<BPHPlusMinusConstCandPtr>
-  tmpList = BPHPlusMinusCandidate::build( bTkTk, pName,   nName );
-
-  return tmpList;
-  int ikx;
-  int nkx = tmpList.size();
-  tktkList.clear();
-  tktkList.reserve( nkx );
-  BPHPlusMinusConstCandPtr pxt( 0 );
-  for ( ikx = 0; ikx < nkx; ++ikx ) {
-    BPHPlusMinusConstCandPtr& pxt = tmpList[ikx];
-    if ( !massSel->accept( *pxt ) ) continue;
-    if ( !chi2Sel->accept( *pxt ) ) continue;
-
-    tktkList.push_back( pxt );
-  }
+  tktkList = BPHPlusMinusCandidate::build( bTkTk, pName, nName );
 
   updated = true;
   return tktkList;

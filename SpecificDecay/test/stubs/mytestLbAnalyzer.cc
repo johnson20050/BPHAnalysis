@@ -1,4 +1,4 @@
-#include "BPHAnalysis/SpecificDecay/test/stubs/TestBPHSpecificDecay.h"
+#include "BPHAnalysis/SpecificDecay/test/stubs/mytestLbAnalyzer.h"
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
@@ -21,10 +21,12 @@
 #include "BPHAnalysis/SpecificDecay/interface/BPHOniaToMuMuBuilder.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHKx0ToKPiBuilder.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHPhiToKKBuilder.h"
-#include "BPHAnalysis/SpecificDecay/interface/BPHBuToJPsiKBuilder.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHBsToJPsiPhiBuilder.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHBdToJPsiKxBuilder.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHParticleMasses.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHTkTkBuilder.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHLambda0_bToJPsiTkTkBuilder.h"
+
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -47,7 +49,7 @@ using namespace std;
 // is equivalent to
 // xyz = ps.getParameter<string>( "xyx" )
 
-TestBPHSpecificDecay::TestBPHSpecificDecay( const edm::ParameterSet& ps ) {
+mytestLbAnalyzer::mytestLbAnalyzer( const edm::ParameterSet& ps ) {
 
   usePM = ( SET_LABEL( patMuonLabel, ps ) != "" );
   useCC = ( SET_LABEL( ccCandsLabel, ps ) != "" );
@@ -74,11 +76,11 @@ TestBPHSpecificDecay::TestBPHSpecificDecay( const edm::ParameterSet& ps ) {
 }
 
 
-TestBPHSpecificDecay::~TestBPHSpecificDecay() {
+mytestLbAnalyzer::~mytestLbAnalyzer() {
 }
 
 
-void TestBPHSpecificDecay::fillDescriptions(
+void mytestLbAnalyzer::fillDescriptions(
                            edm::ConfigurationDescriptions& descriptions ) {
    edm::ParameterSetDescription desc;
    desc.add<string>( "patMuonLabel", "" );
@@ -93,25 +95,32 @@ void TestBPHSpecificDecay::fillDescriptions(
 }
 
 
-void TestBPHSpecificDecay::beginJob() {
-  *fPtr << "TestBPHSpecificDecay::beginJob" << endl;
+void mytestLbAnalyzer::beginJob() {
+  *fPtr << "mytestLbAnalyzer::beginJob" << endl;
   createHisto( "massJPsi"  , 60, 2.95, 3.25 ); // JPsi mass
   createHisto( "mcstJPsi"  , 60, 2.95, 3.25 ); // JPsi mass, with constraint
   createHisto( "massKx0"   , 50, 0.80, 1.05 ); // Kx0  mass
   createHisto( "massPhi"   , 40, 1.01, 1.03 ); // Phi  mass
-  createHisto( "massBu"    , 20, 5.00, 5.50 ); // Bu   mass
-  createHisto( "mcstBu"    , 20, 5.00, 5.50 ); // Bu   mass, with constraint
+  createHisto( "mcstPhi"   , 40, 1.01, 1.03 ); // Phi  mass
+  createHisto( "massTkTk"  ,240, 1.30, 2.50 ); // Phi  mass
+  createHisto( "mcstTkTk"  ,240, 1.30, 2.50 ); // Phi  mass
   createHisto( "massBd"    , 20, 5.00, 5.50 ); // Bd   mass
   createHisto( "mcstBd"    , 20, 5.00, 5.50 ); // Bd   mass, with constraint
   createHisto( "massBs"    , 20, 5.10, 5.60 ); // Bs   mass
+  createHisto( "mcstLb"    , 90, 5.10, 6.00 ); // Bs   mass, with constraint
+  createHisto( "massLb"    , 90, 5.10, 6.00 ); // Bs   mass
   createHisto( "mcstBs"    , 20, 5.10, 5.60 ); // Bs   mass, with constraint
   createHisto( "massBsPhi" , 50, 1.01, 1.03 ); // Phi  mass in Bs decay
+  createHisto( "mcstBsPhi" , 50, 1.01, 1.03 ); // Phi  mass in Bs decay
+  createHisto( "massLbTkTk",240, 1.30, 2.50 ); // Phi  mass in Bs decay
+  createHisto( "mcstLbTkTk",240, 1.30, 2.50 ); // Phi  mass in Bs decay
   createHisto( "massBdKx0" , 50, 0.80, 1.05 ); // Kx0  mass in Bd decay
+  createHisto( "mcstBdKx0" , 50, 0.80, 1.05 ); // Kx0  mass in Bd decay
 
   createHisto( "massFull"  , 200,  2.00, 12.00  ); // Full mass
   createHisto( "massFsel"  , 200,  2.00, 12.00  ); // Full mass
-  createHisto( "massPhi"   ,  70,  0.85,  1.20  ); // JPsi mass
-  createHisto( "massJPsi"  ,  60,  2.95,  3.25  ); // JPsi mass
+  createHisto( "massPhi"   ,  70,  0.85,  1.20  ); // Psi1 mass
+  createHisto( "massPsi1"  ,  60,  2.95,  3.25  ); // Psi1 mass
   createHisto( "massPsi2"  ,  50,  3.55,  3.80  ); // Psi2 mass
   createHisto( "massUps1"  , 130,  9.10,  9.75  ); // Ups1 mass
   createHisto( "massUps2"  ,  90,  9.75, 10.20  ); // Ups2 mass
@@ -120,7 +129,7 @@ void TestBPHSpecificDecay::beginJob() {
   return;
 }
 
-void TestBPHSpecificDecay::analyze( const edm::Event& ev,
+void mytestLbAnalyzer::analyze( const edm::Event& ev,
                                     const edm::EventSetup& es ) {
 
   ostream& outF = *fPtr;
@@ -249,7 +258,7 @@ void TestBPHSpecificDecay::analyze( const edm::Event& ev,
 
   outF << "extract and dump JPsi" << endl;
   vector<BPHPlusMinusConstCandPtr> lJPsi = onia->getList(
-                                           BPHOniaToMuMuBuilder::JPsi );
+                                           BPHOniaToMuMuBuilder::Psi1 );
   int iJPsi;
   int nJPsi = lJPsi.size();
   outF << nJPsi << " JPsi cand found" << endl;
@@ -260,8 +269,8 @@ void TestBPHSpecificDecay::analyze( const edm::Event& ev,
   vector<BPHPlusMinusConstCandPtr> lPmm  = onia->getList(
                                            BPHOniaToMuMuBuilder::Phi,
                                            &muoSel, &massPh );
-  vector<BPHPlusMinusConstCandPtr> lJPsi = onia->getList(
-                                           BPHOniaToMuMuBuilder::JPsi,
+  vector<BPHPlusMinusConstCandPtr> lPsi1 = onia->getList(
+                                           BPHOniaToMuMuBuilder::Psi1,
                                            &muoSel, &massP1 );
   vector<BPHPlusMinusConstCandPtr> lPsi2 = onia->getList(
                                            BPHOniaToMuMuBuilder::Psi2,
@@ -280,11 +289,11 @@ void TestBPHSpecificDecay::analyze( const edm::Event& ev,
   outF << nPhi << " PhiMuMu cand found" << endl;
   for ( iPhi  = 0; iPhi  < nPhi ; ++iPhi  ) dumpRecoCand( "PhiMuMu",
                                                           lPmm[iPhi ].get() );
-  int iJPsi;
-  int nJPsi = lJPsi.size();
-  outF << nJPsi << " JPsi cand found" << endl;
-  for ( iJPsi = 0; iJPsi < nJPsi; ++iJPsi ) dumpRecoCand( "JPsi",
-                                                          lJPsi[iJPsi].get() );
+  int iPsi1;
+  int nPsi1 = lPsi1.size();
+  outF << nPsi1 << " Psi1 cand found" << endl;
+  for ( iPsi1 = 0; iPsi1 < nPsi1; ++iPsi1 ) dumpRecoCand( "Psi1",
+                                                          lPsi1[iPsi1].get() );
   int iPsi2;
   int nPsi2 = lPsi2.size();
   outF << nPsi2 << " Psi2 cand found" << endl;
@@ -307,62 +316,14 @@ void TestBPHSpecificDecay::analyze( const edm::Event& ev,
                                                           lUps3[iUps3].get() );
   delete onia;
 
-  if ( !nJPsi ) return;
+  if ( !nPsi1 ) return;
   if ( !nrc   ) return;
 
   BPHParticlePtSelect tkPt( 0.7 );
-  BPHMassSelect mJPsi( 3.00, 3.17 );
+  BPHMassSelect mJPsi( 3.00, 3.20 );
   BPHChi2Select chi2Bs( 0.02 );
 
-  // build and dump Bu
 
-  outF << "build and dump Bu" << endl;
-  BPHBuToJPsiKBuilder* bu = 0;
-  if ( usePF ) bu = new BPHBuToJPsiKBuilder( es, lJPsi,//lFull,//lJPsi,
-                        BPHRecoBuilder::createCollection( pfCands ) );
-  else
-  if ( usePC ) bu = new BPHBuToJPsiKBuilder( es, lJPsi,//lFull,//lJPsi,
-                        BPHRecoBuilder::createCollection( pcCands ) );
-  else
-  if ( useGP ) bu = new BPHBuToJPsiKBuilder( es, lJPsi,//lFull,//lJPsi,
-                        BPHRecoBuilder::createCollection( gpCands ) );
-
-  vector<BPHRecoConstCandPtr> lBu = bu->build();
-
-  int iBu;
-  int nBu = lBu.size();
-  outF << nBu << " Bu cand found" << endl;
-  for ( iBu = 0; iBu < nBu; ++iBu ) dumpRecoCand( "Bu",
-                                                  lBu[iBu].get() );
-  // the following is an example of decay reconstruction starting from
-  // specific reco::Candidates
-  // here the final decay products are taken from already reconstructed B+,
-  // so there's no physical sense in the operation
-  for ( iBu = 0; iBu < nBu; ++iBu ) {
-    const BPHRecoCandidate* bu = lBu[iBu].get();
-    const reco::Candidate* mPos = bu->originalReco(
-                                  bu->getDaug( "JPsi/MuPos" ) );
-    const reco::Candidate* mNeg = bu->originalReco(
-                                  bu->getDaug( "JPsi/MuNeg" ) );
-    const reco::Candidate* kaon = bu->originalReco(
-                                  bu->getDaug( "kaon"       ) );
-    BPHRecoCandidatePtr njp( new BPHPlusMinusCandidate( &es ) );
-    njp->add( "MuPos", mPos,
-              BPHParticleMasses::muonMass,
-              BPHParticleMasses::muonMSigma );
-    njp->add( "MuNeg", mNeg,
-              BPHParticleMasses::muonMass,
-              BPHParticleMasses::muonMSigma );
-    BPHRecoCandidate nbu( &es );
-    nbu.add( "JPsi", njp );
-    nbu.add( "Kaon", kaon,
-             BPHParticleMasses::kaonMass,
-             BPHParticleMasses::kaonMSigma );
-    nbu.kinematicTree( "JPsi",
-                       BPHParticleMasses::jPsiMass,
-                       BPHParticleMasses::jPsiMWidth );
-    dumpRecoCand( "nBu", &nbu );
-  }
 
   // build and dump Kx0
 
@@ -422,7 +383,7 @@ void TestBPHSpecificDecay::analyze( const edm::Event& ev,
   int iPkk;
   int nPkk = lPkk.size();
   outF << nPkk << " PhiKK cand found" << endl;
-  for ( iPkk = 0; iPkk < nPkk; ++iPkk ) dumpRecoCand( "PhiKK",
+  for ( iPkk = 0; iPkk < nPkk; ++iPkk ) dumpRecoCand( "Phi",
                                                       lPkk[iPkk].get() );
 
   delete phi;
@@ -439,14 +400,57 @@ void TestBPHSpecificDecay::analyze( const edm::Event& ev,
   for ( iBs = 0; iBs < nBs; ++iBs ) dumpRecoCand( "Bs",
                                                   lBs[iBs].get() );
   }
+  // build and dump TkTk Candidate
+
+  BPHTkTkBuilder* tktk = 0;
+  if ( usePF ) tktk = new BPHTkTkBuilder( es,
+                     BPHRecoBuilder::createCollection( pfCands ),
+                     BPHRecoBuilder::createCollection( pfCands ),
+                     "Proton", 0.938272046, 0.000000006,
+                     "Kaon"  , 0.493667   , 0.000016 );
+  else
+  if ( usePC ) tktk = new BPHTkTkBuilder( es,
+                     BPHRecoBuilder::createCollection( pcCands ),
+                     BPHRecoBuilder::createCollection( pcCands ),
+                     "Proton", 0.938272046, 0.000000006,
+                     "Kaon"  , 0.493667   , 0.000016 );
+  else
+  if ( useGP ) tktk = new BPHTkTkBuilder( es,
+                     BPHRecoBuilder::createCollection( gpCands ),
+                     BPHRecoBuilder::createCollection( gpCands ), 
+                     "Proton", 0.938272046, 0.000000006,
+                     "Kaon"  , 0.493667   , 0.000016 );
+
+  vector<BPHPlusMinusConstCandPtr> lTkTk = tktk->build();
+
+  int iTkTk;
+  int nTkTk = lTkTk.size();
+  outF << nTkTk << " TkTk cand found" << endl;
+  for ( iTkTk = 0; iTkTk < nTkTk; ++iTkTk ) dumpRecoCand( "TkTk",
+                                                      lTkTk[iTkTk].get() );
+
+  delete tktk;
+
+  // build and dump Lb
+
+  outF << "build and dump Lb" << endl;
+  if ( nTkTk ) {
+  BPHLambda0_bToJPsiTkTkBuilder* lb = new BPHLambda0_bToJPsiTkTkBuilder( es, lJPsi, lTkTk );
+  vector<BPHRecoConstCandPtr> lLb = lb->build();
+  int iLb;
+  int nLb = lLb.size();
+  outF << nLb << " Lb cand found" << endl;
+  for ( iLb = 0; iLb < nLb; ++iLb ) dumpRecoCand( "Lb",
+                                                  lLb[iLb].get() );
+  }
 
   return;
 
 }
 
 
-void TestBPHSpecificDecay::endJob() {
-  *fPtr << "TestBPHSpecificDecay::endJob" << endl;
+void mytestLbAnalyzer::endJob() {
+  *fPtr << "mytestLbAnalyzer::endJob" << endl;
   TDirectory* currentDir = gDirectory;
   TFile file( outHist.c_str(), "RECREATE" );
   map<string,TH1F*>::iterator iter = histoMap.begin();
@@ -457,12 +461,12 @@ void TestBPHSpecificDecay::endJob() {
 }
 
 
-void TestBPHSpecificDecay::dumpRecoCand( const string& name,
+void mytestLbAnalyzer::dumpRecoCand( const string& name,
                                          const BPHRecoCandidate* cand ) {
 
   fillHisto( name, cand );
   if ( ( name == "PhiMuMu" ) ||
-       ( name == "JPsi" ) ||
+       ( name == "Psi1" ) ||
        ( name == "Psi2" ) ||
        ( name == "Ups1" ) ||
        ( name == "Ups2" ) ||
@@ -585,7 +589,7 @@ void TestBPHSpecificDecay::dumpRecoCand( const string& name,
 }
 
 
-void TestBPHSpecificDecay::fillHisto( const string& name,
+void mytestLbAnalyzer::fillHisto( const string& name,
                                       const BPHRecoCandidate* cand ) {
   string mass = "mass";
   string mcst = "mcst";
@@ -605,7 +609,7 @@ void TestBPHSpecificDecay::fillHisto( const string& name,
 }
 
 
-void TestBPHSpecificDecay::fillHisto( const string& name, float x ) {
+void mytestLbAnalyzer::fillHisto( const string& name, float x ) {
   map<string,TH1F*>::iterator iter = histoMap.find( name );
   map<string,TH1F*>::iterator iend = histoMap.end();
   if ( iter == iend ) return;
@@ -614,7 +618,7 @@ void TestBPHSpecificDecay::fillHisto( const string& name, float x ) {
 }
 
 
-void TestBPHSpecificDecay::createHisto( const string& name,
+void mytestLbAnalyzer::createHisto( const string& name,
                                         int nbin, float hmin, float hmax ) {
   histoMap[name] = new TH1F( name.c_str(), name.c_str(), nbin, hmin, hmax );
   return;
@@ -622,4 +626,4 @@ void TestBPHSpecificDecay::createHisto( const string& name,
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-DEFINE_FWK_MODULE( TestBPHSpecificDecay );
+DEFINE_FWK_MODULE( mytestLbAnalyzer );

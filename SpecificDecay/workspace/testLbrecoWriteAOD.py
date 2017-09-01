@@ -3,8 +3,7 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("bphAnalysis")
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
-
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('Configuration.StandardSequences.Services_cff')
@@ -17,31 +16,29 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 
-process.CandidateSelectedTracks = cms.EDProducer( "ConcreteChargedCandidateProducer",
-                #src=cms.InputTag("oniaSelectedTracks::RECO"),
-                src=cms.InputTag("generalTracks::RECO"),
-                particleType=cms.string('pi+')
-)
-
-from PhysicsTools.PatAlgos.producersLayer1.genericParticleProducer_cfi import patGenericParticles
-process.patSelectedTracks = patGenericParticles.clone(src=cms.InputTag("CandidateSelectedTracks"))
+#process.CandidateSelectedTracks = cms.EDProducer( "ConcreteChargedCandidateProducer",
+#                #src=cms.InputTag("oniaSelectedTracks::RECO"),
+#                src=cms.InputTag("generalTracks::RECO"),
+#                particleType=cms.string('pi+')
+#)
+#
+#from PhysicsTools.PatAlgos.producersLayer1.genericParticleProducer_cfi import patGenericParticles
+#process.patSelectedTracks = patGenericParticles.clone(src=cms.InputTag("CandidateSelectedTracks"))
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-
-process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
-    '',
+'file:///afs/cern.ch/user/l/ltsai/BsToJpsiPhiV2_testFile.root'
 ))
-
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
-from BPHAnalysis.SpecificDecay.LbrecoSelectForWrite_cfi import recoSelect
+#from BPHAnalysis.SpecificDecay.LbrecoSelectForWrite_cfi import recoSelect
+from BPHAnalysis.SpecificDecay.newSelectForWrite_cfi import recoSelect
 
-# create pat::Muons {{{
-process.options.allowUnscheduled = cms.untracked.bool(True)
+
 process.load('PhysicsTools.PatAlgos.producersLayer1.patCandidates_cff')
 process.load('PhysicsTools.PatAlgos.selectionLayer1.selectedPatCandidates_cff')
 process.load('PhysicsTools.PatAlgos.cleaningLayer1.cleanPatCandidates_cff')
@@ -67,8 +64,6 @@ makeTrackCandidates(process,
     mcAs         = None                           # replicate MC match as the one used for Muons
 )
 process.patTrackCands.embedTrack = True
-# create pat::Muons end }}}
-
 
 
 process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
@@ -77,16 +72,17 @@ process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
     pVertexLabel = cms.string('offlinePrimaryVertices::RECO'),
     patMuonLabel = cms.string('selectedPatMuons'),
     #gpCandsLabel = cms.string('patSelectedTracks'),
-    #pfCandsLabel = cms.string('particleFlow'),
+    pfCandsLabel = cms.string('particleFlow'),
     #ccCandsLabel = cms.string('onia2MuMuPAT::RECO'),
 
 # the label of output product
     oniaName      = cms.string('oniaFitted'),
     Lam0Name      = cms.string('Lam0Cand'),
-    LamxName      = cms.string('LamxCand'),
     TkTkName      = cms.string('TkTkFitted'),
     LbToLam0Name  = cms.string('LbToLam0Fitted'),
     LbToTkTkName  = cms.string('LbToTkTkFitted'),
+    PhiName   = cms.string('phiCand'),
+    BsName   = cms.string('bsFitted'),
     writeVertex   = cms.bool( True ),
     writeMomentum = cms.bool( True ),
     recoSelect    = cms.VPSet(recoSelect)
@@ -96,16 +92,19 @@ process.out = cms.OutputModule(
     "PoolOutputModule",
     fileName = cms.untracked.string('recoWriteSpecificDecay.root'),
     outputCommands = cms.untracked.vstring(
-      "keep *",
-      "keep *_lbWriteSpecificDecay_*_bphAnalysis",
-      "drop *_patSelectedTracks_*_*",
-      "drop *_CandidateSelectedTracks_*_*",
-      "drop *_TriggerResults_*_bphAnalysis",
-      "drop *_random*_*_bphAnalysis"
-    ),
+        "drop *",
+        "keep *_lbWriteSpecificDecay_*_bphAnalysis"
+#      "keep *",
+#      "keep *_lbWriteSpecificDecay_*_bphAnalysis",
+#      "drop *_patSelectedTracks_*_*",
+#      "drop *_CandidateSelectedTracks_*_*",
+#      "drop *_TriggerResults_*_bphAnalysis",
+#      "drop *_random*_*_bphAnalysis"
+    )
 )
 
 process.p = cms.Path(
+    #process.CandidateSelectedTracks *
     process.lbWriteSpecificDecay
 )
 
