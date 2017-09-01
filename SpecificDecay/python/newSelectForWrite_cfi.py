@@ -13,7 +13,7 @@ recoSelect = cms.VPSet(
     ),
     cms.PSet( name = cms.string( 'Lam0'  ),
         # ptMin is proton pt cut
-          ptMin = cms.double( 0.8 ),
+          ptMin = cms.double( 0.7 ),
          etaMax = cms.double( 2.5  ),
         massMin = cms.double(  1.00  ),
         massMax = cms.double(  1.50  ),
@@ -23,10 +23,10 @@ recoSelect = cms.VPSet(
     ),
     cms.PSet( name = cms.string( 'TkTk'  ),
         # ptMin is proton pt cut
-          ptMin = cms.double( 0.8 ),
+          ptMin = cms.double( 0.7 ),
          etaMax = cms.double(  2.5 ),
         massMin = cms.double(  0.80  ),
-        massMax = cms.double(  2.50  ),
+        massMax = cms.double(  3.00  ),
         probMin = cms.double( 0.05),
         constrMass  = cms.double( -1.0 ),
         constrSigma = cms.double( -1.0 )
@@ -51,13 +51,13 @@ recoSelect = cms.VPSet(
         # ptMin is proton pt cut
         massMin = cms.double( 5.00 ),
         massMax = cms.double( 6.00 ),
-        probMin = cms.double( 0.02 ),
+        probMin = cms.double( 0.05 ),
      massFitMin = cms.double( 5.00 ),
      massFitMax = cms.double( 6.00 ),
         constrMJPsi = cms.bool(  True )
     ),
     cms.PSet( name = cms.string( 'Phi' ),
-          ptMin = cms.double( 0.8 ),
+          ptMin = cms.double( 0.7 ),
          etaMax = cms.double(  2.5 ),
         massMin = cms.double( 0.80 ),
         massMax = cms.double( 1.50 ),
@@ -72,7 +72,7 @@ recoSelect = cms.VPSet(
         mPhiMax = cms.double( 1.035 ),
         massMin = cms.double( 5.00 ),
         massMax = cms.double( 6.00 ),
-        probMin = cms.double( 0.02 ),
+        probMin = cms.double( 0.05 ),
         massFitMin = cms.double( 5.00 ),
         massFitMax = cms.double( 6.00 ),
         constrMJPsi = cms.bool( True )

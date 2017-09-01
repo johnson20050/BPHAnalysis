@@ -239,7 +239,9 @@ struct recoParticleInfo
             }
             if ( writeVertex ) cc.addUserData( "fitVertex",
                                                    reco::Vertex( *ptr->currentDecayVertex() ) );
-            if ( ptr->isValidFit() )
+
+            // store refit information {{{
+            if ( ptr->isValidFit() ) 
             {
                 const RefCountedKinematicParticle kinPart = ptr->currentParticle();
                 const           KinematicState    kinStat = kinPart->currentState();
@@ -249,7 +251,6 @@ struct recoParticleInfo
                                      kinStat.kinematicParameters().momentum() );
 
 
-// my secondary fit result store code.
                 if ( writeSecParticleInf )
                 {
                     std::vector<RefCountedKinematicParticle> daughters = ptr->kinematicTree()->finalStateParticles();
@@ -292,11 +293,11 @@ struct recoParticleInfo
                             //componentList.insert( std::make_pair(cand_, dName_) );
                             myParticleList.emplace_back( "", dName_, cand_ );
                         }
+                        // get daughFull name end
 
                         int totalCharge = 0;
                         std::map<const reco::Candidate*, std::string> componentList_ = componentList;
                         std::map< const RefCountedKinematicParticle, std::pair<const reco::Candidate*, std::string> > particleList;
-// myTest zone
     
                         //use pt and charge to match the reco::Candidate* and RefCountedKinematicParticle
                         //And the constrained name is used to separate virtual particle and other particle 
@@ -314,6 +315,7 @@ struct recoParticleInfo
 
                             for ( RefCountedKinematicParticle& _cDau : lists_ )
                             {
+                                // use charge and pt to distinguish particle
                                 if ( _oldParticle.getRecoCharge() != charge_ ) continue;
                                 float dPt_ = _oldParticle.getRecoPt();
                                 float rPt_ = _cDau->currentState().kinematicParameters().momentum().transverse();
@@ -339,68 +341,9 @@ struct recoParticleInfo
                                                  particleContainer.getRefCharge() );
                             }
                         }
-
-
-
-// myTest Zone end
-//                        for ( const RefCountedKinematicParticle& daughter_ : daughters )
-//                        {
-//                            int charge_ = daughter_->currentState().particleCharge();
-//                            std::map<const reco::Candidate*, std::string>::const_iterator iter = componentList_.begin();
-//                            std::map<const reco::Candidate*, std::string>::const_iterator iend = componentList_.end  ();
-//
-//                            std::map<const reco::Candidate*, std::string>::const_iterator candIter = componentList_.end();
-//
-//                            float ptDiff = 999.0;
-//                            while ( iter != iend )
-//                            {
-//                                // use charge and pt to map name and RefCountedKinematicParticle
-//                                std::map<const reco::Candidate*, std::string>::const_iterator _iter = iter++;
-//                                int dCharge_ = _iter->first->charge();
-//                                float dPt_ = _iter->first->pt();
-//                                if ( dCharge_ != charge_ ) continue;
-//
-//                                // use float to compare digit.
-//                                const GlobalVector& mom = daughter_->currentState().kinematicParameters().momentum();
-//                                if ( fabs( mom.transverse() - dPt_ ) > ptDiff )
-//                                {
-//                                    ptDiff = fabs( mom.transverse() - dPt_ );
-//                                    candIter = _iter;
-//                                    std::cout << "changed!\n";
-//                                }
-//                            }
-//                            if ( candIter != iend )
-//                            {
-//                                particleList.insert( std::make_pair(daughter_, *candIter) );
-//                                totalCharge+= candIter->first->charge();
-//                                // prevent two RefCountedKinematicParticle takes the same name
-//                                componentList_.erase( candIter );
-//                                std::cout << "pList inserted\n";
-//                            }
-//                        }
-//                            std::cout << "particle list : "; 
-//                        for ( const auto& _nnn : particleList )
-//                                std::cout << _nnn.second.second << ", ";
-//                            std::cout << std::endl;
-//                        // particle name - RefCountedKinematicParticle pair is prepared.
-//                        if ( particleList.size() != ptr->daughFull().size() ) printf( "-----bug: particleList and daughters don't owns the same size! in write() \n" );
-//                        else if ( totalCharge != 0 ) printf( "-----bug: the built particle is not neutral! in write()\n" );
-//                        else
-//                        {
-//                            std::cout << "number of refit daughter : " << particleList.size()  << std::endl;
-//                            for ( const auto& particleContainer : particleList )
-//                            {
-//                                cc.addUserData ( particleContainer.second.second+".fitMom",
-//                                                 particleContainer.first->currentState().kinematicParameters().momentum() );
-//                                cc.addUserData ( particleContainer.second.second+".charge",
-//                                                 particleContainer.first->currentState().particleCharge() );
-//                                std::cout << "particle daughter name : " << particleContainer.second.second << std::endl;
-//                            }
-//                        }
                     }
-                }
-// my secondary fit result store code.
-            }
+                } // if writeSecParticleInf
+            } // store refit information end }}}
 
         }
         typedef std::unique_ptr<pat::CompositeCandidateCollection> ccc_pointer;
@@ -414,76 +357,6 @@ struct recoParticleInfo
         }
         return ccHandle;
     }
-
-  template <class T>
-  edm::OrphanHandle<pat::CompositeCandidateCollection> write( edm::Event& ev,
-              const std::vector<T>& list, const std::string& name ) {
-    pat::CompositeCandidateCollection* ccList =
-      new pat::CompositeCandidateCollection;
-    int i;
-    int n = list.size();
-    std::map<const BPHRecoCandidate*,
-             const BPHRecoCandidate*>::const_iterator jpoIter;
-    std::map<const BPHRecoCandidate*,
-             const BPHRecoCandidate*>::const_iterator jpoIend = jPsiOMap.end();
-    std::map<const BPHRecoCandidate*,vertex_ref>::const_iterator pvrIter;
-    std::map<const BPHRecoCandidate*,vertex_ref>::const_iterator pvrIend =
-                                                                 pvRefMap.end();
-    std::map<const BPHRecoCandidate*,compcc_ref>::const_iterator ccrIter;
-    std::map<const BPHRecoCandidate*,compcc_ref>::const_iterator ccrIend =
-                                                                 ccRefMap.end();
-    for ( i = 0; i < n; ++i ) {
-      const T& ptr = list[i];
-      ccList->push_back( ptr->composite() );
-      pat::CompositeCandidate& cc = ccList->back();
-      if ( ( pvrIter = pvRefMap.find( ptr.get() ) ) != pvrIend )
-           cc.addUserData ( "primaryVertex", pvrIter->second );
-      const std::vector<std::string>& cNames = ptr->compNames();
-      int j = 0;
-      int m = cNames.size();
-      while ( j < m ) {
-        const std::string& compName = cNames[j++];
-        const BPHRecoCandidate* cptr = ptr->getComp( compName ).get();
-        if ( ( ccrIter = ccRefMap.find( cptr ) ) == ccrIend ) {
-          if ( ( jpoIter = jPsiOMap.find( cptr ) ) != jpoIend )
-               cptr = jpoIter->second;
-          else cptr = 0;
-        }
-        if ( ( ccrIter = ccRefMap.find( cptr ) ) != ccrIend ) {
-          compcc_ref cref = ccrIter->second;
-          if ( cref.isNonnull() ) cc.addUserData ( "refTo" + compName, cref );
-        }
-      }
-      const BPHPlusMinusCandidate* pmp =
-            dynamic_cast<const BPHPlusMinusCandidate*>( ptr.get() );
-      if ( pmp != 0 ) cc.addUserData( "cowboy", pmp->isCowboy() );
-      if ( ptr->isEmpty() ) {
-        if ( writeVertex ) cc.addUserData( "vertex" , ptr->vertex() );
-        continue;
-      }
-      if ( writeVertex ) cc.addUserData( "fitVertex",
-                         reco::Vertex( *ptr->currentDecayVertex() ) );
-      if ( ptr->isValidFit() ) {
-        const RefCountedKinematicParticle kinPart = ptr->currentParticle();
-        const           KinematicState    kinStat = kinPart->currentState();
-        cc.addUserFloat( "fitMass", kinStat.mass() );
-        if ( writeMomentum )
-        cc.addUserData ( "fitMomentum",
-                         kinStat.kinematicParameters().momentum() );
-
-      }
-
-    }
-    typedef std::unique_ptr<pat::CompositeCandidateCollection> ccc_pointer;
-    edm::OrphanHandle<pat::CompositeCandidateCollection> ccHandle =
-    ev.put( ccc_pointer( ccList ), name );
-    for ( i = 0; i < n; ++i ) {
-      const BPHRecoCandidate* ptr = list[i].get();
-      edm::Ref<pat::CompositeCandidateCollection> ccRef( ccHandle, i );
-      ccRefMap[ptr] = ccRef;
-    }
-    return ccHandle;
-  }
 };
 
 #endif

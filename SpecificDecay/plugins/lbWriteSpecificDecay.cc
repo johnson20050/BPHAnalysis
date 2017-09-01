@@ -207,13 +207,13 @@ void lbWriteSpecificDecay::beginJob() {
 void lbWriteSpecificDecay::produce( edm::Event& ev,
                                      const edm::EventSetup& es ) {
   fill( ev, es );
-  if ( writeOnia     ) write( ev, lFull     ,     oniaName ); //, false ); 
-  //if ( writeLam0     ) write( ev, lLam0     ,     Lam0Name , false ); 
-  if ( writeTkTk     ) write( ev, lTkTk     ,     TkTkName ); //, false ); 
-  //if ( writeLbToLam0 ) write( ev, lLbToLam0 , LbToLam0Name , true  ); 
-  if ( writeLbToTkTk ) write( ev, lLbToTkTk , LbToTkTkName ,  true); 
-  if ( writePhi      ) write( ev, lPhi      ,      PhiName , false); 
-  if ( writeBs       ) write( ev, lBs       ,       BsName ,  true); 
+  if ( writeOnia     ) write( ev, lFull     ,     oniaName , false ); 
+  if ( writeLam0     ) write( ev, lLam0     ,     Lam0Name , false ); 
+  if ( writeTkTk     ) write( ev, lTkTk     ,     TkTkName , false ); 
+  if ( writeLbToLam0 ) write( ev, lLbToLam0 , LbToLam0Name , true  ); 
+  if ( writeLbToTkTk ) write( ev, lLbToTkTk , LbToTkTkName ,  true ); 
+  if ( writePhi      ) write( ev, lPhi      ,      PhiName , false ); 
+  if ( writeBs       ) write( ev, lBs       ,       BsName ,  true ); 
   return;
 }
 
@@ -598,19 +598,12 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     } // set cut value end  
     // Build Lam0 end }}}
     // Build TkTk {{{
-    //BPHTkTkBuilder* tktk = 0;
-    //std::string pName = "Proton";
-    //std::string nName = "Kaon";
-    //double pMass = BPHParticleMasses::protonMass;
-    //double nMass = BPHParticleMasses::  kaonMass;
-    //double pSigma= BPHParticleMasses::protonMSigma;
-    //double nSigma= BPHParticleMasses::  kaonMSigma;
     BPHTkTkBuilder* tktk = 0;
-    std::string pName = "KaonPos";
-    std::string nName = "KaonNeg";
-    double pMass = BPHParticleMasses::  kaonMass;
+    std::string pName = "Proton";
+    std::string nName = "Kaon";
+    double pMass = BPHParticleMasses::protonMass;
     double nMass = BPHParticleMasses::  kaonMass;
-    double pSigma= BPHParticleMasses::  kaonMSigma;
+    double pSigma= BPHParticleMasses::protonMSigma;
     double nSigma= BPHParticleMasses::  kaonMSigma;
 
     if ( recoTkTk )
@@ -671,53 +664,53 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     } // set cut value end  
     unsigned nTkTk = lTkTk.size();
     // Build TkTk end }}}
-//
-//    // build and dump Lb->Jpsi+Lam0{{{
-//
-//    
-//    int nLam0 = lLam0.size();
-//
-//
-//    // Lambda0 is built, start to build Lambda0_b->J/Psi+Lambda0
-//    if ( recoLam0 && nLam0 )
-//    {
-//        BPHLambda0_bToJPsiLambda0Builder* _lb = new BPHLambda0_bToJPsiLambda0Builder( es, lJPsi, lLam0 );
-//        
-//        // set cut value 
-//        rIter = parMap.find( LbToLam0 );
-//        if ( rIter != rIend )
-//        {
-//            const map<parType,double>& _parMap = rIter->second;
-//            map<parType,double>::const_iterator _parIter = _parMap.begin();
-//            map<parType,double>::const_iterator _parIend = _parMap.end  ();
-//            while ( _parIter != _parIend )
-//            {
-//                const map<parType,double>::value_type& _parEntry = *_parIter++;
-//                parType  _parId      = _parEntry.first;
-//                double   _parValue   = _parEntry.second;
-//
-//                switch( _parId )
-//                {
-//                case mPsiMin        : _lb->setJPsiMassMin   ( _parValue ); break;
-//                case mPsiMax        : _lb->setJPsiMassMax   ( _parValue ); break;
-//                case mLam0Min       : _lb->setLam0MassMin   ( _parValue ); break;
-//                case mLam0Max       : _lb->setLam0MassMax   ( _parValue ); break;
-//                case massMin        : _lb->setMassMin       ( _parValue ); break;
-//                case massMax        : _lb->setMassMax       ( _parValue ); break;
-//                case probMin        : _lb->setProbMin       ( _parValue ); break;
-//                case mFitMin        : _lb->setMassFitMin    ( _parValue ); break;
-//                case mFitMax        : _lb->setMassFitMax    ( _parValue ); break;
-//                case constrMJPsi    : _lb->setConstr        ( _parValue ); break;
-//                case writeCandidate : writeLbToLam0 =       ( _parValue > 0); break;
-//                default:
-//                    break;
-//                }
-//            }
-//        }
-//        lLbToLam0 = _lb->build();
-//        delete _lb;
-//        // set cut value end 
-//    }// build lambda b end }}}
+
+    // build and dump Lb->Jpsi+Lam0{{{
+
+    
+    int nLam0 = lLam0.size();
+
+
+    // Lambda0 is built, start to build Lambda0_b->J/Psi+Lambda0
+    if ( recoLam0 && nLam0 )
+    {
+        BPHLambda0_bToJPsiLambda0Builder* _lb = new BPHLambda0_bToJPsiLambda0Builder( es, lJPsi, lLam0 );
+        
+        // set cut value 
+        rIter = parMap.find( LbToLam0 );
+        if ( rIter != rIend )
+        {
+            const map<parType,double>& _parMap = rIter->second;
+            map<parType,double>::const_iterator _parIter = _parMap.begin();
+            map<parType,double>::const_iterator _parIend = _parMap.end  ();
+            while ( _parIter != _parIend )
+            {
+                const map<parType,double>::value_type& _parEntry = *_parIter++;
+                parType  _parId      = _parEntry.first;
+                double   _parValue   = _parEntry.second;
+
+                switch( _parId )
+                {
+                case mPsiMin        : _lb->setJPsiMassMin   ( _parValue ); break;
+                case mPsiMax        : _lb->setJPsiMassMax   ( _parValue ); break;
+                case mLam0Min       : _lb->setLam0MassMin   ( _parValue ); break;
+                case mLam0Max       : _lb->setLam0MassMax   ( _parValue ); break;
+                case massMin        : _lb->setMassMin       ( _parValue ); break;
+                case massMax        : _lb->setMassMax       ( _parValue ); break;
+                case probMin        : _lb->setProbMin       ( _parValue ); break;
+                case mFitMin        : _lb->setMassFitMin    ( _parValue ); break;
+                case mFitMax        : _lb->setMassFitMax    ( _parValue ); break;
+                case constrMJPsi    : _lb->setConstr        ( _parValue ); break;
+                case writeCandidate : writeLbToLam0 =       ( _parValue > 0); break;
+                default:
+                    break;
+                }
+            }
+        }
+        lLbToLam0 = _lb->build();
+        delete _lb;
+        // set cut value end 
+    }// build lambda b end }}}
 
     // Build and dump Lb->Jpsi+TkTk {{{
     if ( nJPsi && nTkTk && recoLbToTkTk )
