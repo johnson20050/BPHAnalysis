@@ -207,13 +207,16 @@ void lbWriteSpecificDecay::beginJob() {
 void lbWriteSpecificDecay::produce( edm::Event& ev,
                                      const edm::EventSetup& es ) {
   fill( ev, es );
-  if ( writeOnia     ) write( ev, lFull     ,     oniaName , false ); 
-  if ( writeLam0     ) write( ev, lLam0     ,     Lam0Name , false ); 
-  if ( writeTkTk     ) write( ev, lTkTk     ,     TkTkName , false ); 
-  if ( writeLbToLam0 ) write( ev, lLbToLam0 , LbToLam0Name , true  ); 
-  if ( writeLbToTkTk ) write( ev, lLbToTkTk , LbToTkTkName ,  true ); 
-  if ( writePhi      ) write( ev, lPhi      ,      PhiName , false ); 
-  if ( writeBs       ) write( ev, lBs       ,       BsName ,  true ); 
+  if ( lLbToLam0.size() || lLbToTkTk.size() || lBs.size() )
+  {
+      if ( writeOnia     ) write( ev, lFull     ,     oniaName , false ); 
+      if ( writeLam0     ) write( ev, lLam0     ,     Lam0Name , false ); 
+      if ( writeTkTk     ) write( ev, lTkTk     ,     TkTkName , false ); 
+      if ( writeLbToLam0 ) write( ev, lLbToLam0 , LbToLam0Name , true  ); 
+      if ( writeLbToTkTk ) write( ev, lLbToTkTk , LbToTkTkName ,  true ); 
+      if ( writePhi      ) write( ev, lPhi      ,      PhiName , false ); 
+      if ( writeBs       ) write( ev, lBs       ,       BsName ,  true ); 
+  }
   return;
 }
 
@@ -224,6 +227,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     lFull    .clear();
     lJPsi    .clear();
     lLam0    .clear();
+    lTkTk    .clear();
     lLbToLam0.clear();
     lLbToTkTk.clear();
     jPsiOMap .clear();
@@ -713,7 +717,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     }// build lambda b end }}}
 
     // Build and dump Lb->Jpsi+TkTk {{{
-    if ( nJPsi && nTkTk && recoLbToTkTk )
+    if ( nTkTk && recoLbToTkTk )
     {
         BPHLambda0_bToJPsiTkTkBuilder* _lb = new BPHLambda0_bToJPsiTkTkBuilder( es, lJPsi, lTkTk);
         // Set cut value 
@@ -758,75 +762,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
 
 
     }
-    // Build LbToTkTk end }}}
-//    // Build and dump ant Lb->Jpsi+TkTk {{{
-//    if ( nJPsi && nTkTk && recoLbToTkTk )
-//    {
-//        BPHLbToJPsiTkTkBuilder* _lb = 0;
-//        // regard Proton track as Kaon mass and sigma.
-//        // That is to say, change the particle track and refit it.
-//        // finally, the "anti-Proton" with the name "Kaon"
-//        // and "anti-kaon" with the name "Proton"
-//        if ( usePF ) _lb = new BPHLbToJPsiTkTkBuilder( es, lJPsi, lTkTk,
-//                    pName, nMass, nSigma,
-//                    nName, pMass, pSigma
-//                    );
-//        else if ( usePC ) _lb = new BPHLbToJPsiTkTkBuilder( es, lJPsi, lTkTk,
-//                    pName, nMass, nSigma,
-//                    nName, pMass, pSigma
-//                    );
-//        else if ( useGP ) _lb = new BPHLbToJPsiTkTkBuilder( es, lJPsi, lTkTk,
-//                    pName, nMass, nSigma,
-//                    nName, pMass, pSigma
-//                    );
-//        // Set cut value 
-//        // use "Name"(recorded in enum) to find particle, then there is a subMap
-//        // The subMap is list of the cuts used in  the particle
-//        if ( _lb != 0 )
-//        {
-//            rIter = parMap.find( LbToTkTk );
-//
-//            // if find something
-//            if ( rIter != rIend )
-//            {
-//                const map<parType,double>& _parMap = rIter->second;
-//                map<parType,double>::const_iterator _parIter = _parMap.begin();
-//                map<parType,double>::const_iterator _parIend = _parMap.end();
-//                while ( _parIter != _parIend )
-//                {
-//                    // set cut value by switch
-//                    const map<parType,double>::value_type& _parEntry = *_parIter++;
-//                    parType _parId      = _parEntry.first;
-//                    double  _parValue   = _parEntry.second;
-//                    switch( _parId )
-//                    {
-//                        case mPsiMin        : _lb->setJPsiMassMin ( _parValue ); break;
-//                        case mPsiMax        : _lb->setJPsiMassMax ( _parValue ); break;
-//                        case ptMin          : _lb->setPtMin       ( _parValue ); break;
-//                        case etaMax         : _lb->setEtaMax      ( _parValue ); break;
-//                        case massMin        : _lb->setMassMin     ( _parValue ); break;
-//                        case massMax        : _lb->setMassMax     ( _parValue ); break;
-//                        case probMin        : _lb->setProbMin     ( _parValue ); break;
-//    
-//                        case mFitMin        : _lb->setMassFitMin  ( _parValue ); break;
-//                        case mFitMax        : _lb->setMassFitMax  ( _parValue ); break;
-//                        case constrMass     : _lb->setConstr      ( _parValue, _lb->getMassFitSigma() ); break;
-//                        case constrSigma    : _lb->setConstr      ( _lb->getMassFitMass(), _parValue  ); break;
-//                        case writeCandidate : writeLbToTkTk =     ( _parValue > 0 ); break;
-//                        default:
-//                            break;
-//                    }
-//                }
-//            }
-//            laLbToTkTk = _lb->build();
-//            delete   _lb;
-//        }
-//        // set cut value end  
-//
-//        
-//
-//
-//    }
     // Build LbToTkTk end }}}
 // build and dump Phi
 
@@ -876,7 +811,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
 
   // build and dump Bs
 
-  if ( recoBs && nPhi && nJPsi ) {
+  if ( recoBs && nPhi ) {
 
     BPHBsToJPsiPhiBuilder* bs = new BPHBsToJPsiPhiBuilder( es, lJPsi, lPhi );
     rIter = parMap.find( Bs );

@@ -121,9 +121,8 @@ private:
     std::vector<BPHPlusMinusConstCandPtr> lTkTk;
     std::vector<BPHRecoConstCandPtr>      lLbToLam0;
     std::vector<BPHRecoConstCandPtr>      lLbToTkTk;
-    std::vector<BPHRecoConstCandPtr>      laLbToTkTk;
     std::vector<BPHPlusMinusConstCandPtr> lPhi;
-    std::vector<BPHRecoConstCandPtr> lBs;
+    std::vector<BPHRecoConstCandPtr>      lBs;
 
     std::map<const BPHRecoCandidate*,const BPHRecoCandidate*> jPsiOMap;
     typedef edm::Ref< std::vector<reco::Vertex> > vertex_ref;
