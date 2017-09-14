@@ -19,11 +19,13 @@ process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
-    'file:recoWriteSpecificDecay.root'
+    #'file:recoWriteSpecificDecay.root'
+    'file:///home/ltsai/Data/CRABdata/CRABdata_8_Sep_2017_Charmonium_2016B_18Apr2017v2/recoWriteSpecificDecay_100.root'
 ))
 
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016LegacyRepro_v3', '')
 
 process.TFileService = cms.Service('TFileService',
   fileName = cms.string('his_myWriteSDecay.root'),

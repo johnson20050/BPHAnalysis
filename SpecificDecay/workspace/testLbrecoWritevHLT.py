@@ -2,8 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("bphAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('Configuration.StandardSequences.Services_cff')
@@ -17,8 +17,8 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 
 process.CandidateSelectedTracks = cms.EDProducer( "ConcreteChargedCandidateProducer",
-                #src=cms.InputTag("oniaSelectedTracks::RECO"),
-                src=cms.InputTag("generalTracks::RECO"),
+                src=cms.InputTag("oniaSelectedTracks::RECO"), # BPHSkim
+                #src=cms.InputTag("generalTracks::RECO"),     # AOD
                 particleType=cms.string('pi+')
 )
 
@@ -30,8 +30,7 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
-#'file:///afs/cern.ch/user/l/ltsai/BsToJpsiPhiV2_testFile.root'
-'file:///afs/cern.ch/user/l/ltsai/Charmonium_AOD_RunC.root'
+'file:///afs/cern.ch/user/l/ltsai/ReceivedFile/DATA/CMSSW_8_0_28/2016RunB_Charmonium/14C79216-F03D-E711-AE2F-D067E5F91695.root'
 ))
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016LegacyRepro_v3', '')
@@ -40,48 +39,17 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016LegacyRepro_v
 from BPHAnalysis.SpecificDecay.newSelectForWrite_cfi import recoSelect
 
 
-process.load('PhysicsTools.PatAlgos.producersLayer1.patCandidates_cff')
-process.load('PhysicsTools.PatAlgos.selectionLayer1.selectedPatCandidates_cff')
-process.load('PhysicsTools.PatAlgos.cleaningLayer1.cleanPatCandidates_cff')
-
-process.selectedPatMuons.cut = cms.string('muonID(\"TMOneStationTight\")'
-    ' && abs(innerTrack.dxy) < 0.3'
-    ' && abs(innerTrack.dz)  < 20.'
-    ' && innerTrack.hitPattern.trackerLayersWithMeasurement > 5'
-    ' && innerTrack.hitPattern.pixelLayersWithMeasurement > 0'
-    ' && innerTrack.quality(\"highPurity\")'
-)
-
-#make patTracks
-from PhysicsTools.PatAlgos.tools.trackTools import makeTrackCandidates
-makeTrackCandidates(process,
-    label        = 'TrackCands',                  # output collection
-    tracks       = cms.InputTag('generalTracks'), # input track collection
-    particleType = 'pi+',                         # particle type (for assigning a mass)
-    preselection = 'pt > 0.7',                    # preselection cut on candidates
-    selection    = 'pt > 0.7',                    # selection on PAT Layer 1 objects
-    isolation    = {},                            # isolations to use (set to {} for None)
-    isoDeposits  = [],
-    mcAs         = None                           # replicate MC match as the one used for Muons
-)
-process.patTrackCands.embedTrack = True
-
-# remove MC dependence
-from PhysicsTools.PatAlgos.tools.coreTools import *
-removeMCMatching(process, names=['All'], outputModules=[] )
-
 HLTName='HLT_DoubleMu4_JpsiTrk_Displaced_v*'
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
 process.hltHighLevel= hltHighLevel.clone(HLTPaths = cms.vstring(HLTName))
-
 
 process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
 
 # the label used in calling data
     pVertexLabel = cms.string('offlinePrimaryVertices::RECO'),
-    gpCandsLabel = cms.string('patSelectedTracks'),
-    patMuonLabel = cms.string('selectedPatMuons'),
-    #ccCandsLabel = cms.string('onia2MuMuPAT::RECO'),
+    #patMuonLabel = cms.string('selectedPatMuons'), # AOD
+    ccCandsLabel = cms.string('onia2MuMuPAT::RECO'),# BPHSkim
+    gpCandsLabel = cms.string('patSelectedTracks'), # BPHSkim && AOD
 
 # the label of output product
     oniaName      = cms.string('oniaFitted'),
