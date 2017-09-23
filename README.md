@@ -36,7 +36,38 @@ Usage:
         2. HLT is set.<br />
     * in workspace/python/LbrecoWrite_miniAOD.py:<br />
         1. The configuration file to analyze 'miniAOD'.<br />
-    
+
+4. The user added variables:
+    * refit:
+        1. GlobalVector             fitMomentum
+        2. reco::Vertex             fitVertex
+        3. float                    fitMass
+    * get information by Ref<std::vector<T> >: ( load data from other label )
+        1. reco::Vertex             primaryVertex
+        2. pat::CompositeCandidate  refToJPsi
+        3. pat::CompositeCandidate  refTo????
+    * other information:
+        1. bool                     cowboy
+        2. GlobalVector             JPsi/MuPos.fitMom
+        3. GlobalVector             JPsi/MuNeg.fitMom
+        2. GlobalVector             ????/??tk1.fitMom
+        3. GlobalVector             ????/??tk2.fitMom
+        2. GlobalVector             JPsi/MuPos.IPt
+        3. GlobalVector             JPsi/MuNeg.IPt
+        2. GlobalVector             ????/??tk1.IPt
+        3. GlobalVector             ????/??tk2.IPt
+        2. GlobalVector             JPsi/MuPos.IPt_Error
+        3. GlobalVector             JPsi/MuNeg.IPt_Error
+        2. GlobalVector             ????/??tk1.IPt_Error
+        3. GlobalVector             ????/??tk2.IPt_Error
+        2. GlobalVector             JPsi/MuPos.IPz
+        3. GlobalVector             JPsi/MuNeg.IPz
+        2. GlobalVector             ????/??tk1.IPz
+        3. GlobalVector             ????/??tk2.IPz
+        2. GlobalVector             JPsi/MuPos.IPz_Error
+        3. GlobalVector             JPsi/MuNeg.IPz_Error
+        2. GlobalVector             ????/??tk1.IPz_Error
+        3. GlobalVector             ????/??tk2.IPz_Error
 <br>
 <br>
 <br>

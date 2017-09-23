@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("bphAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('Configuration.StandardSequences.Services_cff')
@@ -30,7 +30,7 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
-'file:///afs/cern.ch/user/l/ltsai/ReceivedFile/DATA/CMSSW_8_0_28/2016RunB_Charmonium/14C79216-F03D-E711-AE2F-D067E5F91695.root'
+'file:///home/ltsai/Data/8_0_20/001E3B7A-E784-E611-B6C8-008CFA05E8EC.root'
 ))
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016LegacyRepro_v3', '')
@@ -69,9 +69,9 @@ process.out = cms.OutputModule(
     fileName = cms.untracked.string('recoWriteSpecificDecay.root'),
     outputCommands = cms.untracked.vstring(
         "drop *",
-        "keep *_lbWriteSpecificDecay_*_bphAnalysis"
-        "keep *_offlineBeamSpot_*_RECO"
-        "keep *_offlinePrimaryVertices_*_RECO"
+        "keep *_lbWriteSpecificDecay_*_bphAnalysis",
+        "keep *_offlineBeamSpot_*_RECO",
+        "keep *_offlinePrimaryVertices_*_RECO",
     )
 )
 
