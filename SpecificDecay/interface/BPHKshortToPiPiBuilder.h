@@ -1,6 +1,6 @@
-#ifndef BPHAnalysis_SpecificDecay_BPHLambda0ToPPiBuilder_h
-#define BPHAnalysis_SpecificDecay_BPHLambda0ToPPiBuilder_h
-/** \class BPHLambda0ToPPiBuilder
+#ifndef BPHAnalysis_SpecificDecay_BPHKshortToPiPiBuilder_h
+#define BPHAnalysis_SpecificDecay_BPHKshortToPiPiBuilder_h
+/** \class BPHKshortToPiPiBuilder
  *
  *  Description: 
  *     Class to build K*0 to K+ pi- candidates
@@ -39,19 +39,19 @@ class BPHMassFitSelect;
 //              -- Class Interface --
 //              ---------------------
 
-class BPHLambda0ToPPiBuilder {
+class BPHKshortToPiPiBuilder {
 
  public:
 
   /** Constructor
    */
-  BPHLambda0ToPPiBuilder( const edm::EventSetup& es,
-       const BPHRecoBuilder::BPHGenericCollection* kaonCollection,
-       const BPHRecoBuilder::BPHGenericCollection* pionCollection );
+  BPHKshortToPiPiBuilder( const edm::EventSetup& es,
+       const BPHRecoBuilder::BPHGenericCollection* posCollection,
+       const BPHRecoBuilder::BPHGenericCollection* negCollection );
 
   /** Destructor
    */
-  virtual ~BPHLambda0ToPPiBuilder();
+  virtual ~BPHKshortToPiPiBuilder();
 
   /** Operations
    */
@@ -72,33 +72,35 @@ class BPHLambda0ToPPiBuilder {
   double getMassMin() const;
   double getMassMax() const;
   double getProbMin() const;
+  double getMassFitMin () const;
+  double getMassFitMax () const;
   double getConstrMass () const;
   double getConstrSigma() const;
 
  private:
 
   // private copy and assigment constructors
-  BPHLambda0ToPPiBuilder           ( const BPHLambda0ToPPiBuilder& x );
-  BPHLambda0ToPPiBuilder& operator=( const BPHLambda0ToPPiBuilder& x );
+  BPHKshortToPiPiBuilder           ( const BPHKshortToPiPiBuilder& x );
+  BPHKshortToPiPiBuilder& operator=( const BPHKshortToPiPiBuilder& x );
 
-  std::string kaonName;
-  std::string pionName;
+  std::string pName;
+  std::string nName;
 
   const edm::EventSetup* evSetup;
-  const BPHRecoBuilder::BPHGenericCollection* kCollection;
   const BPHRecoBuilder::BPHGenericCollection* pCollection;
+  const BPHRecoBuilder::BPHGenericCollection* nCollection;
 
   BPHParticlePtSelect *  ptSel;
   BPHParticleEtaSelect* etaSel;
   BPHMassSelect* massSel;
   BPHChi2Select* chi2Sel;
-  BPHMassFitSelect* mFitSel;
+  BPHMassFitSelect*  mFitSel;
   double cMass;
   double cSigma;
   bool massConstr;
   bool updated;
 
-  std::vector<BPHPlusMinusConstCandPtr> kx0List;
+  std::vector<BPHPlusMinusConstCandPtr> ksList;
 
 };
 

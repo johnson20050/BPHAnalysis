@@ -21,6 +21,7 @@
 #include "BPHAnalysis/SpecificDecay/interface/BPHMassSymSelect.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHChi2Select.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHParticleMasses.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHMassFitSelect.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 
@@ -49,8 +50,11 @@ BPHLambda0ToPPiBuilder::BPHLambda0ToPPiBuilder(
   pCollection( pionCollection ) {
     ptSel = new BPHParticlePtSelect (  0.7 );
    etaSel = new BPHParticleEtaSelect( 10.0 );
-  massSel = new BPHMassSelect( 1.00, 1.50 );
+  massSel = new BPHMassSelect( 1.00, 1.20 );
   chi2Sel = new BPHChi2Select( 0.0 );
+  mFitSel = new BPHMassFitSelect( "", 1.115683, -1.0, 1.00, 1.20 );
+  massConstr = false;
+
   updated = false;
 }
 
@@ -108,15 +112,11 @@ vector<BPHPlusMinusConstCandPtr> BPHLambda0ToPPiBuilder::build() {
     if ( !massSel->accept( *pxt ) ) continue;
     if ( !chi2Sel->accept( *pxt ) ) continue;
 
-    pxt->updateMom();
-    pxt->composite();
     kx0List.push_back( pxt );
   }
 
   updated = true;
 
-  //for ( const auto& outParticle : kx0List )
-  //    outParticle->UpdateMomentum();
   return kx0List;
 
 }
@@ -161,6 +161,8 @@ void BPHLambda0ToPPiBuilder::setConstr( double mass, double sigma ) {
   updated = false;
   cMass  = mass;
   cSigma = sigma;
+  massConstr = true;
+
   return;
 }
 

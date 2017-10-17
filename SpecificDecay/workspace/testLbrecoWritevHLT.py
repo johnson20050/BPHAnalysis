@@ -31,6 +31,7 @@ process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
 'file:///home/ltsai/Data/8_0_20/001E3B7A-E784-E611-B6C8-008CFA05E8EC.root'
+#'file:///home/ltsai/Work/LbFrame/MC/CMSSW_7_4_1_patch4/src/step3.root'
 ))
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016LegacyRepro_v3', '')
@@ -56,9 +57,10 @@ process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
     Lam0Name      = cms.string('Lam0Cand'),
     TkTkName      = cms.string('TkTkFitted'),
     LbToLam0Name  = cms.string('LbToLam0Fitted'),
-    LbToTkTkName  = cms.string('LbToTkTkFitted'),
-    PhiName   = cms.string('phiCand'),
-    BsName   = cms.string('bsFitted'),
+    #LbToTkTkName  = cms.string('LbToTkTkFitted'),
+    KsName = cms.string('KshortCand'),
+    #PhiName   = cms.string('phiCand'),
+    #BsName   = cms.string('bsFitted'),
     writeVertex   = cms.bool( True ),
     writeMomentum = cms.bool( True ),
     recoSelect    = cms.VPSet(recoSelect)

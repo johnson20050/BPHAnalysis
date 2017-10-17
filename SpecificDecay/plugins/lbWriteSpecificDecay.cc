@@ -24,8 +24,7 @@
 #include "BPHAnalysis/SpecificDecay/interface/BPHLambda0_bToJPsiLambda0Builder.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHTkTkBuilder.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHLambda0_bToJPsiTkTkBuilder.h"
-#include "BPHAnalysis/SpecificDecay/interface/BPHPhiToKKBuilder.h"
-#include "BPHAnalysis/SpecificDecay/interface/BPHBsToJPsiPhiBuilder.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHKshortToPiPiBuilder.h"
 //#include "BPHAnalysis/SpecificDecay/interface/BPHLbToJPsiTkTkBuilder.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
@@ -71,8 +70,7 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     SET_PAR( string, LbToTkTkName, ps );
     SET_PAR( bool  ,writeMomentum, ps );
     SET_PAR( bool  ,writeVertex  , ps );
-    SET_PAR( string,      PhiName, ps );
-    SET_PAR( string,       BsName, ps );
+    SET_PAR( string,      KsName, ps );
 
     rMap["Onia"    ] = Onia;
     rMap["JPsi"    ] = Psi1;
@@ -81,8 +79,7 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     rMap["TkTk"    ] = TkTk;
     rMap["LbToLam0"] = LbToLam0;
     rMap["LbToTkTk"] = LbToTkTk;
-    rMap["Phi"     ] = Phi ;
-    rMap["Bs"      ] = Bs  ;
+    rMap["Ks"     ] = Ks ;
 
     pMap["ptMin"      ] = ptMin;
     pMap["etaMax"     ] = etaMax;
@@ -97,8 +94,8 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     pMap["massFitMax" ] = mFitMax;
     pMap["constrMass" ] = constrMass;
     pMap["constrSigma"] = constrSigma;
-    pMap["mPhiMin"    ] = mPhiMin;
-    pMap["mPhiMax"    ] = mPhiMax;
+    pMap["mKsMin"    ] = mKsMin;
+    pMap["mKsMax"    ] = mKsMax;
 
     fMap["constrMJPsi"   ] = constrMJPsi;
     fMap["writeCandidate"] = writeCandidate;
@@ -108,8 +105,7 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     recoTkTk      = writeTkTk     =   true;
     recoLbToLam0  = writeLbToLam0 =
     recoLbToTkTk  = writeLbToTkTk =  false;
-    recoPhi = writePhi = true;
-    recoBs = writeBs = true;
+    recoKs = writeKs = true;
 
     writeOnia = true;
     const vector<edm::ParameterSet> recoSelect =
@@ -143,8 +139,7 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
   if ( writeTkTk     ) produces<pat::CompositeCandidateCollection>( TkTkName     );
   if ( writeLbToLam0 ) produces<pat::CompositeCandidateCollection>( LbToLam0Name );
   if ( writeLbToTkTk ) produces<pat::CompositeCandidateCollection>( LbToTkTkName );
-  if ( writePhi      ) produces<pat::CompositeCandidateCollection>(  PhiName     );
-  if ( writeBs       ) produces<pat::CompositeCandidateCollection>(   BsName     );
+  if ( writeKs       ) produces<pat::CompositeCandidateCollection>(  KsName      );
 
 }
 
@@ -167,8 +162,7 @@ void lbWriteSpecificDecay::fillDescriptions(
     desc.add<string>(     "TkTkName",   "TkTkCand" );
     desc.add<string>( "LbToLam0Name", "LbToLam0Fitted" );
     desc.add<string>( "LbToTkTkName", "LbToTkTkFitted" );
-    desc.add<string>(      "PhiName",    "PhiCand" );
-    desc.add<string>(       "BsName",     "BsCand" );
+    desc.add<string>(       "KsName",    "KsCand" );
 
     desc.add<bool>  ( "writeVertex"  , true );
     desc.add<bool>  ( "writeMomentum", true );
@@ -189,8 +183,8 @@ void lbWriteSpecificDecay::fillDescriptions(
     dpar.add<double>(    "constrSigma", -2.0e35 );
     dpar.add<  bool>(    "constrMJPsi",    true );
     dpar.add<  bool>( "writeCandidate",    true );
-    dpar.add<double>(        "mPhiMin", -2.0e35 );
-    dpar.add<double>(        "mPhiMax", -2.0e35 );
+    dpar.add<double>(         "mKsMin", -2.0e35 );
+    dpar.add<double>(         "mKsMax", -2.0e35 );
 
     vector<edm::ParameterSet> rpar;
     desc.addVPSet( "recoSelect", dpar, rpar );
@@ -207,16 +201,13 @@ void lbWriteSpecificDecay::beginJob() {
 void lbWriteSpecificDecay::produce( edm::Event& ev,
                                      const edm::EventSetup& es ) {
   fill( ev, es );
-  if ( lLbToLam0.size() || lLbToTkTk.size() || lBs.size() )
-  {
-      if ( writeOnia     ) write( ev, lFull     ,     oniaName , false ); 
-      if ( writeLam0     ) write( ev, lLam0     ,     Lam0Name , false ); 
-      if ( writeTkTk     ) write( ev, lTkTk     ,     TkTkName , false ); 
-      if ( writeLbToLam0 ) write( ev, lLbToLam0 , LbToLam0Name , true  ); 
-      if ( writeLbToTkTk ) write( ev, lLbToTkTk , LbToTkTkName ,  true ); 
-      if ( writePhi      ) write( ev, lPhi      ,      PhiName , false ); 
-      if ( writeBs       ) write( ev, lBs       ,       BsName ,  true ); 
-  }
+  bool writeEvent = lLbToTkTk.size();
+  if ( writeOnia     ) write( ev, lFull     ,     oniaName , writeEvent ); 
+  if ( writeLam0     ) write( ev, lLam0     ,     Lam0Name , writeEvent ); 
+  if ( writeTkTk     ) write( ev, lTkTk     ,     TkTkName , writeEvent ); 
+  if ( writeLbToLam0 ) write( ev, lLbToLam0 , LbToLam0Name , writeEvent ); 
+  if ( writeLbToTkTk ) write( ev, lLbToTkTk , LbToTkTkName , writeEvent ); 
+  if ( writeKs       ) write( ev, lKs       ,       KsName , writeEvent ); 
   return;
 }
 
@@ -233,8 +224,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     jPsiOMap .clear();
     pvRefMap .clear();
     ccRefMap .clear();
-    lPhi.clear();
-    lBs.clear();
+    lKs.clear();
     // clean up end }}}
 
     // get magnetic field
@@ -373,7 +363,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
             BPHOniaToMuMuBuilder::oniaType type;
             switch( rType )
             {
-                //case Pmm : type = BPHOniaToMuMuBuilder::Phi ; break;
+                //case Pmm : type = BPHOniaToMuMuBuilder::Ks ; break;
                 case Psi1: type = BPHOniaToMuMuBuilder::Psi1; break;
                 case Psi2: type = BPHOniaToMuMuBuilder::Psi2; break;
                 //case Ups : type = BPHOniaToMuMuBuilder::Ups ; break;
@@ -763,25 +753,25 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
 
     }
     // Build LbToTkTk end }}}
-// build and dump Phi
+// build and dump Ks {{{
 
-  BPHPhiToKKBuilder* phi = 0;
-  if ( recoPhi ) {
-    if ( usePF ) phi = new BPHPhiToKKBuilder( es,
-                       BPHRecoBuilder::createCollection( pfCands ),
-                       BPHRecoBuilder::createCollection( pfCands ) );
+  BPHKshortToPiPiBuilder* ks = 0;
+  if ( recoKs ) {
+    if ( usePF ) ks = new BPHKshortToPiPiBuilder( es,
+                           BPHRecoBuilder::createCollection( pfCands ),
+                           BPHRecoBuilder::createCollection( pfCands ) );
     else
-    if ( usePC ) phi = new BPHPhiToKKBuilder( es,
-                       BPHRecoBuilder::createCollection( pcCands ),
-                       BPHRecoBuilder::createCollection( pcCands ) );
+    if ( usePC ) ks = new BPHKshortToPiPiBuilder( es,
+                           BPHRecoBuilder::createCollection( pcCands ),
+                           BPHRecoBuilder::createCollection( pcCands ) );
     else
-    if ( useGP ) phi = new BPHPhiToKKBuilder( es,
-                       BPHRecoBuilder::createCollection( gpCands ),
-                       BPHRecoBuilder::createCollection( gpCands ) );
+    if ( useGP ) ks = new BPHKshortToPiPiBuilder( es,
+                           BPHRecoBuilder::createCollection( gpCands ),
+                           BPHRecoBuilder::createCollection( gpCands ) );
   }
 
-  if ( phi != 0 ) {
-    rIter = parMap.find( Phi );
+  if ( ks != 0 ) {
+    rIter = parMap.find( Ks );
     if ( rIter != rIend ) {
       const map<parType,double>& pMap = rIter->second;
       map<parType,double>::const_iterator pIter = pMap.begin();
@@ -791,59 +781,23 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
         parType id = pEntry.first;
         double  pv = pEntry.second;
         switch( id ) {
-        case ptMin      : phi->setPtMin  ( pv ); break;
-        case etaMax     : phi->setEtaMax ( pv ); break;
-        case massMin    : phi->setMassMin( pv ); break;
-        case massMax    : phi->setMassMax( pv ); break;
-        case probMin    : phi->setProbMin( pv ); break;
-        case constrMass : phi->setConstr ( pv, phi->getConstrSigma() ); break;
-        case constrSigma: phi->setConstr ( phi->getConstrMass() , pv ); break;
-        case writeCandidate: writePhi =  ( pv > 0 ); break;
+        case ptMin      : ks->setPtMin  ( pv ); break;
+        case etaMax     : ks->setEtaMax ( pv ); break;
+        case massMin    : ks->setMassMin( pv ); break;
+        case massMax    : ks->setMassMax( pv ); break;
+        case probMin    : ks->setProbMin( pv ); break;
+        case constrMass : ks->setConstr ( pv, ks->getConstrSigma() ); break;
+        case constrSigma: ks->setConstr ( ks->getConstrMass() , pv ); break;
+        case writeCandidate: writeKs =  ( pv > 0 ); break;
         default: break;
         }
       }
     }
-    lPhi = phi->build();
-    delete phi;
+    lKs = ks->build();
+    delete ks;
   }
 
-  unsigned nPhi = lPhi.size();
-
-  // build and dump Bs
-
-  if ( recoBs && nPhi ) {
-
-    BPHBsToJPsiPhiBuilder* bs = new BPHBsToJPsiPhiBuilder( es, lJPsi, lPhi );
-    rIter = parMap.find( Bs );
-    if ( rIter != rIend ) {
-      const map<parType,double>& pMap = rIter->second;
-      map<parType,double>::const_iterator pIter = pMap.begin();
-      map<parType,double>::const_iterator pIend = pMap.end();
-      while ( pIter != pIend ) {
-        const map<parType,double>::value_type& pEntry = *pIter++;
-        parType id = pEntry.first;
-        double  pv = pEntry.second;
-        switch( id ) {
-        case mPsiMin    : bs->setJPsiMassMin( pv ); break;
-        case mPsiMax    : bs->setJPsiMassMax( pv ); break;
-        case mPhiMin    : bs->setPhiMassMin ( pv ); break;
-        case mPhiMax    : bs->setPhiMassMax ( pv ); break;
-        case massMin    : bs->setMassMin    ( pv ); break;
-        case massMax    : bs->setMassMax    ( pv ); break;
-        case probMin    : bs->setProbMin    ( pv ); break;
-        case mFitMin    : bs->setMassFitMin ( pv ); break;
-        case mFitMax    : bs->setMassFitMax ( pv ); break;
-        case constrMJPsi: bs->setConstr     ( pv > 0 ); break;
-        case writeCandidate: writeBs =      ( pv > 0 ); break;
-        default: break;
-        }
-      }
-    }
-
-    lBs = bs->build();
-
-    delete bs;
-  }
+//  // }}}
 }
 
 
@@ -864,8 +818,7 @@ void lbWriteSpecificDecay::setRecoParameters( const edm::ParameterSet& ps ) {
         case TkTk     : recoTkTk      = true; writeTkTk       = writeCandidate; break;
         case LbToLam0 : recoLbToLam0  = true; writeLbToLam0   = writeCandidate; break;
         case LbToTkTk : recoLbToTkTk  = true; writeLbToTkTk   = writeCandidate; break;
-        case Phi      : recoPhi       = true; writePhi        = writeCandidate; break;
-        case Bs       : recoBs        = true; writeBs         = writeCandidate; break;
+        case Ks       : recoKs        = true; writeKs         = writeCandidate; break;
     }
 
 
