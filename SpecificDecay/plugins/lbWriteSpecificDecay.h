@@ -191,7 +191,7 @@ private:
             }
             return nullptr;
         }
-        private:        
+        //private:        
         std::string cName;
         std::string dName;
         const reco::Candidate* cptr;
@@ -232,6 +232,7 @@ private:
                 while ( j < m )
                 {
                     const std::string& compName = cNames[j++];
+                    if ( !ptr->getComp( compName ) ) continue;
                     const BPHRecoCandidate* cptr = ptr->getComp( compName ).get();
                     if ( ( ccrIter = ccRefMap.find( cptr ) ) == ccrIend )
                     {
@@ -273,7 +274,10 @@ private:
                     std::vector<RefCountedKinematicParticle> daughters = ptr->kinematicTree()->finalStateParticles();
                     std::vector<RefCountedKinematicParticle> compDaugh;
                 
+
                     // find RefCountedKinematicParticle
+        
+                    if ( ptr->seckinematicTree().get() )
                     if ( ptr->seckinematicTree()->isValid() )
                     {
                         // the last one is the constrained particle, it is virtual particle, need to be removed.
@@ -291,6 +295,7 @@ private:
                     std::map<const reco::Candidate*, std::string> componentList;
                     for ( const std::string& cName_ : cNames_ )
                     {
+                        if ( !ptr->getComp(cName_) ) continue;
                         const BPHRecoCandidate* cand_ = ptr->getComp( cName_ ).get();
                         const std::vector<std::string>& dNames__ = cand_->daugNames();
                         for ( const std::string& dName__ : dNames__ )
@@ -319,7 +324,7 @@ private:
                         float ptDiff = 999.0;
     
                         std::vector<RefCountedKinematicParticle> lists_;
-                        if ( _oldParticle.getCompName() == constrName )
+                        if ( _oldParticle.getCompName() == constrName && !constrName.empty() )
                             lists_ = compDaugh;
                         else
                             lists_ = daughters;
@@ -353,46 +358,51 @@ private:
     
                     // add refit momentum of daughters
                     for ( const recoParticleInfo& particleContainer : myParticleList )
+                    {
+                        if ( !particleContainer.refptr.get() ) continue;
                         cc.addUserData ( particleContainer.getFullName()+".fitMom",
                                          particleContainer.getRefitMom() );
-                }
-    
-    
-                for ( const recoParticleInfo& particleContainer : myParticleList )
-                {
-                    const BPHRecoCandidate* _jpsi = ptr->getComp( "JPsi" ).get();
-                    if ( !_jpsi ) continue; // asdf need to be modified to use PV or BS.
-                    const reco::Vertex* _pv = nullptr;
-                    for ( const auto& ljpsi : lFull )
-                    {
-                        // connect jpsi in candidate & jpsi in lFull. ( in order to use pvRefMap )
-                        const BPHPlusMinusCandidate* _ljpsi = ljpsi.get();
-                        const pat::CompositeCandidate& _p1 = _jpsi->composite();
-                        const pat::CompositeCandidate& _p2 = _ljpsi->composite();
-                        if ( fabs (_p1.pt() - _p2.pt() ) < 0.001 && fabs( _p1.eta()-_p2.eta() ) < 0.001 )
-                        if ( ( pvrIter = pvRefMap.find( _ljpsi ) ) == pvrIend ) continue;
-                        vertex_ref _pvRef = pvrIter->second;
-                        if ( _pvRef.isNull() ) continue;
-                        _pv = _pvRef.get();
-                        break;
+
+//                    if ( !ptr->getComp("JPsi") ) continue;
+//                    const BPHRecoCandidate* _jpsi = ptr->getComp( "JPsi" ).get();
+//                    if ( !_jpsi ) continue; // asdf need to be modified to use PV or BS.
+//                    const reco::Vertex* _pv = nullptr;
+//                    for ( const auto& ljpsi : lFull )
+//                    {
+//                        // connect jpsi in candidate & jpsi in lFull. ( in order to use pvRefMap )
+//                        const BPHPlusMinusCandidate* _ljpsi = ljpsi.get();
+//                        const pat::CompositeCandidate& _p1 = _jpsi->composite();
+//                        const pat::CompositeCandidate& _p2 = _ljpsi->composite();
+//                        if ( fabs (_p1.pt() - _p2.pt() ) < 0.001 && fabs( _p1.eta()-_p2.eta() ) < 0.001 )
+//                        if ( ( pvrIter = pvRefMap.find( _ljpsi ) ) == pvrIend ) continue;
+//                        vertex_ref _pvRef = pvrIter->second;
+//                        if ( _pvRef.isNull() ) continue;
+//                        _pv = _pvRef.get();
+//                        break;
+//                    }
+//    
+//                    if ( !_pv ) continue;
+//    
+//                    reco::TransientTrack newTT = particleContainer.getRefitParticle()->refittedTransientTrack();
+//                    GlobalPoint pv_g( _pv->x(), _pv->y(), _pv->z() );
+//                    TrajectoryStateClosestToPoint traj = newTT.trajectoryStateClosestToPoint( pv_g );
+//                    float IPt ( traj.perigeeParameters().transverseImpactParameter() );
+//                    float IPt_err ( traj.perigeeError().transverseImpactParameterError() );
+//                    float IPz ( traj.perigeeParameters().longitudinalImpactParameter() );
+//                    float IPz_err ( traj.perigeeError().longitudinalImpactParameterError() );
+//    
+//                    cc.addUserFloat ( particleContainer.getFullName()+".IPt", IPt );
+//                    cc.addUserFloat ( particleContainer.getFullName()+".IPt.Error", IPt_err );
+//                    cc.addUserFloat ( particleContainer.getFullName()+".IPz", IPz );
+//                    cc.addUserFloat ( particleContainer.getFullName()+".IPz.Error", IPz_err );
                     }
-    
-                    if ( !_pv ) continue;
-    
-                    reco::TransientTrack newTT = particleContainer.getRefitParticle()->refittedTransientTrack();
-                    GlobalPoint pv_g( _pv->x(), _pv->y(), _pv->z() );
-                    TrajectoryStateClosestToPoint traj = newTT.trajectoryStateClosestToPoint( pv_g );
-                    float IPt ( traj.perigeeParameters().transverseImpactParameter() );
-                    float IPt_err ( traj.perigeeError().transverseImpactParameterError() );
-                    float IPz ( traj.perigeeParameters().longitudinalImpactParameter() );
-                    float IPz_err ( traj.perigeeError().longitudinalImpactParameterError() );
-    
-                    cc.addUserFloat ( particleContainer.getFullName()+".IPt", IPt );
-                    cc.addUserFloat ( particleContainer.getFullName()+".IPt.Error", IPt_err );
-                    cc.addUserFloat ( particleContainer.getFullName()+".IPz", IPz );
-                    cc.addUserFloat ( particleContainer.getFullName()+".IPz.Error", IPz_err );
                 }
     
+    
+//                for ( const recoParticleInfo& particleContainer : myParticleList )
+//                {
+//                }
+//    
                 // store refit information end }}}
             }
         } // if writeDownThisEvent
