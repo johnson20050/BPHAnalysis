@@ -20,12 +20,8 @@
 #include "BPHAnalysis/SpecificDecay/interface/BPHChi2Select.h"
 
 #include "BPHAnalysis/SpecificDecay/interface/BPHOniaToMuMuBuilder.h"
-#include "BPHAnalysis/SpecificDecay/interface/BPHLambda0ToPPiBuilder.h"
-#include "BPHAnalysis/SpecificDecay/interface/BPHLambda0_bToJPsiLambda0Builder.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHTkTkBuilder.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHLambda0_bToJPsiTkTkBuilder.h"
-#include "BPHAnalysis/SpecificDecay/interface/BPHKshortToPiPiBuilder.h"
-//#include "BPHAnalysis/SpecificDecay/interface/BPHLbToJPsiTkTkBuilder.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -64,29 +60,21 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
 
     // Set the label used in output product.
     SET_PAR( string,     oniaName, ps );
-    SET_PAR( string,     Lam0Name, ps );
     SET_PAR( string,     TkTkName, ps );
-    SET_PAR( string, LbToLam0Name, ps );
     SET_PAR( string, LbToTkTkName, ps );
     SET_PAR( bool  ,writeMomentum, ps );
     SET_PAR( bool  ,writeVertex  , ps );
-    SET_PAR( string,      KsName, ps );
 
     rMap["Onia"    ] = Onia;
     rMap["JPsi"    ] = Psi1;
     rMap["Psi2"    ] = Psi2;
-    rMap["Lam0"    ] = Lam0;
     rMap["TkTk"    ] = TkTk;
-    rMap["LbToLam0"] = LbToLam0;
     rMap["LbToTkTk"] = LbToTkTk;
-    rMap["Ks"     ] = Ks ;
 
     pMap["ptMin"      ] = ptMin;
     pMap["etaMax"     ] = etaMax;
     pMap["mPsiMin"    ] = mPsiMin;
     pMap["mPsiMax"    ] = mPsiMax;
-    pMap["mLam0Min"   ] = mLam0Min;
-    pMap["mLam0Max"   ] = mLam0Max;
     pMap["massMin"    ] = massMin;
     pMap["massMax"    ] = massMax;
     pMap["probMin"    ] = probMin;
@@ -94,18 +82,13 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     pMap["massFitMax" ] = mFitMax;
     pMap["constrMass" ] = constrMass;
     pMap["constrSigma"] = constrSigma;
-    pMap["mKsMin"    ] = mKsMin;
-    pMap["mKsMax"    ] = mKsMax;
 
     fMap["constrMJPsi"   ] = constrMJPsi;
     fMap["writeCandidate"] = writeCandidate;
 
     recoOnia      =
-    recoLam0      = writeLam0     =  
     recoTkTk      = writeTkTk     =   true;
-    recoLbToLam0  = writeLbToLam0 =
     recoLbToTkTk  = writeLbToTkTk =  false;
-    recoKs = writeKs = true;
 
     writeOnia = true;
     const vector<edm::ParameterSet> recoSelect =
@@ -115,9 +98,7 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     for ( iSel = 0; iSel != nSel; ++iSel ) setRecoParameters( recoSelect[iSel] );
     if ( !recoOnia ) writeOnia = false;
 
-    if (  recoLbToLam0 )  recoOnia =  recoLam0   = true;
     if (  recoLbToTkTk )  recoOnia =  recoTkTk   = true;
-    if ( writeLbToLam0 ) writeOnia = writeLam0   = true;
     if ( writeLbToTkTk ) writeOnia = writeTkTk   = true;
 
     // Get data by label/token
@@ -133,13 +114,11 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
                                                                   pcCandsLabel );
     if ( useGP ) consume< vector<pat::GenericParticle        > >( gpCandsToken,
                                                                   gpCandsLabel );
+    //if ( useBS ) consume< reco::BeamSpot > ( bsToken, bsLabel );
 
   if ( writeOnia     ) produces<pat::CompositeCandidateCollection>( oniaName     );
-  if ( writeLam0     ) produces<pat::CompositeCandidateCollection>( Lam0Name     );
   if ( writeTkTk     ) produces<pat::CompositeCandidateCollection>( TkTkName     );
-  if ( writeLbToLam0 ) produces<pat::CompositeCandidateCollection>( LbToLam0Name );
   if ( writeLbToTkTk ) produces<pat::CompositeCandidateCollection>( LbToTkTkName );
-  if ( writeKs       ) produces<pat::CompositeCandidateCollection>(  KsName      );
 
 }
 
@@ -158,11 +137,8 @@ void lbWriteSpecificDecay::fillDescriptions(
     desc.add<string>( "pcCandsLabel", "" );
     desc.add<string>( "gpCandsLabel", "" );
     desc.add<string>(     "oniaName",   "oniaCand" );
-    desc.add<string>(     "Lam0Name",   "Lam0Cand" );
     desc.add<string>(     "TkTkName",   "TkTkCand" );
-    desc.add<string>( "LbToLam0Name", "LbToLam0Fitted" );
     desc.add<string>( "LbToTkTkName", "LbToTkTkFitted" );
-    desc.add<string>(       "KsName",    "KsCand" );
 
     desc.add<bool>  ( "writeVertex"  , true );
     desc.add<bool>  ( "writeMomentum", true );
@@ -172,8 +148,6 @@ void lbWriteSpecificDecay::fillDescriptions(
     dpar.add<double>(         "etaMax", -2.0e35 );
     dpar.add<double>(        "mPsiMin", -2.0e35 );
     dpar.add<double>(        "mPsiMax", -2.0e35 );
-    dpar.add<double>(       "mLam0Min", -2.0e35 );
-    dpar.add<double>(       "mLam0Max", -2.0e35 );
     dpar.add<double>(        "massMin", -2.0e35 );
     dpar.add<double>(        "massMax", -2.0e35 );
     dpar.add<double>(        "probMin", -2.0e35 );
@@ -183,8 +157,6 @@ void lbWriteSpecificDecay::fillDescriptions(
     dpar.add<double>(    "constrSigma", -2.0e35 );
     dpar.add<  bool>(    "constrMJPsi",    true );
     dpar.add<  bool>( "writeCandidate",    true );
-    dpar.add<double>(         "mKsMin", -2.0e35 );
-    dpar.add<double>(         "mKsMax", -2.0e35 );
 
     vector<edm::ParameterSet> rpar;
     desc.addVPSet( "recoSelect", dpar, rpar );
@@ -201,13 +173,11 @@ void lbWriteSpecificDecay::beginJob() {
 void lbWriteSpecificDecay::produce( edm::Event& ev,
                                      const edm::EventSetup& es ) {
   fill( ev, es );
-  bool writeEvent = lLbToTkTk.size();
+  //bool writeEvent = lLbToTkTk.size();
+  bool writeEvent = true;
   if ( writeOnia     ) write( ev, lFull     ,     oniaName , writeEvent ); 
-  if ( writeLam0     ) write( ev, lLam0     ,     Lam0Name , writeEvent ); 
   if ( writeTkTk     ) write( ev, lTkTk     ,     TkTkName , writeEvent ); 
-  if ( writeLbToLam0 ) write( ev, lLbToLam0 , LbToLam0Name , writeEvent ); 
   if ( writeLbToTkTk ) write( ev, lLbToTkTk , LbToTkTkName , writeEvent ); 
-  if ( writeKs       ) write( ev, lKs       ,       KsName , writeEvent ); 
   return;
 }
 
@@ -217,14 +187,11 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     // clean up {{{
     lFull    .clear();
     lJPsi    .clear();
-    lLam0    .clear();
     lTkTk    .clear();
-    lLbToLam0.clear();
     lLbToTkTk.clear();
     jPsiOMap .clear();
     pvRefMap .clear();
     ccRefMap .clear();
-    lKs.clear();
     // clean up end }}}
 
     // get magnetic field
@@ -363,7 +330,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
             BPHOniaToMuMuBuilder::oniaType type;
             switch( rType )
             {
-                //case Pmm : type = BPHOniaToMuMuBuilder::Ks ; break;
                 case Psi1: type = BPHOniaToMuMuBuilder::Psi1; break;
                 case Psi2: type = BPHOniaToMuMuBuilder::Psi2; break;
                 //case Ups : type = BPHOniaToMuMuBuilder::Ups ; break;
@@ -507,90 +473,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     int nJPsi = lJPsi.size();
     delete onia; // chk pV end }}}
 
-
-    if ( !nJPsi ) return;
-    // Search for the map of lJPsi and lFull {{{
-    if ( !nrc   ) return;
-
-    int ij;
-    int io;
-    int nj = lJPsi.size();
-    int no = lFull.size();
-    for ( ij = 0; ij < nj; ++ij )
-    {
-        const BPHRecoCandidate* jp = lJPsi[ij].get();
-        for ( io = 0; io < no; ++io )
-        {
-            const BPHRecoCandidate* oc = lFull[io].get();
-            if ( ( jp->originalReco( jp->getDaug( "MuPos" ) ) ==
-                    oc->originalReco( oc->getDaug( "MuPos" ) ) ) &&
-                    ( jp->originalReco( jp->getDaug( "MuNeg" ) ) ==
-                      oc->originalReco( oc->getDaug( "MuNeg" ) ) ) )
-            {
-                jPsiOMap[jp] = oc;
-                break;
-            }
-        }
-    } 
-    // Search for the map of lJPsi and lFull end}}}
-
-
-
-    // Build Lam0 {{{
-    BPHLambda0ToPPiBuilder* lam0 = 0;
-
-    if ( recoLam0 )
-    {
-        if      ( usePF ) lam0 = new BPHLambda0ToPPiBuilder( es,
-                    BPHRecoBuilder::createCollection( pfCands ),
-                    BPHRecoBuilder::createCollection( pfCands ) );
-        else if ( usePC ) lam0 = new BPHLambda0ToPPiBuilder( es,
-                    BPHRecoBuilder::createCollection( pcCands ),
-                    BPHRecoBuilder::createCollection( pcCands ) );
-        else if ( useGP ) lam0 = new BPHLambda0ToPPiBuilder( es,
-                    BPHRecoBuilder::createCollection( gpCands ),
-                    BPHRecoBuilder::createCollection( gpCands ) );
-    }
-    // Set cut value 
-    // use "Name"(recorded in enum) to find particle, then there is a subMap
-    // The subMap is list of the cuts used in  the particle
-    if ( lam0 != 0 )
-    {
-        rIter = parMap.find( Lam0 );
-
-        // if find something
-        if ( rIter != rIend )
-        {
-            const map<parType,double>& _parMap = rIter->second;
-            map<parType,double>::const_iterator _parIter = _parMap.begin();
-            map<parType,double>::const_iterator _parIend = _parMap.end();
-            while ( _parIter != _parIend )
-            {
-                // set cut value by switch
-                const map<parType,double>::value_type& _parEntry = *_parIter++;
-                parType _parId      = _parEntry.first;
-                double  _parValue   = _parEntry.second;
-                switch( _parId )
-                {
-                    case ptMin          : lam0->setPtMin       ( _parValue ); break;
-                    case etaMax         : lam0->setEtaMax      ( _parValue ); break;
-                    case massMin        : lam0->setMassMin     ( _parValue ); break;
-                    case massMax        : lam0->setMassMax     ( _parValue ); break;
-                    case probMin        : lam0->setProbMin     ( _parValue ); break;
-                    case constrMass     : lam0->setConstr      ( _parValue, lam0->getConstrSigma() ); break;
-                    case constrSigma    : lam0->setConstr      ( lam0->getConstrMass(), _parValue  ); break;
-                    case writeCandidate : writeLam0 =          ( _parValue > 0 ); break;
-                    default:
-                        break;
-                }
-            }
-        }
-        lLam0 = lam0->build();
-        delete   lam0;
-
-
-    } // set cut value end  
-    // Build Lam0 end }}}
     // Build TkTk {{{
     BPHTkTkBuilder* tktk = 0;
     std::string pName = "Proton";
@@ -658,53 +540,31 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     } // set cut value end  
     unsigned nTkTk = lTkTk.size();
     // Build TkTk end }}}
+    if ( !nJPsi ) return;
+    // Search for the map of lJPsi and lFull {{{
+    if ( !nrc   ) return;
 
-    // build and dump Lb->Jpsi+Lam0{{{
-
-    
-    int nLam0 = lLam0.size();
-
-
-    // Lambda0 is built, start to build Lambda0_b->J/Psi+Lambda0
-    if ( recoLam0 && nLam0 )
+    int ij;
+    int io;
+    int nj = lJPsi.size();
+    int no = lFull.size();
+    for ( ij = 0; ij < nj; ++ij )
     {
-        BPHLambda0_bToJPsiLambda0Builder* _lb = new BPHLambda0_bToJPsiLambda0Builder( es, lJPsi, lLam0 );
-        
-        // set cut value 
-        rIter = parMap.find( LbToLam0 );
-        if ( rIter != rIend )
+        const BPHRecoCandidate* jp = lJPsi[ij].get();
+        for ( io = 0; io < no; ++io )
         {
-            const map<parType,double>& _parMap = rIter->second;
-            map<parType,double>::const_iterator _parIter = _parMap.begin();
-            map<parType,double>::const_iterator _parIend = _parMap.end  ();
-            while ( _parIter != _parIend )
+            const BPHRecoCandidate* oc = lFull[io].get();
+            if ( ( jp->originalReco( jp->getDaug( "MuPos" ) ) ==
+                    oc->originalReco( oc->getDaug( "MuPos" ) ) ) &&
+                    ( jp->originalReco( jp->getDaug( "MuNeg" ) ) ==
+                      oc->originalReco( oc->getDaug( "MuNeg" ) ) ) )
             {
-                const map<parType,double>::value_type& _parEntry = *_parIter++;
-                parType  _parId      = _parEntry.first;
-                double   _parValue   = _parEntry.second;
-
-                switch( _parId )
-                {
-                case mPsiMin        : _lb->setJPsiMassMin   ( _parValue ); break;
-                case mPsiMax        : _lb->setJPsiMassMax   ( _parValue ); break;
-                case mLam0Min       : _lb->setLam0MassMin   ( _parValue ); break;
-                case mLam0Max       : _lb->setLam0MassMax   ( _parValue ); break;
-                case massMin        : _lb->setMassMin       ( _parValue ); break;
-                case massMax        : _lb->setMassMax       ( _parValue ); break;
-                case probMin        : _lb->setProbMin       ( _parValue ); break;
-                case mFitMin        : _lb->setMassFitMin    ( _parValue ); break;
-                case mFitMax        : _lb->setMassFitMax    ( _parValue ); break;
-                case constrMJPsi    : _lb->setConstr        ( _parValue ); break;
-                case writeCandidate : writeLbToLam0 =       ( _parValue > 0); break;
-                default:
-                    break;
-                }
+                jPsiOMap[jp] = oc;
+                break;
             }
         }
-        lLbToLam0 = _lb->build();
-        delete _lb;
-        // set cut value end 
-    }// build lambda b end }}}
+    } 
+    // Search for the map of lJPsi and lFull end}}}
 
     // Build and dump Lb->Jpsi+TkTk {{{
     if ( nTkTk && recoLbToTkTk )
@@ -753,51 +613,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
 
     }
     // Build LbToTkTk end }}}
-// build and dump Ks {{{
-
-  BPHKshortToPiPiBuilder* ks = 0;
-  if ( recoKs ) {
-    if ( usePF ) ks = new BPHKshortToPiPiBuilder( es,
-                           BPHRecoBuilder::createCollection( pfCands ),
-                           BPHRecoBuilder::createCollection( pfCands ) );
-    else
-    if ( usePC ) ks = new BPHKshortToPiPiBuilder( es,
-                           BPHRecoBuilder::createCollection( pcCands ),
-                           BPHRecoBuilder::createCollection( pcCands ) );
-    else
-    if ( useGP ) ks = new BPHKshortToPiPiBuilder( es,
-                           BPHRecoBuilder::createCollection( gpCands ),
-                           BPHRecoBuilder::createCollection( gpCands ) );
-  }
-
-  if ( ks != 0 ) {
-    rIter = parMap.find( Ks );
-    if ( rIter != rIend ) {
-      const map<parType,double>& pMap = rIter->second;
-      map<parType,double>::const_iterator pIter = pMap.begin();
-      map<parType,double>::const_iterator pIend = pMap.end();
-      while ( pIter != pIend ) {
-        const map<parType,double>::value_type& pEntry = *pIter++;
-        parType id = pEntry.first;
-        double  pv = pEntry.second;
-        switch( id ) {
-        case ptMin      : ks->setPtMin  ( pv ); break;
-        case etaMax     : ks->setEtaMax ( pv ); break;
-        case massMin    : ks->setMassMin( pv ); break;
-        case massMax    : ks->setMassMax( pv ); break;
-        case probMin    : ks->setProbMin( pv ); break;
-        case constrMass : ks->setConstr ( pv, ks->getConstrSigma() ); break;
-        case constrSigma: ks->setConstr ( ks->getConstrMass() , pv ); break;
-        case writeCandidate: writeKs =  ( pv > 0 ); break;
-        default: break;
-        }
-      }
-    }
-    lKs = ks->build();
-    delete ks;
-  }
-
-//  // }}}
 }
 
 
@@ -814,11 +629,8 @@ void lbWriteSpecificDecay::setRecoParameters( const edm::ParameterSet& ps ) {
         case Onia     : recoOnia      = true; writeOnia       = writeCandidate; break;
         case Psi1     :
         case Psi2     : recoOnia      = true;                                   break;
-        case Lam0     : recoLam0      = true; writeLam0       = writeCandidate; break;
         case TkTk     : recoTkTk      = true; writeTkTk       = writeCandidate; break;
-        case LbToLam0 : recoLbToLam0  = true; writeLbToLam0   = writeCandidate; break;
         case LbToTkTk : recoLbToTkTk  = true; writeLbToTkTk   = writeCandidate; break;
-        case Ks       : recoKs        = true; writeKs         = writeCandidate; break;
     }
 
 

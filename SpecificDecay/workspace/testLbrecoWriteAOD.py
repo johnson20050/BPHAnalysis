@@ -30,8 +30,7 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
-#'file:///afs/cern.ch/user/l/ltsai/BsToJpsiPhiV2_testFile.root'
-'file:///afs/cern.ch/user/l/ltsai/Charmonium_AOD_RunC.root'
+'file:///home/ltsai/Data/8028_2016RunG_AOD_07Aug17.root'
 ))
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016LegacyRepro_v3', '')
@@ -89,8 +88,7 @@ process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
     TkTkName      = cms.string('TkTkFitted'),
     LbToLam0Name  = cms.string('LbToLam0Fitted'),
     LbToTkTkName  = cms.string('LbToTkTkFitted'),
-    PhiName   = cms.string('phiCand'),
-    BsName   = cms.string('bsFitted'),
+    KsName = cms.string( 'KshortCand'),
     writeVertex   = cms.bool( True ),
     writeMomentum = cms.bool( True ),
     recoSelect    = cms.VPSet(recoSelect)
@@ -101,9 +99,9 @@ process.out = cms.OutputModule(
     fileName = cms.untracked.string('recoWriteSpecificDecay.root'),
     outputCommands = cms.untracked.vstring(
         "drop *",
-        "keep *_lbWriteSpecificDecay_*_bphAnalysis"
-        "keep *_offlineBeamSpot_*_RECO"
-        "keep *_offlinePrimaryVertices_*_RECO"
+        "keep *_lbWriteSpecificDecay_*_bphAnalysis",
+        "keep *_offlineBeamSpot_*_RECO",
+        "keep *_offlinePrimaryVertices_*_RECO",
     )
 )
 

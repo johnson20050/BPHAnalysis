@@ -58,6 +58,7 @@ private:
     std::string pfCandsLabel;
     std::string pcCandsLabel;
     std::string gpCandsLabel;
+    //std::string bsLabel;
 
     // token wrappers to allow running both on "old" and "new" CMSSW versions
     BPHTokenWrapper< std::vector<reco::Vertex>                 > pVertexToken;
@@ -66,6 +67,7 @@ private:
     BPHTokenWrapper< std::vector<reco::PFCandidate           > > pfCandsToken;
     BPHTokenWrapper< std::vector<BPHTrackReference::candidate> > pcCandsToken;
     BPHTokenWrapper< std::vector<pat::GenericParticle        > > gpCandsToken;
+    //BPHTokenWrapper< reco::BeamSpot > bsToken;
 
 
     bool usePV;
@@ -77,17 +79,13 @@ private:
 
 // The label used in output product
     std::string     oniaName;
-    std::string     Lam0Name;
     std::string     TkTkName;
-    std::string LbToLam0Name;
     std::string LbToTkTkName;
 
-    std::string KsName;
 
-    enum recoType { Onia, Psi1, Psi2, Lam0, TkTk, LbToLam0, LbToTkTk, Ks };
+    enum recoType { Onia, Psi1, Psi2, TkTk, LbToTkTk };
     enum  parType { ptMin, etaMax,
-                    mPsiMin, mPsiMax, mLam0Min, mLam0Max,
-                    mKsMin, mKsMax,
+                    mPsiMin, mPsiMax,
                     massMin, massMax, probMin, mFitMin, mFitMax,
                     constrMass, constrSigma, constrMJPsi, writeCandidate,
                   };
@@ -99,29 +97,20 @@ private:
 
 
     bool recoOnia     ;
-    bool recoLam0     ;
     bool recoTkTk     ;
-    bool recoLbToLam0 ;
     bool recoLbToTkTk ;
-    bool recoKs;
 
     bool writeOnia    ;
-    bool writeLam0    ;
     bool writeTkTk    ;
-    bool writeLbToLam0;
     bool writeLbToTkTk;
-    bool writeKs;
 
     bool writeVertex;
     bool writeMomentum;
 
     std::vector<BPHPlusMinusConstCandPtr> lFull;
     std::vector<BPHPlusMinusConstCandPtr> lJPsi;
-    std::vector<BPHPlusMinusConstCandPtr> lLam0;
     std::vector<BPHPlusMinusConstCandPtr> lTkTk;
-    std::vector<BPHRecoConstCandPtr>      lLbToLam0;
     std::vector<BPHRecoConstCandPtr>      lLbToTkTk;
-    std::vector<BPHPlusMinusConstCandPtr> lKs;
 
     std::map<const BPHRecoCandidate*,const BPHRecoCandidate*> jPsiOMap;
     typedef edm::Ref< std::vector<reco::Vertex> > vertex_ref;
@@ -363,48 +352,78 @@ private:
                         cc.addUserData ( particleContainer.getFullName()+".fitMom",
                                          particleContainer.getRefitMom() );
 
-//                    if ( !ptr->getComp("JPsi") ) continue;
-//                    const BPHRecoCandidate* _jpsi = ptr->getComp( "JPsi" ).get();
-//                    if ( !_jpsi ) continue; // asdf need to be modified to use PV or BS.
-//                    const reco::Vertex* _pv = nullptr;
-//                    for ( const auto& ljpsi : lFull )
-//                    {
-//                        // connect jpsi in candidate & jpsi in lFull. ( in order to use pvRefMap )
-//                        const BPHPlusMinusCandidate* _ljpsi = ljpsi.get();
-//                        const pat::CompositeCandidate& _p1 = _jpsi->composite();
-//                        const pat::CompositeCandidate& _p2 = _ljpsi->composite();
-//                        if ( fabs (_p1.pt() - _p2.pt() ) < 0.001 && fabs( _p1.eta()-_p2.eta() ) < 0.001 )
-//                        if ( ( pvrIter = pvRefMap.find( _ljpsi ) ) == pvrIend ) continue;
-//                        vertex_ref _pvRef = pvrIter->second;
-//                        if ( _pvRef.isNull() ) continue;
-//                        _pv = _pvRef.get();
-//                        break;
-//                    }
-//    
-//                    if ( !_pv ) continue;
-//    
-//                    reco::TransientTrack newTT = particleContainer.getRefitParticle()->refittedTransientTrack();
-//                    GlobalPoint pv_g( _pv->x(), _pv->y(), _pv->z() );
-//                    TrajectoryStateClosestToPoint traj = newTT.trajectoryStateClosestToPoint( pv_g );
-//                    float IPt ( traj.perigeeParameters().transverseImpactParameter() );
-//                    float IPt_err ( traj.perigeeError().transverseImpactParameterError() );
-//                    float IPz ( traj.perigeeParameters().longitudinalImpactParameter() );
-//                    float IPz_err ( traj.perigeeError().longitudinalImpactParameterError() );
-//    
-//                    cc.addUserFloat ( particleContainer.getFullName()+".IPt", IPt );
-//                    cc.addUserFloat ( particleContainer.getFullName()+".IPt.Error", IPt_err );
-//                    cc.addUserFloat ( particleContainer.getFullName()+".IPz", IPz );
-//                    cc.addUserFloat ( particleContainer.getFullName()+".IPz.Error", IPz_err );
-                    }
-                }
+                        const reco::Vertex* _pv = nullptr;
+                        //bool killPV = false;
+                        if ( ptr->compNames().size() ) // if it is Lambda0_b or Bs
+                        {
+                            if ( ptr->getComp("JPsi") )
+                            {
+                                const BPHRecoCandidate* _jpsi = ptr->getComp( "JPsi" ).get();
+                                if ( !_jpsi ) continue; // asdf need to be modified to use PV or BS.
+                                for ( const auto& ljpsi : lFull )
+                                {
+                                    // connect jpsi in candidate & jpsi in lFull. ( in order to use pvRefMap )
+                                    const BPHPlusMinusCandidate* _ljpsi = ljpsi.get();
+                                    const pat::CompositeCandidate& _p1 = _jpsi->composite();
+                                    const pat::CompositeCandidate& _p2 = _ljpsi->composite();
+                                    if ( fabs (_p1.pt() - _p2.pt() ) < 0.001 && fabs( _p1.eta()-_p2.eta() ) < 0.001 )
+                                    if ( ( pvrIter = pvRefMap.find( _ljpsi ) ) == pvrIend ) continue;
+                                    vertex_ref _pvRef = pvrIter->second;
+                                    if ( _pvRef.isNull() ) continue;
+                                    _pv = _pvRef.get();
+                                    break;
+                                }
+                            }
+                        }
+                        //else // if it is secondary candidate like Lam0 or Kshort or JPsi
+                        //{
+                        //    edm::Handle<reco::BeamSpot> bsHandle;
+                        //    //ev.getByLabel( edm::InputTag("offlineBeamSpot", "", "RECO"), bsHandle  );
+                        //    ev.getByLabel( "offlineBeamSpot__RECO", bsHandle  );
+                        //    //bsToken.get( ev, bsHandle );
+    
+                        //    if ( !bsHandle.isValid() ) continue;
+                        //    killPV = true;
+                        //    _pv = new reco::Vertex( bsHandle->position(), bsHandle->covariance3D() );
+                        //}
+    
+        
+                        if ( !_pv ) continue;
+                        std::cout << "particleContainer full name = " << particleContainer.getFullName() << std::endl;
+        
+                        std::cout << "chk poin01\n";
+                        reco::TransientTrack newTT = particleContainer.getRefitParticle()->refittedTransientTrack();
+                        std::cout << "chk poin01.5\n";
+                        std::cout << " pv = " << _pv << std::endl;
+                        std::cout << "chk poin01.51\n";
+
+                        if ( !newTT.isValid() ) continue;
+                        std::cout << "chk poin01.6\n";
+
+                        if ( !_pv->isValid() ) continue;
+                        std::cout << "pv.x = " << std::endl;
+                        std::cout << "    " << _pv->x() << std::endl;
+                        std::cout << "chk poin02\n";
+                        GlobalPoint pv_g( _pv->x(), _pv->y(), _pv->z() );
+                        std::cout << "chk poin03\n";
+                        TrajectoryStateClosestToPoint traj = newTT.trajectoryStateClosestToPoint( pv_g );
+                        std::cout << "chk poin04\n";
+                        float IPt ( traj.perigeeParameters().transverseImpactParameter() );
+                        std::cout << "chk poin05\n";
+                        float IPt_err ( traj.perigeeError().transverseImpactParameterError() );
+                        std::cout << "chk poin06\n";
+        
+                        cc.addUserFloat ( particleContainer.getFullName()+".IPt", IPt );
+                        cc.addUserFloat ( particleContainer.getFullName()+".IPt.Error", IPt_err );
+                        std::cout << "chk poin08\n";
+    
+                        //if ( killPV ) delete _pv;
+                    } // end of particleContainer
+                } // if writeMomentum end
     
     
-//                for ( const recoParticleInfo& particleContainer : myParticleList )
-//                {
-//                }
-//    
                 // store refit information end }}}
-            }
+            } // run over all candidate end 
         } // if writeDownThisEvent
         typedef std::unique_ptr<pat::CompositeCandidateCollection> ccc_pointer;
         edm::OrphanHandle<pat::CompositeCandidateCollection> ccHandle =
