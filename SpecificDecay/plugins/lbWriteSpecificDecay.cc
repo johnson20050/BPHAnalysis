@@ -58,6 +58,7 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     useGP = ( SET_PAR( string, gpCandsLabel, ps ) != "" );
 
 
+    SET_PAR( bool  ,        isAOD, ps );
     // Set the label used in output product.
     SET_PAR( string,     oniaName, ps );
     SET_PAR( string,     TkTkName, ps );
@@ -139,9 +140,11 @@ void lbWriteSpecificDecay::fillDescriptions(
     desc.add<string>(     "oniaName",   "oniaCand" );
     desc.add<string>(     "TkTkName",   "TkTkCand" );
     desc.add<string>( "LbToTkTkName", "LbToTkTkFitted" );
+    
 
     desc.add<bool>  ( "writeVertex"  , true );
     desc.add<bool>  ( "writeMomentum", true );
+    desc.add<bool>  (         "isAOD",false );
     edm::ParameterSetDescription dpar;
     dpar.add<string>(           "name" );
     dpar.add<double>(          "ptMin", -2.0e35 );
@@ -157,6 +160,7 @@ void lbWriteSpecificDecay::fillDescriptions(
     dpar.add<double>(    "constrSigma", -2.0e35 );
     dpar.add<  bool>(    "constrMJPsi",    true );
     dpar.add<  bool>( "writeCandidate",    true );
+    dpar.add<  bool>(          "isAOD",   false );
 
     vector<edm::ParameterSet> rpar;
     desc.addVPSet( "recoSelect", dpar, rpar );
@@ -198,6 +202,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     edm::ESHandle<MagneticField> magneticField;
     es.get<IdealMagneticFieldRecord>().get( magneticField );
 
+    std::map<const BPHRecoCandidate*,const reco::Vertex*> oniaVtxMap;
     // find muon and get MuMu Onia full list, use them to decide primary vertex {{{
     // get object collections
     // collections are got through "BPHTokenWrapper" interface to allow
@@ -370,7 +375,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
 
     int iFull;
     int nFull = lFull.size();
-    map<const BPHRecoCandidate*,const reco::Vertex*> oniaVtxMap;
 
     // Vertex information{{{
     typedef mu_cc_map::const_iterator mu_cc_iter;

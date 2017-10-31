@@ -82,13 +82,11 @@ process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
     patMuonLabel = cms.string('selectedPatMuons'),
     #ccCandsLabel = cms.string('onia2MuMuPAT::RECO'),
 
+    isAOD = cms.bool( True ),
 # the label of output product
     oniaName      = cms.string('oniaFitted'),
-    Lam0Name      = cms.string('Lam0Cand'),
     TkTkName      = cms.string('TkTkFitted'),
-    LbToLam0Name  = cms.string('LbToLam0Fitted'),
     LbToTkTkName  = cms.string('LbToTkTkFitted'),
-    KsName = cms.string( 'KshortCand'),
     writeVertex   = cms.bool( True ),
     writeMomentum = cms.bool( True ),
     recoSelect    = cms.VPSet(recoSelect)
