@@ -50,6 +50,7 @@ using namespace std;
 lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
 
     //  Check if there is the label used in reading data or not.
+    useBS = ( SET_PAR( string, bsReadyLabel, ps ) != "" );
     usePV = ( SET_PAR( string, pVertexLabel, ps ) != "" );
     usePM = ( SET_PAR( string, patMuonLabel, ps ) != "" );
     useCC = ( SET_PAR( string, ccCandsLabel, ps ) != "" );
@@ -103,6 +104,8 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     if ( writeLbToTkTk ) writeOnia = writeTkTk   = true;
 
     // Get data by label/token
+    if ( useBS ) consume< reco::BeamSpot                       >( bsReadyToken,
+                                                                  bsReadyLabel );
     if ( usePV ) consume< vector<reco::Vertex                > >( pVertexToken,
                                                                   pVertexLabel );
     if ( usePM ) consume< pat::MuonCollection                  >( patMuonToken,
@@ -131,6 +134,7 @@ lbWriteSpecificDecay::~lbWriteSpecificDecay() {
 void lbWriteSpecificDecay::fillDescriptions(
                             edm::ConfigurationDescriptions& descriptions ) {
     edm::ParameterSetDescription desc;
+    desc.add<string>( "bsReadyLabel", "" );
     desc.add<string>( "pVertexLabel", "" );
     desc.add<string>( "patMuonLabel", "" );
     desc.add<string>( "ccCandsLabel", "" );

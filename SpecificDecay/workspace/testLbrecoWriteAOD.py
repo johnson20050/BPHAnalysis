@@ -77,6 +77,7 @@ process.hltHighLevel= hltHighLevel.clone(HLTPaths = cms.vstring(HLTName))
 process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
 
 # the label used in calling data
+    bsReadyLabel = cms.string('offlineBeamSpot::RECO'),
     pVertexLabel = cms.string('offlinePrimaryVertices::RECO'),
     gpCandsLabel = cms.string('patSelectedTracks'),
     patMuonLabel = cms.string('selectedPatMuons'),

@@ -52,6 +52,7 @@ public:
 
 private:
 
+    std::string bsReadyLabel;
     std::string pVertexLabel;
     std::string patMuonLabel;
     std::string ccCandsLabel;
@@ -61,6 +62,7 @@ private:
     //std::string bsLabel;
 
     // token wrappers to allow running both on "old" and "new" CMSSW versions
+    BPHTokenWrapper< reco::BeamSpot                            > bsReadyToken;
     BPHTokenWrapper< std::vector<reco::Vertex>                 > pVertexToken;
     BPHTokenWrapper< pat::MuonCollection                       > patMuonToken;
     BPHTokenWrapper< std::vector<pat::CompositeCandidate     > > ccCandsToken;
@@ -70,6 +72,7 @@ private:
     //BPHTokenWrapper< reco::BeamSpot > bsToken;
 
 
+    bool useBS;
     bool usePV;
     bool usePM;
     bool useCC;
@@ -377,15 +380,14 @@ private:
                                 }
                             }
                         }
-                        else // if it is secondary candidate like Lam0 or Kshort or JPsi
+                        else if ( useBS )// if it is secondary candidate like Lam0 or Kshort or JPsi
                         {
-                            edm::Handle<reco::BeamSpot> bsHandle;
-                            ev.getByLabel( "offlineBeamSpot__RECO", bsHandle  );
+                            edm::Handle< reco::BeamSpot > bsHandle;
+                            bsReadyToken.get( ev, bsHandle );
   
                             if ( !bsHandle.isValid() ) continue;
                             killPV = true;
                             _pv = new reco::Vertex( bsHandle->position(), bsHandle->covariance3D() );
-                            std::cout << "bs used!\n";
                         }
     
         
