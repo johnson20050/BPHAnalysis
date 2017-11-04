@@ -93,7 +93,6 @@ class BPHTrackReference {
   }
 
   static const reco::Track* getFromRC( const reco::Candidate& rc ) {
-//    std::cout << "getFromRC" << std::endl;
     try {
       const reco::TrackRef& tkr = rc.get<reco::TrackRef>();
       if ( tkr.isNonnull() && tkr.isAvailable() ) return tkr.get();
@@ -103,7 +102,6 @@ class BPHTrackReference {
     return 0;
   }
   static const reco::Track* getFromPF( const reco::Candidate& rc ) {
-//    std::cout << "getFromPF" << std::endl;
     const reco::PFCandidate* pf =
           dynamic_cast<const reco::PFCandidate*>( &rc );
     if ( pf == 0 ) return 0;
@@ -116,7 +114,6 @@ class BPHTrackReference {
     return 0;
   }
   static const reco::Track* getFromGP( const reco::Candidate& rc ) {
-//    std::cout << "getFromGC" << std::endl;
     const pat::GenericParticle* gp =
         dynamic_cast<const pat::GenericParticle*>( &rc );
     if ( gp == 0 ) return 0;
@@ -129,7 +126,6 @@ class BPHTrackReference {
     return 0;
   }
   static const reco::Track* getFromBT( const reco::Candidate& rc ) {
-//    std::cout << "getFromBT" << std::endl;
     try {
       const reco::Track* trk = rc.bestTrack();
       return trk;
@@ -139,7 +135,6 @@ class BPHTrackReference {
     return 0;
   }
   static const reco::Track* getFromPC( const reco::Candidate& rc ) {
-//    std::cout << "getFromPC" << std::endl;
     const pat::PackedCandidate* pp =
         dynamic_cast<const pat::PackedCandidate*>( &rc );
     if ( pp == 0 ) return 0;
@@ -152,7 +147,6 @@ class BPHTrackReference {
     return 0;
   }
   static const reco::Track* getMuonPF( const reco::Candidate& rc ) {
-//    std::cout << "getMuonPF" << std::endl;
     const pat::Muon* mu = dynamic_cast<const pat::Muon*>( &rc );
     if ( mu == 0 ) return 0;
     return getMuonPF( mu );
@@ -170,7 +164,6 @@ class BPHTrackReference {
     return 0;
   }
   static const reco::Track* getMuonBT( const reco::Candidate& rc ) {
-//    std::cout << "getMuonBT" << std::endl;
     const reco::Muon* mu = dynamic_cast<const reco::Muon*>( &rc );
     if ( mu == 0 ) return 0;
     return getMuonBT( mu );
@@ -185,7 +178,6 @@ class BPHTrackReference {
     return 0;
   }
   static const reco::Track* getMuonIT( const reco::Candidate& rc ) {
-//    std::cout << "getMuonIT" << std::endl;
     const pat::Muon* mu = dynamic_cast<const pat::Muon*>( &rc );
     if ( mu == 0 ) return 0;
     return getMuonIT( mu );
@@ -201,7 +193,6 @@ class BPHTrackReference {
     return 0;
   }
   static const reco::Track* getMuonGT( const reco::Candidate& rc ) {
-//    std::cout << "getMuonGT" << std::endl;
     const pat::Muon* mu = dynamic_cast<const pat::Muon*>( &rc );
     if ( mu == 0 ) return 0;
     return getMuonGT( mu );
@@ -217,7 +208,6 @@ class BPHTrackReference {
     return 0;
   }
   static const reco::Track* getMuonSA( const reco::Candidate& rc ) {
-//    std::cout << "getMuonGT" << std::endl;
     const pat::Muon* mu = dynamic_cast<const pat::Muon*>( &rc );
     if ( mu == 0 ) return 0;
     return getMuonSA( mu );
@@ -233,7 +223,6 @@ class BPHTrackReference {
     return 0;
   }
   static const reco::Track* getElecPF( const reco::Candidate& rc ) {
-//    std::cout << "getElecPF" << std::endl;
     const pat::Electron* el = dynamic_cast<const pat::Electron*>( &rc );
     if ( el == 0 ) return 0;
     return getElecPF( el );

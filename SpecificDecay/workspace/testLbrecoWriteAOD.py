@@ -77,13 +77,15 @@ process.hltHighLevel= hltHighLevel.clone(HLTPaths = cms.vstring(HLTName))
 process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
 
 # the label used in calling data
-    bsReadyLabel = cms.string('offlineBeamSpot::RECO'),
+    bsPointLabel = cms.string('offlineBeamSpot::RECO'),
     pVertexLabel = cms.string('offlinePrimaryVertices::RECO'),
     gpCandsLabel = cms.string('patSelectedTracks'),
     patMuonLabel = cms.string('selectedPatMuons'),
     #ccCandsLabel = cms.string('onia2MuMuPAT::RECO'),
+    dedxHrmLabel = cms.string('dedxHarmonic2::RECO'),
+    dedxPLHLabel = cms.string('dedxPixelHarmonic2::RECO'),
 
-    isAOD = cms.bool( True ),
+    isAOD = cms.bool( True ), # data with label: edm::ValueMap<reco::DeDxData>_ "dedxHarmonic2"  "" "RECO" will be recorded
 # the label of output product
     oniaName      = cms.string('oniaFitted'),
     TkTkName      = cms.string('TkTkFitted'),

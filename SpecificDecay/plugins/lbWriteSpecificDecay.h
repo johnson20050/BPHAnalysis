@@ -24,6 +24,11 @@
 #include "RecoVertex/KinematicFitPrimitives/interface/RefCountedKinematicVertex.h"
 #include "RecoVertex/KinematicFitPrimitives/interface/RefCountedKinematicVertex.h"
 
+// use reco::DeDxData
+#include "DataFormats/TrackReco/interface/DeDxData.h"
+#include "DataFormats/Common/interface/ValueMap.h"
+#include "DataFormats/Common/interface/Ref.h"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -52,23 +57,27 @@ public:
 
 private:
 
-    std::string bsReadyLabel;
+    std::string bsPointLabel;
     std::string pVertexLabel;
     std::string patMuonLabel;
     std::string ccCandsLabel;
     std::string pfCandsLabel;
     std::string pcCandsLabel;
     std::string gpCandsLabel;
+    std::string dedxHrmLabel;
+    std::string dedxPLHLabel;
     //std::string bsLabel;
 
     // token wrappers to allow running both on "old" and "new" CMSSW versions
-    BPHTokenWrapper< reco::BeamSpot                            > bsReadyToken;
+    BPHTokenWrapper< reco::BeamSpot                            > bsPointToken;
     BPHTokenWrapper< std::vector<reco::Vertex>                 > pVertexToken;
     BPHTokenWrapper< pat::MuonCollection                       > patMuonToken;
     BPHTokenWrapper< std::vector<pat::CompositeCandidate     > > ccCandsToken;
     BPHTokenWrapper< std::vector<reco::PFCandidate           > > pfCandsToken;
     BPHTokenWrapper< std::vector<BPHTrackReference::candidate> > pcCandsToken;
     BPHTokenWrapper< std::vector<pat::GenericParticle        > > gpCandsToken;
+    BPHTokenWrapper< edm::ValueMap<reco::DeDxData            > > dedxHrmToken;
+    BPHTokenWrapper< edm::ValueMap<reco::DeDxData            > > dedxPLHToken;
     //BPHTokenWrapper< reco::BeamSpot > bsToken;
 
 
@@ -148,6 +157,8 @@ private:
         { return cptr->charge(); }
         float getRecoPt() const
         { return cptr->pt(); }
+        const reco::Candidate* getRecoParticle() const
+        { return cptr; }
         GlobalVector getRefitMom() const
         { return refptr->currentState().kinematicParameters().momentum(); }
         int getRefitCharge() const
@@ -209,6 +220,32 @@ private:
         std::map<const BPHRecoCandidate*,compcc_ref>::const_iterator ccrIter;
         std::map<const BPHRecoCandidate*,compcc_ref>::const_iterator ccrIend =
             ccRefMap.end();
+
+        edm::Handle<edm::ValueMap<reco::DeDxData>> dedxHrmHandle;
+        edm::Handle<edm::ValueMap<reco::DeDxData>> dedxPLHHandle;
+        edm::Handle< std::vector<pat::GenericParticle> > gpHandle;
+        edm::Handle< std::vector<reco::PFCandidate> > pfHandle;
+        std::vector< const edm::ValueMap<reco::DeDxData>* > dedxMaps;
+        edm::Handle< reco::BeamSpot > bsHandle;
+        if ( isAOD ) // used to find dE/dx data
+        {
+            dedxHrmToken.get( ev, dedxHrmHandle );
+            dedxPLHToken.get( ev, dedxPLHHandle );
+            if ( dedxHrmHandle->size() && dedxPLHHandle->size() )
+            {
+                dedxMaps.reserve(2);
+                dedxMaps.emplace_back( dedxHrmHandle.product() );
+                dedxMaps.emplace_back( dedxPLHHandle.product() );
+            }
+            if ( usePF )
+                pfCandsToken.get( ev, pfHandle );
+            if ( useGP )
+                gpCandsToken.get( ev, gpHandle );
+        }
+        if ( useBS ) // used to find Impact parameter for secondary particle
+            if ( list.size() )
+                if ( !list[0]->compNames().size() )
+                    bsPointToken.get( ev, bsHandle );
 
         if ( writeDownThisEvent )
         {
@@ -356,13 +393,14 @@ private:
                         cc.addUserData ( particleContainer.getFullName()+".fitMom",
                                          particleContainer.getRefitMom() );
 
-                        const reco::Vertex* _pv = nullptr;
-                        bool killPV = false;
+                        std::unique_ptr<GlobalPoint> myReferencePoint(nullptr);
                         if ( ptr->compNames().size() ) // if it is Lambda0_b or Bs
                         {
                             if ( !ptr->getComp("JPsi") ) continue;
                             const BPHRecoCandidate* _jpsi = ptr->getComp( "JPsi" ).get();
                             if ( !_jpsi ) continue; // asdf need to be modified to use PV or BS.
+                            double minRsquare = 999.;
+                            const reco::Vertex* _pv = nullptr;
                             for ( const auto& ljpsi : lFull )
                             {
                                 // connect jpsi in candidate & jpsi in lFull. ( in order to use pvRefMap )
@@ -370,45 +408,61 @@ private:
                                 const pat::CompositeCandidate& _p1 = _jpsi->composite();
                                 const pat::CompositeCandidate& _p2 = _ljpsi->composite();
                                 double Rsquare = pow(_p1.phi() - _p2.phi(), 2 ) + pow( _p1.eta() - _p2.eta(), 2 );
-                                if ( Rsquare < 0.01 )
-                                {
+                                if ( Rsquare < minRsquare )
                                     if ( ( pvrIter = pvRefMap.find( _ljpsi ) ) != pvrIend )
                                     {
                                         _pv = pvrIter->second.get();
-                                        break;
+                                        minRsquare = Rsquare;
                                     }
-                                }
                             }
+                            if ( !_pv ) continue;
+                            if ( !_pv->isValid() ) continue;
+                            std::unique_ptr<GlobalPoint> pvPoint( new GlobalPoint( _pv->x(), _pv->y(), _pv->z() ) );
+                            myReferencePoint = std::move( pvPoint );
                         }
                         else if ( useBS )// if it is secondary candidate like Lam0 or Kshort or JPsi
                         {
-                            edm::Handle< reco::BeamSpot > bsHandle;
-                            bsReadyToken.get( ev, bsHandle );
-  
                             if ( !bsHandle.isValid() ) continue;
-                            killPV = true;
-                            _pv = new reco::Vertex( bsHandle->position(), bsHandle->covariance3D() );
+                            std::unique_ptr<GlobalPoint> bsPoint( new GlobalPoint( bsHandle->x0(), bsHandle->y0(), bsHandle->z0() ) );
+                            myReferencePoint = std::move( bsPoint );
                         }
-    
         
-                        if ( !_pv ) continue;
         
-                        reco::TransientTrack newTT = particleContainer.getRefitParticle()->refittedTransientTrack();
-
+                        const reco::TransientTrack& newTT = particleContainer.getRefitParticle()->refittedTransientTrack();
                         if ( !newTT.isValid() ) continue;
-                        if ( !_pv->isValid() ) continue;
-                        GlobalPoint pv_g( _pv->x(), _pv->y(), _pv->z() );
-                        TrajectoryStateClosestToPoint traj = newTT.trajectoryStateClosestToPoint( pv_g );
+                        TrajectoryStateClosestToPoint traj = newTT.trajectoryStateClosestToPoint( *myReferencePoint );
                         float IPt ( traj.perigeeParameters().transverseImpactParameter() );
                         float IPt_err ( traj.perigeeError().transverseImpactParameterError() );
         
                         cc.addUserFloat ( particleContainer.getFullName()+".IPt", IPt );
                         cc.addUserFloat ( particleContainer.getFullName()+".IPt.Error", IPt_err );
-    
-                        if ( killPV ) delete _pv;
+                        if ( dedxMaps.size() )
+                        {
+                            const edm::ValueMap<reco::DeDxData>& dedxHrmMap = *(dedxMaps[0]);
+                            const edm::ValueMap<reco::DeDxData>& dedxPLHMap = *(dedxMaps[1]);
+                            if ( useGP )
+                            {
+                                std::vector< pat::GenericParticle >::const_iterator iter = gpHandle->begin();
+                                std::vector< pat::GenericParticle >::const_iterator iend = gpHandle->end  ();
+                                while ( iter != iend )
+                                {
+                                    const pat::GenericParticle& gpCand = *iter++;
+                                    if ( gpCand.overlap( *particleContainer.getRecoParticle() ) )
+                                    {
+                                        const reco::TrackRef& trackID = gpCand.track();
+                                        const reco::DeDxData& _dedxHrm = dedxHrmMap[ trackID ];
+                                        const reco::DeDxData& _dedxPLH = dedxPLHMap[ trackID ];
+
+                                        cc.addUserFloat( particleContainer.getFullName()+".dEdx.Harmonic", _dedxHrm.dEdx() );
+                                        cc.addUserFloat( particleContainer.getFullName()+".dEdx.pixelHrm", _dedxPLH.dEdx() );
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     } // end of particleContainer
                 } // if writeMomentum end
-    
+   
     
                 // store refit information end }}}
             } // run over all candidate end 

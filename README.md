@@ -47,29 +47,26 @@ Usage:
         2. pat::CompositeCandidate  refToJPsi
         3. pat::CompositeCandidate  refTo????
     * other information:
-        1. bool                     cowboy
-        2. GlobalVector             JPsi/MuPos.fitMom
-        3. GlobalVector             JPsi/MuNeg.fitMom
-        2. GlobalVector             ????/??tk1.fitMom
-        3. GlobalVector             ????/??tk2.fitMom
-        2. GlobalVector             JPsi/MuPos.IPt
-        3. GlobalVector             JPsi/MuNeg.IPt
-        2. GlobalVector             ????/??tk1.IPt
-        3. GlobalVector             ????/??tk2.IPt
-        2. GlobalVector             JPsi/MuPos.IPt_Error
-        3. GlobalVector             JPsi/MuNeg.IPt_Error
-        2. GlobalVector             ????/??tk1.IPt_Error
-        3. GlobalVector             ????/??tk2.IPt_Error
-        2. GlobalVector             JPsi/MuPos.IPz
-        3. GlobalVector             JPsi/MuNeg.IPz
-        2. GlobalVector             ????/??tk1.IPz
-        3. GlobalVector             ????/??tk2.IPz
-        2. GlobalVector             JPsi/MuPos.IPz_Error
-        3. GlobalVector             JPsi/MuNeg.IPz_Error
-        2. GlobalVector             ????/??tk1.IPz_Error
-        3. GlobalVector             ????/??tk2.IPz_Error
+         1. bool                     cowboy
+         2. GlobalVector             JPsi/MuPos.fitMom
+         3. GlobalVector             JPsi/MuNeg.fitMom
+         4. GlobalVector             ????/??tk1.fitMom
+         5. GlobalVector             ????/??tk2.fitMom
+         6. float                    JPsi/MuPos.IPt
+         7. float                    JPsi/MuNeg.IPt
+         8. float                    ????/??tk1.IPt
+         9. float                    ????/??tk2.IPt
+        10. float                    JPsi/MuPos.IPt_Error
+        11. float                    JPsi/MuNeg.IPt_Error
+        12. float                    ????/??tk1.IPt_Error
+        13. float                    ????/??tk2.IPt_Error
+        14. float                    JPsi/MuPos.dEdx.Harmonic
+        15. float                    JPsi/MuPos.dEdx.pixelHrm
+        16. float                    ????/??tk1.dEdx.Harmonic
+        17. float                    ????/??tk2.dEdx.pixelHrm
+
 <br>
 <br>
 <br>
-## Modified by 29/07/2017<br>
+## Modified by 02/11/2017<br>
 ## Author: Lian-Sheng, Tsai. in NTUHEP<br>

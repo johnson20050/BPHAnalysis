@@ -50,13 +50,15 @@ using namespace std;
 lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
 
     //  Check if there is the label used in reading data or not.
-    useBS = ( SET_PAR( string, bsReadyLabel, ps ) != "" );
+    useBS = ( SET_PAR( string, bsPointLabel, ps ) != "" );
     usePV = ( SET_PAR( string, pVertexLabel, ps ) != "" );
     usePM = ( SET_PAR( string, patMuonLabel, ps ) != "" );
     useCC = ( SET_PAR( string, ccCandsLabel, ps ) != "" );
     usePF = ( SET_PAR( string, pfCandsLabel, ps ) != "" );
     usePC = ( SET_PAR( string, pcCandsLabel, ps ) != "" );
     useGP = ( SET_PAR( string, gpCandsLabel, ps ) != "" );
+    SET_PAR( string, dedxHrmLabel, ps );
+    SET_PAR( string, dedxPLHLabel, ps );
 
 
     SET_PAR( bool  ,        isAOD, ps );
@@ -104,8 +106,8 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     if ( writeLbToTkTk ) writeOnia = writeTkTk   = true;
 
     // Get data by label/token
-    if ( useBS ) consume< reco::BeamSpot                       >( bsReadyToken,
-                                                                  bsReadyLabel );
+    if ( useBS ) consume< reco::BeamSpot                       >( bsPointToken,
+                                                                  bsPointLabel );
     if ( usePV ) consume< vector<reco::Vertex                > >( pVertexToken,
                                                                   pVertexLabel );
     if ( usePM ) consume< pat::MuonCollection                  >( patMuonToken,
@@ -118,7 +120,11 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
                                                                   pcCandsLabel );
     if ( useGP ) consume< vector<pat::GenericParticle        > >( gpCandsToken,
                                                                   gpCandsLabel );
-    //if ( useBS ) consume< reco::BeamSpot > ( bsToken, bsLabel );
+
+    if ( isAOD ) consume< edm::ValueMap<reco::DeDxData>        >( dedxHrmToken,
+                                                                  dedxHrmLabel );
+    if ( isAOD ) consume< edm::ValueMap<reco::DeDxData>        >( dedxPLHToken,
+                                                                  dedxPLHLabel );
 
   if ( writeOnia     ) produces<pat::CompositeCandidateCollection>( oniaName     );
   if ( writeTkTk     ) produces<pat::CompositeCandidateCollection>( TkTkName     );
@@ -134,13 +140,15 @@ lbWriteSpecificDecay::~lbWriteSpecificDecay() {
 void lbWriteSpecificDecay::fillDescriptions(
                             edm::ConfigurationDescriptions& descriptions ) {
     edm::ParameterSetDescription desc;
-    desc.add<string>( "bsReadyLabel", "" );
+    desc.add<string>( "bsPointLabel", "" );
     desc.add<string>( "pVertexLabel", "" );
     desc.add<string>( "patMuonLabel", "" );
     desc.add<string>( "ccCandsLabel", "" );
     desc.add<string>( "pfCandsLabel", "" );
     desc.add<string>( "pcCandsLabel", "" );
     desc.add<string>( "gpCandsLabel", "" );
+    desc.add<string>( "dedxHrmLabel", "" );
+    desc.add<string>( "dedxPLHLabel", "" );
     desc.add<string>(     "oniaName",   "oniaCand" );
     desc.add<string>(     "TkTkName",   "TkTkCand" );
     desc.add<string>( "LbToTkTkName", "LbToTkTkFitted" );
