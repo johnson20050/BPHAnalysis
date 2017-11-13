@@ -47,7 +47,9 @@ BPHLambda0ToPPiBuilder::BPHLambda0ToPPiBuilder(
   pionName( "Pion" ),
   evSetup( &es ),
   kCollection( kaonCollection ),
-  pCollection( pionCollection ) {
+  pCollection( pionCollection ),
+  _massDiff( 0.002 )
+{
     ptSel = new BPHParticlePtSelect (  0.7 );
    etaSel = new BPHParticleEtaSelect( 10.0 );
   massSel = new BPHMassSelect( 1.00, 1.20 );
@@ -80,8 +82,11 @@ vector<BPHPlusMinusConstCandPtr> BPHLambda0ToPPiBuilder::build() {
                                    BPHParticleMasses::protonMSigma );
   bKx0.add( pionName, pCollection, BPHParticleMasses::pionMass,
                                    BPHParticleMasses::pionMSigma );
-  bKx0.filter( kaonName, *ptSel );
-  bKx0.filter( pionName, *ptSel );
+  if ( ptSel->getPtMin() > 0. )
+  {
+      bKx0.filter( kaonName, *ptSel );
+      bKx0.filter( pionName, *ptSel );
+  }
   bKx0.filter( kaonName, *etaSel );
   bKx0.filter( pionName, *etaSel );
   BPHMassSymSelect mTmpSel( kaonName, pionName, massSel );
@@ -105,8 +110,16 @@ vector<BPHPlusMinusConstCandPtr> BPHLambda0ToPPiBuilder::build() {
               BPHParticleMasses::pionMass );
     kxb->add( kaonName, kx0->originalReco( kx0->getDaug( pionName ) ),
               BPHParticleMasses::protonMass );
-    if ( fabs( kx0->composite().mass() - BPHParticleMasses::lambda0Mass ) <
-         fabs( kxb->composite().mass() - BPHParticleMasses::lambda0Mass ) )
+    if ( !kx0->isValidFit() ) continue;
+    float mass0 = kx0->currentParticle()->currentState().mass();
+    float massb = kxb->currentParticle()->currentState().mass();
+    // if particle and anti-particle are in Lam0 signal region, it cannot be distinguished, throwout it.
+    if ( fabs( mass0 - BPHParticleMasses::lambda0Mass ) < _massDiff &&
+         fabs( massb - BPHParticleMasses::lambda0Mass ) < _massDiff   )
+        continue;
+    else if 
+       ( fabs( mass0 - BPHParticleMasses::lambda0Mass ) <
+         fabs( massb - BPHParticleMasses::lambda0Mass ) )
          pxt = px0;
     else pxt = pxb;
     if ( !massSel->accept( *pxt ) ) continue;

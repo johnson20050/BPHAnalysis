@@ -98,6 +98,9 @@ class BPHLambda0ToPPiBuilder {
   bool massConstr;
   bool updated;
 
+  // if masses of particle and anti-particle are similiar to Lam0, throw out this event.
+  const double _massDiff;
+
   std::vector<BPHPlusMinusConstCandPtr> kx0List;
 
 };

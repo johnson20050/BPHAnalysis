@@ -92,13 +92,14 @@ private:
 
 // The label used in output product
     std::string     oniaName;
-    std::string     TkTkName;
-    std::string LbToTkTkName;
+    std::string     Lam0Name;
+    std::string LbToLam0Name;
 
 
-    enum recoType { Onia, Psi1, Psi2, TkTk, LbToTkTk };
+    enum recoType { Onia, Psi1, Psi2, Lam0, LbToLam0 };
     enum  parType { ptMin, etaMax,
                     mPsiMin, mPsiMax,
+                    mLam0Min, mLam0Max,
                     massMin, massMax, probMin, mFitMin, mFitMax,
                     constrMass, constrSigma, constrMJPsi, writeCandidate,
                   };
@@ -110,20 +111,20 @@ private:
 
 
     bool recoOnia     ;
-    bool recoTkTk     ;
-    bool recoLbToTkTk ;
+    bool recoLam0     ;
+    bool recoLbToLam0 ;
 
     bool writeOnia    ;
-    bool writeTkTk    ;
-    bool writeLbToTkTk;
+    bool writeLam0    ;
+    bool writeLbToLam0;
 
     bool writeVertex;
     bool writeMomentum;
 
     std::vector<BPHPlusMinusConstCandPtr> lFull;
     std::vector<BPHPlusMinusConstCandPtr> lJPsi;
-    std::vector<BPHPlusMinusConstCandPtr> lTkTk;
-    std::vector<BPHRecoConstCandPtr>      lLbToTkTk;
+    std::vector<BPHPlusMinusConstCandPtr> lLam0;
+    std::vector<BPHRecoConstCandPtr>      lLbToLam0;
 
     std::map<const BPHRecoCandidate*,const BPHRecoCandidate*> jPsiOMap;
     typedef edm::Ref< std::vector<reco::Vertex> > vertex_ref;
@@ -387,6 +388,7 @@ private:
                     }
     
                     // add refit momentum of daughters
+                    
                     for ( const recoParticleInfo& particleContainer : myParticleList )
                     {
                         if ( !particleContainer.refptr.get() ) continue;
@@ -436,6 +438,8 @@ private:
         
                         cc.addUserFloat ( particleContainer.getFullName()+".IPt", IPt );
                         cc.addUserFloat ( particleContainer.getFullName()+".IPt.Error", IPt_err );
+                        
+                        
                         if ( dedxMaps.size() )
                         {
                             const edm::ValueMap<reco::DeDxData>& dedxHrmMap = *(dedxMaps[0]);
@@ -463,8 +467,8 @@ private:
                     } // end of particleContainer
                 } // if writeMomentum end
    
-    
                 // store refit information end }}}
+
             } // run over all candidate end 
         } // if writeDownThisEvent
         typedef std::unique_ptr<pat::CompositeCandidateCollection> ccc_pointer;
