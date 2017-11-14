@@ -163,6 +163,8 @@ void lbWriteSpecificDecay::fillDescriptions(
     dpar.add<double>(         "etaMax", -2.0e35 );
     dpar.add<double>(        "mPsiMin", -2.0e35 );
     dpar.add<double>(        "mPsiMax", -2.0e35 );
+    dpar.add<double>(       "mLam0Min", -2.0e35 );
+    dpar.add<double>(       "mLam0Max", -2.0e35 );
     dpar.add<double>(        "massMin", -2.0e35 );
     dpar.add<double>(        "massMax", -2.0e35 );
     dpar.add<double>(        "probMin", -2.0e35 );
