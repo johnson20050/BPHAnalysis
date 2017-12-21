@@ -12,7 +12,7 @@ recoSelect = cms.VPSet(
         constrSigma = cms.double( 0.000006 )
     ),
     cms.PSet( name = cms.string( 'Lam0'  ),
-          ptMin = cms.double( -1.0),
+          ptMin = cms.double( -1.0 ),
          etaMax = cms.double(  2.5 ),
         massMin = cms.double(  1.00  ),
         massMax = cms.double(  1.25  ),

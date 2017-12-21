@@ -2,8 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("bphAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('Configuration.StandardSequences.Services_cff')
@@ -83,13 +83,14 @@ process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
     patMuonLabel = cms.string('selectedPatMuons'),
     #ccCandsLabel = cms.string('onia2MuMuPAT::RECO'),
     dedxHrmLabel = cms.string('dedxHarmonic2::RECO'),
-    dedxPLHLabel = cms.string('dedxPixelHarmonic2::RECO'),
+    #dedxPLHLabel = cms.string('dedxPixelHarmonic2::RECO'),
 
-    isAOD = cms.bool( True ), # data with label: edm::ValueMap<reco::DeDxData>_ "dedxHarmonic2"  "" "RECO" will be recorded
 # the label of output product
     oniaName      = cms.string('oniaFitted'),
-    TkTkName      = cms.string('TkTkFitted'),
-    LbToTkTkName  = cms.string('LbToTkTkFitted'),
+    #TkTkName      = cms.string('TkTkFitted'),
+    #LbToTkTkName  = cms.string('LbToTkTkFitted'),
+    Lam0Name      = cms.string('Lam0Fitted'),
+    LbToLam0Name  = cms.string('LbToLam0Fitted'),
     writeVertex   = cms.bool( True ),
     writeMomentum = cms.bool( True ),
     recoSelect    = cms.VPSet(recoSelect)
@@ -113,4 +114,3 @@ process.p = cms.Path(
 )
 
 process.e = cms.EndPath(process.out)
-

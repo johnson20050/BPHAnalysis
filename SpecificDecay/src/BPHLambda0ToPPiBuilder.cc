@@ -111,6 +111,7 @@ vector<BPHPlusMinusConstCandPtr> BPHLambda0ToPPiBuilder::build() {
     kxb->add( kaonName, kx0->originalReco( kx0->getDaug( pionName ) ),
               BPHParticleMasses::protonMass );
     if ( !kx0->isValidFit() ) continue;
+    if ( !kxb->isValidFit() ) continue;
     float mass0 = kx0->currentParticle()->currentState().mass();
     float massb = kxb->currentParticle()->currentState().mass();
     // if particle and anti-particle are in Lam0 signal region, it cannot be distinguished, throwout it.

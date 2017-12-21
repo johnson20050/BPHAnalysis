@@ -57,11 +57,10 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     usePF = ( SET_PAR( string, pfCandsLabel, ps ) != "" );
     usePC = ( SET_PAR( string, pcCandsLabel, ps ) != "" );
     useGP = ( SET_PAR( string, gpCandsLabel, ps ) != "" );
-    SET_PAR( string, dedxHrmLabel, ps );
-    SET_PAR( string, dedxPLHLabel, ps );
+    useHrm= ( SET_PAR( string, dedxHrmLabel, ps ) != "" );
+    usePLH= ( SET_PAR( string, dedxPLHLabel, ps ) != "" );
 
 
-    SET_PAR( bool  ,        isAOD, ps );
     // Set the label used in output product.
     SET_PAR( string,     oniaName, ps );
     SET_PAR( string,     Lam0Name, ps );
@@ -121,9 +120,9 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     if ( useGP ) consume< vector<pat::GenericParticle        > >( gpCandsToken,
                                                                   gpCandsLabel );
 
-    if ( isAOD ) consume< edm::ValueMap<reco::DeDxData>        >( dedxHrmToken,
+    if ( useHrm) consume< edm::ValueMap<reco::DeDxData>        >( dedxHrmToken,
                                                                   dedxHrmLabel );
-    if ( isAOD ) consume< edm::ValueMap<reco::DeDxData>        >( dedxPLHToken,
+    if ( usePLH) consume< edm::ValueMap<reco::DeDxData>        >( dedxPLHToken,
                                                                   dedxPLHLabel );
 
   if ( writeOnia     ) produces<pat::CompositeCandidateCollection>( oniaName     );
@@ -152,11 +151,10 @@ void lbWriteSpecificDecay::fillDescriptions(
     desc.add<string>(     "oniaName",   "oniaCand" );
     desc.add<string>(     "Lam0Name",   "Lam0Cand" );
     desc.add<string>( "LbToLam0Name", "LbToLam0Fitted" );
-    
+
 
     desc.add<bool>  ( "writeVertex"  , true );
     desc.add<bool>  ( "writeMomentum", true );
-    desc.add<bool>  (         "isAOD",false );
     edm::ParameterSetDescription dpar;
     dpar.add<string>(           "name" );
     dpar.add<double>(          "ptMin", -2.0e35 );
@@ -174,7 +172,6 @@ void lbWriteSpecificDecay::fillDescriptions(
     dpar.add<double>(    "constrSigma", -2.0e35 );
     dpar.add<  bool>(    "constrMJPsi",    true );
     dpar.add<  bool>( "writeCandidate",    true );
-    dpar.add<  bool>(          "isAOD",   false );
 
     vector<edm::ParameterSet> rpar;
     desc.addVPSet( "recoSelect", dpar, rpar );
@@ -193,9 +190,11 @@ void lbWriteSpecificDecay::produce( edm::Event& ev,
   fill( ev, es );
   //bool writeEvent = lLbToLam0.size();
   bool writeEvent = true;
-  if ( writeOnia     ) write( ev, lFull     ,     oniaName , writeEvent ); 
-  if ( writeLam0     ) write( ev, lLam0     ,     Lam0Name , writeEvent ); 
-  if ( writeLbToLam0 ) write( ev, lLbToLam0 , LbToLam0Name , writeEvent ); 
+  if ( writeOnia     ) write( ev, lFull     ,     oniaName , writeEvent );
+  if ( writeLam0     ) write( ev, lLam0     ,     Lam0Name , writeEvent );
+  if ( writeLbToLam0 ) write( ev, lLbToLam0 , LbToLam0Name , writeEvent );
+  std::cout << "Lam0 : " << lLam0.size() << std::endl;
+  std::cout << "Lb   : " << lLbToLam0.size() << std::endl;
   return;
 }
 
@@ -221,7 +220,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     // get object collections
     // collections are got through "BPHTokenWrapper" interface to allow
     // uniform access in different CMSSW versions
-    
+
     edm::Handle< vector<reco::Vertex> > pVertices;
     int npv = 0;
     if ( usePV )
@@ -328,7 +327,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
             onia = new BPHOniaToMuMuBuilder( es,
                     BPHRecoBuilder::createCollection( patMuon, "cfmign" ),
                     BPHRecoBuilder::createCollection( patMuon, "cfmign" ) );
-        else if ( useCC ) 
+        else if ( useCC )
             onia = new BPHOniaToMuMuBuilder( es,
                     BPHRecoBuilder::createCollection( muDaugs, "cfmig" ),
                     BPHRecoBuilder::createCollection( muDaugs, "cfmig" ) );
@@ -360,7 +359,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
             }
             map<parType,double>::const_iterator pIter = pMap.begin();
             map<parType,double>::const_iterator pIend = pMap.end();
- 
+
             // pass particle typename and cutvalue into "onia"
             while ( pIter != pIend )
             {
@@ -514,7 +513,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
                 break;
             }
         }
-    } 
+    }
     // Search for the map of lJPsi and lFull end}}}
 
     // Build Lam0 {{{
@@ -535,7 +534,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
                     BPHRecoBuilder::createCollection( gpCands )
                     );
     }
-    // Set cut value 
+    // Set cut value
     // use "Name"(recorded in enum) to find particle, then there is a subMap
     // The subMap is list of the cuts used in  the particle
     if ( tktk != 0 )
@@ -569,7 +568,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
         delete   tktk;
 
 
-    } // set cut value end  
+    } // set cut value end
     unsigned nLam0 = lLam0.size();
     // Build Lam0 end }}}
 
@@ -577,7 +576,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     if ( nLam0 && recoLbToLam0 )
     {
         BPHLambda0_bToJPsiLambda0Builder* _lb = new BPHLambda0_bToJPsiLambda0Builder( es, lJPsi, lLam0);
-        // Set cut value 
+        // Set cut value
         // use "Name"(recorded in enum) to find particle, then there is a subMap
         // The subMap is list of the cuts used in  the particle
         rIter = parMap.find( LbToLam0 );
@@ -600,14 +599,14 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
                     case mPsiMax        : _lb->setJPsiMassMax ( _parValue ); break;
                     case mLam0Min       : _lb->setLam0MassMin ( _parValue ); break;
                     case mLam0Max       : _lb->setLam0MassMax ( _parValue ); break;
-                                          
+
                     case massMin        : _lb->setMassMin     ( _parValue ); break;
                     case massMax        : _lb->setMassMax     ( _parValue ); break;
                     case probMin        : _lb->setProbMin     ( _parValue ); break;
-    
+
                     case mFitMin        : _lb->setMassFitMin  ( _parValue ); break;
                     case mFitMax        : _lb->setMassFitMax  ( _parValue ); break;
-                    case constrMJPsi    : _lb->setConstr        ( _parValue ); break;
+                    case constrMJPsi    : _lb->setConstr      ( _parValue ); break;
                     case writeCandidate : writeLbToLam0 =     ( _parValue > 0 ); break;
                     default:
                         break;
@@ -616,7 +615,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
         }
         lLbToLam0 = _lb->build();
         delete   _lb;
-        // set cut value end  
+        // set cut value end
     }
     // Build LbToLam0 end }}}
 }
