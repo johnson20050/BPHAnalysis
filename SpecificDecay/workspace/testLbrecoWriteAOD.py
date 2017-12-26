@@ -2,8 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("bphAnalysis")
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('Configuration.StandardSequences.Services_cff')
@@ -30,10 +30,10 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
-'file:///home/ltsai/Data/8028_2016RunG_AOD_07Aug17.root'
+'file:///home/ltsai/Data/CMSSW_8_0_21/LbToJPsiLam0/08A76328-3362-E711-90FD-0025905A611C.root'
 ))
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016LegacyRepro_v3', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
 #from BPHAnalysis.SpecificDecay.LbrecoSelectForWrite_cfi import recoSelect
 from BPHAnalysis.SpecificDecay.newSelectForWrite_cfi import recoSelect
@@ -66,8 +66,8 @@ makeTrackCandidates(process,
 process.patTrackCands.embedTrack = True
 
 # remove MC dependence
-from PhysicsTools.PatAlgos.tools.coreTools import *
-removeMCMatching(process, names=['All'], outputModules=[] )
+#from PhysicsTools.PatAlgos.tools.coreTools import *
+#removeMCMatching(process, names=['All'], outputModules=[] )
 
 HLTName='HLT_DoubleMu4_JpsiTrk_Displaced_v*'
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
@@ -104,6 +104,7 @@ process.out = cms.OutputModule(
         "keep *_lbWriteSpecificDecay_*_bphAnalysis",
         "keep *_offlineBeamSpot_*_RECO",
         "keep *_offlinePrimaryVertices_*_RECO",
+        "keep *_genParticles__HLT"
     )
 )
 

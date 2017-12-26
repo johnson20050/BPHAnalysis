@@ -129,9 +129,15 @@ private:
     std::vector<BPHPlusMinusConstCandPtr> lLam0;
     std::vector<BPHRecoConstCandPtr>      lLbToLam0;
 
+    // the connection between JPsi & lFull.
+    // lFull is the mumu candidate which will be recorded in storage.
+    // JPsi is the particle you regard it as jpsi candidate.
     std::map<const BPHRecoCandidate*,const BPHRecoCandidate*> jPsiOMap;
+    // the connection between lFull & pvRef
     typedef edm::Ref< std::vector<reco::Vertex> > vertex_ref;
     std::map<const BPHRecoCandidate*,vertex_ref> pvRefMap;
+    // after candidates are "put" in storage, the function 'write' will create Ref object.
+    // and the
     typedef edm::Ref< pat::CompositeCandidateCollection > compcc_ref;
     std::map<const BPHRecoCandidate*,compcc_ref> ccRefMap;
 
@@ -144,6 +150,10 @@ private:
             new pat::CompositeCandidateCollection;
         int i;
         int n = list.size();
+        //int listTag[ n ];
+        //for ( int kk = 0; kk < n; ++kk )
+        //    listTag[kk] = -1;
+
         std::map<const BPHRecoCandidate*,
             const BPHRecoCandidate*>::const_iterator jpoIter;
         std::map<const BPHRecoCandidate*,
@@ -184,9 +194,9 @@ private:
                 const T& ptr = list[i];
                 // bool-int to check if it is needed to write event.
                 int dddPassed = 0;
-                //ccList->push_back( ptr->composite() );
-                //pat::CompositeCandidate& cc = ccList->back();
-                pat::CompositeCandidate cc = ptr->composite();
+                ccList->push_back( ptr->composite() );
+                pat::CompositeCandidate& cc = ccList->back();
+                //pat::CompositeCandidate cc = ptr->composite();
                 if ( ( pvrIter = pvRefMap.find( ptr.get() ) ) != pvrIend )
                     cc.addUserData ( "primaryVertex", pvrIter->second );
                 const std::vector<std::string>& cNames = ptr->compNames();
@@ -241,7 +251,8 @@ private:
                     // find RefCountedKinematicParticle
 
                     if ( ptr->seckinematicTree().get() )
-                    if ( ptr->seckinematicTree()->isValid() )
+                    //if ( ptr->seckinematicTree()->isValid() )
+                    if ( ptr->compNames().size() )
                     {
                         // the last one is the constrained particle, it is virtual particle, need to be removed.
                         daughters.erase( --daughters.end() );
@@ -249,6 +260,31 @@ private:
                     }
 
 
+                    //if ( !(ptr->compNames().size()) )
+                    //{
+                    //    std::cout << "d : c : dF = " << daughters.size() <<","<< compDaugh.size() <<","<< ptr->daughFull().size() << std::endl;
+                    //    for ( const auto& dN : ptr->daugNames() )
+                    //        std::cout << "---" << dN;
+                    //    std::vector<RefCountedKinematicParticle> cDaugh;
+                    //    if ( ptr->seckinematicTree().get() )
+                    //    {
+                    //        cDaugh = ptr->seckinematicTree()->finalStateParticles();
+                    //        for ( int i=0; i<2;++i )
+                    //            if ( fabs( cDaugh[i]->currentState().mass() - daughters[i]->currentState().mass() ) > 0.000000000001 )
+                    //                std::cout << "sec fit & first fit results are different!!\n";
+                    //    }
+                    //    std::cout << std::endl;
+                    //}
+                    //else
+                    //{
+                    //    std::cout << "d : c : dF = " << daughters.size() <<","<< compDaugh.size() <<","<< ptr->daughFull().size() << std::endl;
+                    //    for ( const auto& dN : ptr->daugNames() )
+                    //        std::cout << "---" << dN;
+                    //    for ( const auto& cN : ptr->compNames() )
+                    //        std::cout << "..." << cN;
+                    //    std::cout << std::endl;
+//
+                    //}
                     // all RefCountedKinematicParticle are found, check if it losts particle?
                     if ( (daughters.size()+compDaugh.size()) != ptr->daughFull().size() ) continue;
 
@@ -319,7 +355,6 @@ private:
                     dddPassed = myParticleList.size();
                     for ( const usefulFuncs::recoParticleInfo& particleContainer : myParticleList )
                     {
-
                         if ( !particleContainer.refptr.get() ) continue;
                         cc.addUserData ( particleContainer.getFullName()+".fitMom",
                                          particleContainer.getRefitMom() );
@@ -328,20 +363,14 @@ private:
                         if ( ptr->compNames().size() ) // if it is Lambda0_b or Bs ( find PV )
                         {
                             if ( !ptr->getComp("JPsi") ) continue;
-                            const BPHRecoCandidate* _jpsi = ptr->getComp( "JPsi" ).get();
-                            if ( !_jpsi ) continue; // asdf need to be modified to use PV or BS.
-                            double minRsquare = 999.;
+                            const BPHRecoCandidate* jpsi = ptr->getComp( "JPsi" ).get();
                             const reco::Vertex* _pv = nullptr;
-                            for ( const auto& ljpsi : lFull )
-                            {
-                                // connect jpsi in candidate & jpsi in lFull. ( in order to use pvRefMap )
-                                const BPHPlusMinusCandidate* _ljpsi = ljpsi.get();
-                                const pat::CompositeCandidate& _p1 = _jpsi->composite();
-                                const pat::CompositeCandidate& _p2 = _ljpsi->composite();
-                                if ( ( pvrIter = pvRefMap.find( _ljpsi ) ) == pvrIend ) continue;
-                                if ( usefulFuncs::ccMatch( _p1, _p2, minRsquare ) )
-                                    _pv = pvrIter->second.get();
-                            }
+
+                            // find the jpsi in lFull. And use the pvMap to find pv.
+                            if (( jpoIter = jPsiOMap.find(jpsi) ) != jpoIend )
+                                jpsi = jpoIter->second;
+                            if (( pvrIter = pvRefMap.find(jpsi) ) != pvRefMap.end() )
+                                _pv = pvrIter->second.get();
                             if ( !_pv ) continue;
                             if ( !_pv->isValid() ) continue;
                             std::unique_ptr<GlobalPoint> pvPoint( new GlobalPoint( _pv->x(), _pv->y(), _pv->z() ) );
@@ -363,7 +392,7 @@ private:
 
 
                         // !!! refit result preselection
-                        if ( IPt < 0.03 ) continue;
+                        //if ( IPt/IPt_err < 1. ) continue;
                         const GlobalPoint& pVtx = ptr->currentDecayVertex()->position();
                         const GlobalPoint& pPv  = *myReferencePoint.get();
                         GlobalVector distDiff( pVtx.x()-pPv.x(), pVtx.y()-pPv.y(), pVtx.z()-pPv.z() );
@@ -375,46 +404,55 @@ private:
                         cc.addUserFloat ( particleContainer.getFullName()+".IPt.Error", IPt_err );
 
 
-                        if ( useGP )
+                        reco::TrackRef trackID;
+                        if ( trackID.isNull() ) trackID = usefulFuncs::getTrackRefFromGP( *particleContainer.getRecoParticle() );
+                        if ( trackID.isNull() ) trackID = usefulFuncs::getTrackRefFromPF( *particleContainer.getRecoParticle() );
+                        if ( trackID.isNull() ) trackID = usefulFuncs::getTrackRefFromRC( *particleContainer.getRecoParticle() );
+                        if ( trackID.isNonnull() )
                         {
-                            std::vector< pat::GenericParticle >::const_iterator iter = gpHandle->begin();
-                            std::vector< pat::GenericParticle >::const_iterator iend = gpHandle->end  ();
-                            while ( iter != iend )
-                            {
-                                const pat::GenericParticle& gpCand = *iter++;
-                                if ( !gpCand.overlap( *particleContainer.getRecoParticle() ) ) continue;
-                                const reco::TrackRef& trackID = gpCand.track();
                                 if ( useHrm )
                                 {
                                     const edm::ValueMap<reco::DeDxData>& dedxHrmMap = *( dedxHrmHandle.product() );
                                     const reco::DeDxData& _dedxHrm = dedxHrmMap[ trackID ];
-                                    cc.addUserFloat( particleContainer.getFullName()+".dEdx.Harmonic", _dedxHrm.dEdx() );
+                                    if ( _dedxHrm.dEdx() )
+                                        cc.addUserFloat( particleContainer.getFullName()+".dEdx.Harmonic", _dedxHrm.dEdx() );
                                 }
                                 if ( usePLH )
                                 {
-                                const edm::ValueMap<reco::DeDxData>& dedxPLHMap = *( dedxPLHHandle.product() );
-                                const reco::DeDxData& _dedxPLH = dedxPLHMap[ trackID ];
-                                cc.addUserFloat( particleContainer.getFullName()+".dEdx.pixelHrm", _dedxPLH.dEdx() );
+                                    const edm::ValueMap<reco::DeDxData>& dedxPLHMap = *( dedxPLHHandle.product() );
+                                    const reco::DeDxData& _dedxPLH = dedxPLHMap[ trackID ];
+                                    if ( _dedxPLH.dEdx() )
+                                        cc.addUserFloat( particleContainer.getFullName()+".dEdx.pixelHrm", _dedxPLH.dEdx() );
                                 }
-                                break;
-                            } // while loop
-                        } // if useGP
+                        }
+
+
+
                         --dddPassed;
                     } // end of particleContainer
+                    //for ( const usefulFuncs::recoParticleInfo& particleContainer : myParticleList )
+                    //    std::cout << ", " << particleContainer.getFullName();
+                    //std::cout << std::endl;
+
                 } // if writeMomentum end
 
                 // store refit information end }}}
 
                 // if all daughter information are stored
-                if ( dddPassed == 0 )
-                    ccList->push_back( cc );
+                //if ( dddPassed == 0 )
+                    //ccList->push_back( cc );
+                //listTag[i] = dddPassed;
             } // run over all candidate end
         } // if writeDownThisEvent
         typedef std::unique_ptr<pat::CompositeCandidateCollection> ccc_pointer;
         edm::OrphanHandle<pat::CompositeCandidateCollection> ccHandle =
             ev.put( ccc_pointer( ccList ), name );
+        // after candidates are "put", start to obtain Ref object
+        // ex : lFull, lJPsi, lLam0, lLbToJPsiLam0
         for ( i = 0; i < n; ++i )
         {
+            //if ( listTag[i] != 0 ) continue;
+            //if ( listTag[i] ) listTag[i] = listTag[i];
             const BPHRecoCandidate* ptr = list[i].get();
             edm::Ref<pat::CompositeCandidateCollection> ccRef( ccHandle, i );
             ccRefMap[ptr] = ccRef;

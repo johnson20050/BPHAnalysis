@@ -1,4 +1,8 @@
 #include "BPHAnalysis/SpecificDecay/interface/usefulFuncs.h"
+#include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/PatCandidates/interface/GenericParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -67,4 +71,40 @@ bool usefulFuncs::recoParticleInfo::checkSameCharge() const
     else
         printf ("recoParticleInfo::cptr or refptr doesn't exit!\n");
     return false;
+}
+reco::TrackRef usefulFuncs::getTrackRefFromRC( const reco::Candidate& rc )
+{
+    try
+    {
+        const reco::TrackRef& tkr = rc.get<reco::TrackRef>();
+        if ( tkr.isNonnull() && tkr.isAvailable() ) return tkr;
+    }
+    catch ( edm::Exception e ){}
+    return reco::TrackRef();
+}
+reco::TrackRef usefulFuncs::getTrackRefFromPF( const reco::Candidate& rc )
+{
+    const reco::PFCandidate* pf =
+          dynamic_cast<const reco::PFCandidate*>( &rc );
+    if ( pf == 0 ) return reco::TrackRef();
+    try
+    {
+        const reco::TrackRef& tkr = pf->trackRef();
+        if ( tkr.isNonnull() && tkr.isAvailable() ) return tkr;
+    }
+    catch ( edm::Exception e ) {}
+    return reco::TrackRef();
+}
+reco::TrackRef usefulFuncs::getTrackRefFromGP( const reco::Candidate& rc )
+{
+    const pat::GenericParticle* gp =
+        dynamic_cast<const pat::GenericParticle*>( &rc );
+    if ( gp == 0 ) return reco::TrackRef();
+    try
+    {
+        const reco::TrackRef& tkr = gp->track();
+        if ( tkr.isNonnull() && tkr.isAvailable() ) return tkr;
+    }
+    catch ( edm::Exception e ) {}
+    return reco::TrackRef();
 }

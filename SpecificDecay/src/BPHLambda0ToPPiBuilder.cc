@@ -68,6 +68,7 @@ BPHLambda0ToPPiBuilder::~BPHLambda0ToPPiBuilder() {
   delete  etaSel;
   delete massSel;
   delete chi2Sel;
+  delete mFitSel;
 }
 
 //--------------
@@ -110,6 +111,7 @@ vector<BPHPlusMinusConstCandPtr> BPHLambda0ToPPiBuilder::build() {
               BPHParticleMasses::pionMass );
     kxb->add( kaonName, kx0->originalReco( kx0->getDaug( pionName ) ),
               BPHParticleMasses::protonMass );
+
     if ( !kx0->isValidFit() ) continue;
     if ( !kxb->isValidFit() ) continue;
     float mass0 = kx0->currentParticle()->currentState().mass();
@@ -118,13 +120,14 @@ vector<BPHPlusMinusConstCandPtr> BPHLambda0ToPPiBuilder::build() {
     if ( fabs( mass0 - BPHParticleMasses::lambda0Mass ) < _massDiff &&
          fabs( massb - BPHParticleMasses::lambda0Mass ) < _massDiff   )
         continue;
-    else if 
+    else if
        ( fabs( mass0 - BPHParticleMasses::lambda0Mass ) <
          fabs( massb - BPHParticleMasses::lambda0Mass ) )
          pxt = px0;
     else pxt = pxb;
     if ( !massSel->accept( *pxt ) ) continue;
     if ( !chi2Sel->accept( *pxt ) ) continue;
+    if ( !mFitSel->accept( *pxt ) ) continue;
 
     kx0List.push_back( pxt );
   }
@@ -214,4 +217,3 @@ double BPHLambda0ToPPiBuilder::getConstrMass() const {
 double BPHLambda0ToPPiBuilder::getConstrSigma() const {
   return cSigma;
 }
-
