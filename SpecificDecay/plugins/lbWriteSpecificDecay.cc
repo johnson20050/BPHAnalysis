@@ -493,10 +493,12 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     int nJPsi = lJPsi.size();
     delete onia; // chk pV end }}}
 
-    if ( !nJPsi ) return;
-    // Search for the map of lJPsi and lFull {{{
-    if ( !nrc   ) return;
+    //if ( !nJPsi ) return;
+    //// Search for the map of lJPsi and lFull {{{
+    //if ( !nrc   ) return;
 
+if ( nJPsi && nrc )
+{
     int ij;
     int io;
     int nj = lJPsi.size();
@@ -517,6 +519,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
             }
         }
     }
+}
     // Search for the map of lJPsi and lFull end}}}
 
     // Build Lam0 {{{
