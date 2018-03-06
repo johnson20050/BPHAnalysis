@@ -95,14 +95,13 @@ private:
 
 // The label used in output product
     std::string     oniaName;
-    std::string     Lam0Name;
-    std::string LbToLam0Name;
+    std::string     TkTkName;
+    std::string LbToTkTkName;
 
 
-    enum recoType { Onia, Psi1, Psi2, Lam0, LbToLam0 };
+    enum recoType { Onia, Psi1, Psi2, TkTk, LbToTkTk };
     enum  parType { ptMin, etaMax,
                     mPsiMin, mPsiMax,
-                    mLam0Min, mLam0Max,
                     massMin, massMax, probMin, mFitMin, mFitMax,
                     constrMass, constrSigma, constrMJPsi, writeCandidate,
                   };
@@ -114,20 +113,20 @@ private:
 
 
     bool recoOnia     ;
-    bool recoLam0     ;
-    bool recoLbToLam0 ;
+    bool recoTkTk     ;
+    bool recoLbToTkTk ;
 
     bool writeOnia    ;
-    bool writeLam0    ;
-    bool writeLbToLam0;
+    bool writeTkTk    ;
+    bool writeLbToTkTk;
 
     bool writeVertex;
     bool writeMomentum;
 
     std::vector<BPHPlusMinusConstCandPtr> lFull;
     std::vector<BPHPlusMinusConstCandPtr> lJPsi;
-    std::vector<BPHPlusMinusConstCandPtr> lLam0;
-    std::vector<BPHRecoConstCandPtr>      lLbToLam0;
+    std::vector<BPHPlusMinusConstCandPtr> lTkTk;
+    std::vector<BPHRecoConstCandPtr>      lLbToTkTk;
 
     // the connection between JPsi & lFull.
     // lFull is the mumu candidate which will be recorded in storage.
@@ -150,9 +149,6 @@ private:
             new pat::CompositeCandidateCollection;
         int i;
         int n = list.size();
-        //int listTag[ n ];
-        //for ( int kk = 0; kk < n; ++kk )
-        //    listTag[kk] = -1;
 
         std::map<const BPHRecoCandidate*,
             const BPHRecoCandidate*>::const_iterator jpoIter;
@@ -376,7 +372,7 @@ private:
                             std::unique_ptr<GlobalPoint> pvPoint( new GlobalPoint( _pv->x(), _pv->y(), _pv->z() ) );
                             myReferencePoint = std::move( pvPoint );
                         }
-                        else if ( useBS )// if it is secondary candidate like Lam0 or Kshort or JPsi
+                        else if ( useBS )// if it is secondary candidate like TkTk or Kshort or JPsi
                         {
                             if ( !bsHandle.isValid() ) continue;
                             std::unique_ptr<GlobalPoint> bsPoint( new GlobalPoint( bsHandle->x0(), bsHandle->y0(), bsHandle->z0() ) );
@@ -448,7 +444,7 @@ private:
         edm::OrphanHandle<pat::CompositeCandidateCollection> ccHandle =
             ev.put( ccc_pointer( ccList ), name );
         // after candidates are "put", start to obtain Ref object
-        // ex : lFull, lJPsi, lLam0, lLbToJPsiLam0
+        // ex : lFull, lJPsi, lTkTk, lLbToJPsiTkTk
         for ( i = 0; i < n; ++i )
         {
             //if ( listTag[i] != 0 ) continue;

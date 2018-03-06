@@ -52,10 +52,10 @@ process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
 
 # the label of output product
     oniaName      = cms.string('oniaFitted'),
-    #TkTkName      = cms.string('TkTkFitted'),
-    #LbToTkTkName  = cms.string('LbToTkTkFitted'),
-    Lam0Name      = cms.string('Lam0Fitted'),
-    LbToLam0Name  = cms.string('LbToLam0Fitted'),
+    TkTkName      = cms.string('TkTkFitted'),
+    LbToTkTkName  = cms.string('LbToTkTkFitted'),
+    #Lam0Name      = cms.string('Lam0Fitted'),
+    #LbToLam0Name  = cms.string('LbToLam0Fitted'),
     writeVertex   = cms.bool( True ),
     writeMomentum = cms.bool( True ),
     recoSelect    = cms.VPSet(recoSelect)
