@@ -188,12 +188,6 @@ void lbWriteSpecificDecay::beginJob() {
 void lbWriteSpecificDecay::produce( edm::Event& ev,
                                      const edm::EventSetup& es ) {
   fill( ev, es );
-  std::cout << ", lFull: " << lFull.size();
-  std::cout << ", JPsi : " << lJPsi.size();
-  std::cout << ", Lam0 : " << lLam0.size();
-  std::cout << ", Lb   : " << lLbToLam0.size();
-  std::cout << std::endl;
-  //bool writeEvent = lLbToLam0.size();
   bool writeEvent = true;
   if ( writeOnia     ) write( ev, lFull     ,     oniaName , writeEvent );
   if ( writeLam0     ) write( ev, lLam0     ,     Lam0Name , writeEvent );
