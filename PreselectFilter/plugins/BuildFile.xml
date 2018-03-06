@@ -1,0 +1,11 @@
+<use   name="DataFormats/ParticleFlowCandidate"/>
+<use   name="DataFormats/PatCandidates"/>
+<use   name="DataFormats/TrackReco"/>
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/ParameterSet"/>
+<use   name="FWCore/MessageLogger"/>
+<use   name="FWCore/ServiceRegistry"/>
+<use   name="PhysicsTools/UtilAlgos"/>
+<library   file="*.cc" name="FilterToSpecificDecayPlugins">
+  <flags   EDM_PLUGIN="1"/>
+</library>

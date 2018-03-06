@@ -77,8 +77,11 @@ vector<BPHPlusMinusConstCandPtr> BPHTkTkBuilder::build() {
   BPHRecoBuilder bTkTk( *evSetup );
   bTkTk.add( pName, pCollection, pMass, pSigma );
   bTkTk.add( nName, nCollection, nMass, nSigma );
-  bTkTk.filter( pName, * ptSel );
-  bTkTk.filter( nName, * ptSel );
+  if ( ptSel->getPtMin() > 0 )
+  {
+      bTkTk.filter( pName, * ptSel );
+      bTkTk.filter( nName, * ptSel );
+  }
   bTkTk.filter( pName, *etaSel );
   bTkTk.filter( nName, *etaSel );
   bTkTk.filter( *massSel );

@@ -36,6 +36,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "BPHAnalysis/SpecificDecay/interface/usefulFuncs.h"
+
 class TH1F;
 class BPHRecoCandidate;
 
@@ -88,7 +90,8 @@ private:
     bool usePF;
     bool usePC;
     bool useGP;
-    bool isAOD;
+    bool useHrm;
+    bool usePLH;
 
 // The label used in output product
     std::string     oniaName;
@@ -125,83 +128,19 @@ private:
     std::vector<BPHPlusMinusConstCandPtr> lTkTk;
     std::vector<BPHRecoConstCandPtr>      lLbToTkTk;
 
+    // the connection between JPsi & lFull.
+    // lFull is the mumu candidate which will be recorded in storage.
+    // JPsi is the particle you regard it as jpsi candidate.
     std::map<const BPHRecoCandidate*,const BPHRecoCandidate*> jPsiOMap;
+    // the connection between lFull & pvRef
     typedef edm::Ref< std::vector<reco::Vertex> > vertex_ref;
     std::map<const BPHRecoCandidate*,vertex_ref> pvRefMap;
+    // after candidates are "put" in storage, the function 'write' will create Ref object.
+    // and the
     typedef edm::Ref< pat::CompositeCandidateCollection > compcc_ref;
     std::map<const BPHRecoCandidate*,compcc_ref> ccRefMap;
 
     void setRecoParameters( const edm::ParameterSet& ps );
-// my added struct recoParticleInfo {{{
-// this struct uses the map on particle name and reco::Candidate
-// and finally pair particle name and RefCountedKinematicParticle
-    struct recoParticleInfo
-    {
-        recoParticleInfo( const std::string& compName, const std::string& daugName, const reco::Candidate* inptr ) :
-            cName( compName ),
-            dName( daugName ),
-            cptr( inptr ),
-            refptr( nullptr ) {}
-        std::string getFullName() const
-        { 
-            if ( this->isCompDaughter() )
-                return cName+"/"+dName; 
-            return dName;
-        }
-
-        std::string getCompName() const
-        { return cName; }
-        std::string getDaugName() const
-        { return dName; }
-        int getRecoCharge() const
-        { return cptr->charge(); }
-        float getRecoPt() const
-        { return cptr->pt(); }
-        const reco::Candidate* getRecoParticle() const
-        { return cptr; }
-        GlobalVector getRefitMom() const
-        { return refptr->currentState().kinematicParameters().momentum(); }
-        int getRefitCharge() const
-        { return refptr->currentState().particleCharge(); }
-        void setRefitParticle( RefCountedKinematicParticle& obj )
-        { refptr.swap(obj); }
-        RefCountedKinematicParticle getRefitParticle() const
-        { return refptr; }
-        bool isCompDaughter() const
-        { return !cName.empty(); }
-        bool checkSameCharge() const
-        {
-            if ( cptr && refptr ) 
-            {
-                if ( this->getRecoCharge() == this->getRefitCharge() )
-                    return true;
-            }
-            else
-                printf ("recoParticleInfo::cptr or refptr doesn't exit!\n");
-            return false;
-        }
-    
-        // used to get jpsi and pv
-        template<class T>
-        static const T* getByRef( const pat::CompositeCandidate& cand, const std::string& name ) 
-        {
-            if ( cand.hasUserData( name ) ) 
-            {
-                typedef edm::Ref< std::vector<T> > objRef;
-                const objRef* ref = cand.userData<objRef>( name );
-                if ( ref ==      0 ) return nullptr;
-                if ( ref->isNull() ) return nullptr;
-                return ref->get();
-            }
-            return nullptr;
-        }
-        //private:        
-        std::string cName;
-        std::string dName;
-        const reco::Candidate* cptr;
-        RefCountedKinematicParticle refptr;
-    };
-// my added recoParticleInfo end}}}
     template <class T>
     edm::OrphanHandle<pat::CompositeCandidateCollection> write( edm::Event& ev,
             const std::vector<T>& list, const std::string& name, bool writeDownThisEvent )
@@ -210,6 +149,7 @@ private:
             new pat::CompositeCandidateCollection;
         int i;
         int n = list.size();
+
         std::map<const BPHRecoCandidate*,
             const BPHRecoCandidate*>::const_iterator jpoIter;
         std::map<const BPHRecoCandidate*,
@@ -225,18 +165,14 @@ private:
         edm::Handle<edm::ValueMap<reco::DeDxData>> dedxPLHHandle;
         edm::Handle< std::vector<pat::GenericParticle> > gpHandle;
         edm::Handle< std::vector<reco::PFCandidate> > pfHandle;
-        std::vector< const edm::ValueMap<reco::DeDxData>* > dedxMaps;
         edm::Handle< reco::BeamSpot > bsHandle;
-        if ( isAOD ) // used to find dE/dx data
-        {
-            dedxHrmToken.get( ev, dedxHrmHandle );
+
+        if ( usePLH )
             dedxPLHToken.get( ev, dedxPLHHandle );
-            if ( dedxHrmHandle->size() && dedxPLHHandle->size() )
-            {
-                dedxMaps.reserve(2);
-                dedxMaps.emplace_back( dedxHrmHandle.product() );
-                dedxMaps.emplace_back( dedxPLHHandle.product() );
-            }
+        if ( useHrm )
+            dedxHrmToken.get( ev, dedxHrmHandle );
+        if ( usePLH || useHrm )
+        {
             if ( usePF )
                 pfCandsToken.get( ev, pfHandle );
             if ( useGP )
@@ -252,8 +188,11 @@ private:
             for ( i = 0; i < n; ++i )
             {
                 const T& ptr = list[i];
+                // bool-int to check if it is needed to write event.
+                int dddPassed = 0;
                 ccList->push_back( ptr->composite() );
                 pat::CompositeCandidate& cc = ccList->back();
+                //pat::CompositeCandidate cc = ptr->composite();
                 if ( ( pvrIter = pvRefMap.find( ptr.get() ) ) != pvrIend )
                     cc.addUserData ( "primaryVertex", pvrIter->second );
                 const std::vector<std::string>& cNames = ptr->compNames();
@@ -286,39 +225,65 @@ private:
                 }
                 if ( writeVertex ) cc.addUserData( "fitVertex",
                                                        reco::Vertex( *ptr->currentDecayVertex() ) );
-    
+
                 // store refit information {{{
                 if ( !ptr->isValidFit() )  continue;
-    
+
                 const RefCountedKinematicParticle kinPart = ptr->currentParticle();
                 const           KinematicState    kinStat = kinPart->currentState();
                 cc.addUserFloat( "fitMass", kinStat.mass() );
-                std::vector<recoParticleInfo> myParticleList;
+                std::vector<usefulFuncs::recoParticleInfo> myParticleList;
                 myParticleList.reserve( cc.numberOfDaughters()+1 );
                 if ( writeMomentum )
                 {
                     // store refit particle momentum
                     cc.addUserData ( "fitMomentum", kinStat.kinematicParameters().momentum() );
-    
+
                     // store refit daughter momentum
                     std::vector<RefCountedKinematicParticle> daughters = ptr->kinematicTree()->finalStateParticles();
                     std::vector<RefCountedKinematicParticle> compDaugh;
-                
+
 
                     // find RefCountedKinematicParticle
-        
+
                     if ( ptr->seckinematicTree().get() )
-                    if ( ptr->seckinematicTree()->isValid() )
+                    //if ( ptr->seckinematicTree()->isValid() )
+                    if ( ptr->compNames().size() )
                     {
                         // the last one is the constrained particle, it is virtual particle, need to be removed.
                         daughters.erase( --daughters.end() );
                         compDaugh = ptr->seckinematicTree()->finalStateParticles();
                     }
-    
-    
+
+
+                    //if ( !(ptr->compNames().size()) )
+                    //{
+                    //    std::cout << "d : c : dF = " << daughters.size() <<","<< compDaugh.size() <<","<< ptr->daughFull().size() << std::endl;
+                    //    for ( const auto& dN : ptr->daugNames() )
+                    //        std::cout << "---" << dN;
+                    //    std::vector<RefCountedKinematicParticle> cDaugh;
+                    //    if ( ptr->seckinematicTree().get() )
+                    //    {
+                    //        cDaugh = ptr->seckinematicTree()->finalStateParticles();
+                    //        for ( int i=0; i<2;++i )
+                    //            if ( fabs( cDaugh[i]->currentState().mass() - daughters[i]->currentState().mass() ) > 0.000000000001 )
+                    //                std::cout << "sec fit & first fit results are different!!\n";
+                    //    }
+                    //    std::cout << std::endl;
+                    //}
+                    //else
+                    //{
+                    //    std::cout << "d : c : dF = " << daughters.size() <<","<< compDaugh.size() <<","<< ptr->daughFull().size() << std::endl;
+                    //    for ( const auto& dN : ptr->daugNames() )
+                    //        std::cout << "---" << dN;
+                    //    for ( const auto& cN : ptr->compNames() )
+                    //        std::cout << "..." << cN;
+                    //    std::cout << std::endl;
+//
+                    //}
                     // all RefCountedKinematicParticle are found, check if it losts particle?
                     if ( (daughters.size()+compDaugh.size()) != ptr->daughFull().size() ) continue;
-    
+
                     //get the daughterFull name stored in BPHRecoCandidate. {{{
                     const std::vector<std::string>& cNames_ = ptr->compNames();
                     const std::vector<std::string>& dNames_ = ptr->daugNames();
@@ -340,138 +305,150 @@ private:
                         myParticleList.emplace_back( "", dName_, cand_ );
                     }
                     // get daughFull name end }}}
-    
+
                     int totalCharge = 0;
                     std::map<const reco::Candidate*, std::string> componentList_ = componentList;
                     std::map< const RefCountedKinematicParticle, std::pair<const reco::Candidate*, std::string> > particleList;
-    
+
                     //use pt and charge to match the reco::Candidate* and RefCountedKinematicParticle
-                    //And the constrained name is used to separate virtual particle and other particle 
+                    //And the constrained name is used to separate virtual particle and other particle
                     const std::string& constrName = ptr->getConstrName();
-                    for ( recoParticleInfo& _oldParticle : myParticleList )
+                    for ( usefulFuncs::recoParticleInfo& _oldParticle : myParticleList )
                     {
-                        int charge_ = _oldParticle.getRecoCharge();
-                        float ptDiff = 999.0;
-    
+
                         std::vector<RefCountedKinematicParticle> lists_;
                         if ( _oldParticle.getCompName() == constrName && !constrName.empty() )
                             lists_ = compDaugh;
                         else
                             lists_ = daughters;
-    
+
+                        int charge_ = _oldParticle.getRecoCharge();
+                        double minDeltaR2 = 999.;
                         for ( RefCountedKinematicParticle& _cDau : lists_ )
                         {
                             // use charge and pt to distinguish particle
                             if ( _oldParticle.getRecoCharge() != charge_ ) continue;
-                            float dPt_ = _oldParticle.getRecoPt();
-                            float rPt_ = _cDau->currentState().kinematicParameters().momentum().transverse();
-                            if ( fabs( dPt_-rPt_ ) < ptDiff )
-                            {
-                                ptDiff = fabs( dPt_-rPt_ );
+                            if ( usefulFuncs::candidateMatch( _cDau, _oldParticle.getRecoParticle(), minDeltaR2 ) )
                                 _oldParticle.setRefitParticle( _cDau );
-                            }
                         }
                         totalCharge += _oldParticle.getRecoCharge();
                     }
-    
+
                     // particle name - RefCountedKinematicParticle pair is prepared.
-                    if ( myParticleList.size() != ptr->daughFull().size() ) 
+                    if ( myParticleList.size() != ptr->daughFull().size() )
                     {
                         printf( "-----bug: particleList and daughters don't owns the same size! in write() \n" );
                         continue;
                     }
-                    if ( totalCharge != 0 ) 
+                    if ( totalCharge != 0 )
                     {
                         printf( "-----bug: the built particle is not neutral! in write()\n" );
                         continue;
                     }
-    
+
                     // add refit momentum of daughters
-                    for ( const recoParticleInfo& particleContainer : myParticleList )
+
+                    dddPassed = myParticleList.size();
+                    for ( const usefulFuncs::recoParticleInfo& particleContainer : myParticleList )
                     {
                         if ( !particleContainer.refptr.get() ) continue;
                         cc.addUserData ( particleContainer.getFullName()+".fitMom",
                                          particleContainer.getRefitMom() );
 
                         std::unique_ptr<GlobalPoint> myReferencePoint(nullptr);
-                        if ( ptr->compNames().size() ) // if it is Lambda0_b or Bs
+                        if ( ptr->compNames().size() ) // if it is Lambda0_b or Bs ( find PV )
                         {
                             if ( !ptr->getComp("JPsi") ) continue;
-                            const BPHRecoCandidate* _jpsi = ptr->getComp( "JPsi" ).get();
-                            if ( !_jpsi ) continue; // asdf need to be modified to use PV or BS.
-                            double minRsquare = 999.;
+                            const BPHRecoCandidate* jpsi = ptr->getComp( "JPsi" ).get();
                             const reco::Vertex* _pv = nullptr;
-                            for ( const auto& ljpsi : lFull )
-                            {
-                                // connect jpsi in candidate & jpsi in lFull. ( in order to use pvRefMap )
-                                const BPHPlusMinusCandidate* _ljpsi = ljpsi.get();
-                                const pat::CompositeCandidate& _p1 = _jpsi->composite();
-                                const pat::CompositeCandidate& _p2 = _ljpsi->composite();
-                                double Rsquare = pow(_p1.phi() - _p2.phi(), 2 ) + pow( _p1.eta() - _p2.eta(), 2 );
-                                if ( Rsquare < minRsquare )
-                                    if ( ( pvrIter = pvRefMap.find( _ljpsi ) ) != pvrIend )
-                                    {
-                                        _pv = pvrIter->second.get();
-                                        minRsquare = Rsquare;
-                                    }
-                            }
+
+                            // find the jpsi in lFull. And use the pvMap to find pv.
+                            if (( jpoIter = jPsiOMap.find(jpsi) ) != jpoIend )
+                                jpsi = jpoIter->second;
+                            if (( pvrIter = pvRefMap.find(jpsi) ) != pvRefMap.end() )
+                                _pv = pvrIter->second.get();
                             if ( !_pv ) continue;
                             if ( !_pv->isValid() ) continue;
                             std::unique_ptr<GlobalPoint> pvPoint( new GlobalPoint( _pv->x(), _pv->y(), _pv->z() ) );
                             myReferencePoint = std::move( pvPoint );
                         }
-                        else if ( useBS )// if it is secondary candidate like Lam0 or Kshort or JPsi
+                        else if ( useBS )// if it is secondary candidate like TkTk or Kshort or JPsi
                         {
                             if ( !bsHandle.isValid() ) continue;
                             std::unique_ptr<GlobalPoint> bsPoint( new GlobalPoint( bsHandle->x0(), bsHandle->y0(), bsHandle->z0() ) );
                             myReferencePoint = std::move( bsPoint );
                         }
-        
-        
+
+
                         const reco::TransientTrack& newTT = particleContainer.getRefitParticle()->refittedTransientTrack();
                         if ( !newTT.isValid() ) continue;
                         TrajectoryStateClosestToPoint traj = newTT.trajectoryStateClosestToPoint( *myReferencePoint );
                         float IPt ( traj.perigeeParameters().transverseImpactParameter() );
                         float IPt_err ( traj.perigeeError().transverseImpactParameterError() );
-        
+
+
+                        // !!! refit result preselection
+                        //if ( IPt/IPt_err < 1. ) continue;
+                        const GlobalPoint& pVtx = ptr->currentDecayVertex()->position();
+                        const GlobalPoint& pPv  = *myReferencePoint.get();
+                        GlobalVector distDiff( pVtx.x()-pPv.x(), pVtx.y()-pPv.y(), pVtx.z()-pPv.z() );
+                        //GlobalVector momentum(
+
+                        // !!! refit result preselection end
+
                         cc.addUserFloat ( particleContainer.getFullName()+".IPt", IPt );
                         cc.addUserFloat ( particleContainer.getFullName()+".IPt.Error", IPt_err );
-                        if ( dedxMaps.size() )
-                        {
-                            const edm::ValueMap<reco::DeDxData>& dedxHrmMap = *(dedxMaps[0]);
-                            const edm::ValueMap<reco::DeDxData>& dedxPLHMap = *(dedxMaps[1]);
-                            if ( useGP )
-                            {
-                                std::vector< pat::GenericParticle >::const_iterator iter = gpHandle->begin();
-                                std::vector< pat::GenericParticle >::const_iterator iend = gpHandle->end  ();
-                                while ( iter != iend )
-                                {
-                                    const pat::GenericParticle& gpCand = *iter++;
-                                    if ( gpCand.overlap( *particleContainer.getRecoParticle() ) )
-                                    {
-                                        const reco::TrackRef& trackID = gpCand.track();
-                                        const reco::DeDxData& _dedxHrm = dedxHrmMap[ trackID ];
-                                        const reco::DeDxData& _dedxPLH = dedxPLHMap[ trackID ];
 
+
+                        reco::TrackRef trackID;
+                        if ( trackID.isNull() ) trackID = usefulFuncs::getTrackRefFromGP( *particleContainer.getRecoParticle() );
+                        if ( trackID.isNull() ) trackID = usefulFuncs::getTrackRefFromPF( *particleContainer.getRecoParticle() );
+                        if ( trackID.isNull() ) trackID = usefulFuncs::getTrackRefFromRC( *particleContainer.getRecoParticle() );
+                        if ( trackID.isNonnull() )
+                        {
+                                if ( useHrm )
+                                {
+                                    const edm::ValueMap<reco::DeDxData>& dedxHrmMap = *( dedxHrmHandle.product() );
+                                    const reco::DeDxData& _dedxHrm = dedxHrmMap[ trackID ];
+                                    if ( _dedxHrm.dEdx() )
                                         cc.addUserFloat( particleContainer.getFullName()+".dEdx.Harmonic", _dedxHrm.dEdx() );
-                                        cc.addUserFloat( particleContainer.getFullName()+".dEdx.pixelHrm", _dedxPLH.dEdx() );
-                                        break;
-                                    }
                                 }
-                            }
+                                if ( usePLH )
+                                {
+                                    const edm::ValueMap<reco::DeDxData>& dedxPLHMap = *( dedxPLHHandle.product() );
+                                    const reco::DeDxData& _dedxPLH = dedxPLHMap[ trackID ];
+                                    if ( _dedxPLH.dEdx() )
+                                        cc.addUserFloat( particleContainer.getFullName()+".dEdx.pixelHrm", _dedxPLH.dEdx() );
+                                }
                         }
+
+
+
+                        --dddPassed;
                     } // end of particleContainer
+                    //for ( const usefulFuncs::recoParticleInfo& particleContainer : myParticleList )
+                    //    std::cout << ", " << particleContainer.getFullName();
+                    //std::cout << std::endl;
+
                 } // if writeMomentum end
-   
-    
+
                 // store refit information end }}}
-            } // run over all candidate end 
+
+                // if all daughter information are stored
+                //if ( dddPassed == 0 )
+                    //ccList->push_back( cc );
+                //listTag[i] = dddPassed;
+            } // run over all candidate end
         } // if writeDownThisEvent
         typedef std::unique_ptr<pat::CompositeCandidateCollection> ccc_pointer;
         edm::OrphanHandle<pat::CompositeCandidateCollection> ccHandle =
             ev.put( ccc_pointer( ccList ), name );
+        // after candidates are "put", start to obtain Ref object
+        // ex : lFull, lJPsi, lTkTk, lLbToJPsiTkTk
         for ( i = 0; i < n; ++i )
         {
+            //if ( listTag[i] != 0 ) continue;
+            //if ( listTag[i] ) listTag[i] = listTag[i];
             const BPHRecoCandidate* ptr = list[i].get();
             edm::Ref<pat::CompositeCandidateCollection> ccRef( ccHandle, i );
             ccRefMap[ptr] = ccRef;
