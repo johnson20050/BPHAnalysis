@@ -37,13 +37,16 @@ using namespace std;
 // Constructors --
 //----------------
 BPHLambda0_bToJPsiTkTkBuilder::BPHLambda0_bToJPsiTkTkBuilder( const edm::EventSetup& es,
-    const std::vector<BPHPlusMinusConstCandPtr>& JpsiCollection,
-    const std::vector<BPHPlusMinusConstCandPtr>& TkTkCollection ):
+    const std::vector<BPHPlusMinusConstCandPtr>&  JpsiCollection,
+    const std::vector<BPHPlusMinusConstCandPtr>& pTkTkCollection,
+    const std::vector<BPHPlusMinusConstCandPtr>& Collection ):
   jPsiName( "JPsi" ),
   tktkName( "TkTk" ),
   evSetup( &es ),
-  jpsiCollection( &JpsiCollection ),
-  tktkCollection( &TkTkCollection ) {
+   jpsiCollection( & JpsiCollection ),
+  ptktkCollection( &pTkTkCollection ),
+  ntktkCollection( &Collection ),
+  _massDiff( 0.0148 ) {
   jpsiSel = new BPHMassSelect   ( 2.80, 3.40 );
   massSel = new BPHMassSelect   ( 4.50, 7.00 );
   chi2Sel = new BPHChi2Select   ( 0.02 );
@@ -75,34 +78,65 @@ vector<BPHRecoConstCandPtr> BPHLambda0_bToJPsiTkTkBuilder::build() {
 
   if ( updated ) return lbList;
 
-  BPHRecoBuilder bLb( *evSetup );
-  bLb.setMinPDiffererence( minPDiff );
-  bLb.add( jPsiName, *jpsiCollection );
-  bLb.add( tktkName, *tktkCollection );
-  bLb.filter( jPsiName, *jpsiSel  );
+  //BPHRecoBuilder bLb( *evSetup );
+  //bLb.setMinPDiffererence( minPDiff );
+  //bLb.add( jPsiName, * jpsiCollection );
+  //bLb.add( tktkName, *ptktkCollection );
+  //bLb.filter( jPsiName, *jpsiSel  );
 
-  bLb.filter( *massSel );
-  bLb.filter( *chi2Sel );
-  if ( massConstr ) bLb.filter( *mFitSel );
+  //bLb.filter( *massSel );
+  //bLb.filter( *chi2Sel );
+  //if ( massConstr ) bLb.filter( *mFitSel );
 
-  lbList = BPHRecoCandidate::build( bLb );
-//
-//  Apply kinematic constraint on the JPsi mass.
-//  The operation is already performed when apply the mass selection,
-//  so it's not repeated. The following code is left as example
-//  for similar operations
-//
-//  int iLb;
-//  int nLb = ( massConstr ? lbList.size() : 0 );
-//  for ( iLb = 0; iLb < nLb; ++iLb ) {
-//    BPHRecoCandidate* cptr( const_cast<BPHRecoCandidate*>(
-//                            lbList[iLb].get() ) );
-//    BPHRecoConstCandPtr jpsi = cptr->getComp( jPsiName );
-//    double jMass = jpsi->constrMass();
-//    if ( jMass < 0 ) continue;
-//    double sigma = jpsi->constrSigma();
-//    cptr->kinematicTree( virtualParticleName, jpsiMass, jpsisigma );
-//  }
+  //std::vector<BPHRecoConstCandPtr> tmpList = BPHRecoCandidate::build( bLb );
+
+  if ( ptktkCollection->size() != ntktkCollection->size() )
+      printf("2 tktk list not the same!\n");
+  int iJPsi;
+  int nJPsi =  jpsiCollection->size();
+  int iTkTk;
+  int nTkTk = ptktkCollection->size();
+  lbList.clear();
+  lbList.reserve( nTkTk*nJPsi );
+  BPHRecoConstCandPtr pxt( 0 );
+  for ( iJPsi = 0; iJPsi < nJPsi; ++iJPsi )
+  for ( iTkTk = 0; iTkTk < nTkTk; ++iTkTk ) {
+    BPHRecoCandidatePtr px0( new BPHRecoCandidate( evSetup ) );
+    BPHRecoCandidatePtr pxb( new BPHRecoCandidate( evSetup ) );
+    BPHRecoCandidate* kx0 = px0.get();
+    BPHRecoCandidate* kxb = pxb.get();
+
+    //kx0->add( jPsiName, BPHRecoConstCandPtr( jpsiCollection->at(iJPsi).get()) );
+    //kxb->add( jPsiName, BPHRecoConstCandPtr( jpsiCollection->at(iJPsi).get()) );
+    kx0->add( jPsiName, jpsiCollection->at(iJPsi) );
+    kxb->add( jPsiName, jpsiCollection->at(iJPsi) );
+    //kx0->add( tktkName, BPHRecoConstCandPtr(ptktkCollection->at(iTkTk).get()) );
+    //kxb->add( tktkName, BPHRecoConstCandPtr(ntktkCollection->at(iTkTk).get()) );
+    kx0->add( tktkName, ptktkCollection->at(iTkTk) );
+    kxb->add( tktkName, ntktkCollection->at(iTkTk) );
+
+    if ( massConstr )
+        if ( !mFitSel->accept( *px0 ) ) continue;
+    if ( massConstr )
+        if ( !mFitSel->accept( *pxb ) ) continue;
+    if ( !kx0->isValidFit() ) continue;
+    if ( !kxb->isValidFit() ) continue;
+    float mass0 = kx0->currentParticle()->currentState().mass();
+    float massb = kxb->currentParticle()->currentState().mass();
+    // if particle and anti-particle are in Lam0 signal region, it cannot be distinguished, throwout it.
+    if ( fabs( mass0 - BPHParticleMasses::Lambda0_bMass ) < _massDiff &&
+         fabs( massb - BPHParticleMasses::Lambda0_bMass ) < _massDiff   )
+        continue;
+    else if
+       ( fabs( mass0 - BPHParticleMasses::Lambda0_bMass ) <
+         fabs( massb - BPHParticleMasses::Lambda0_bMass ) )
+         pxt = px0;
+    else pxt = pxb;
+    if ( !massSel->accept( *pxt ) ) continue;
+    if ( !chi2Sel->accept( *pxt ) ) continue;
+
+    lbList.push_back( pxt );
+  }
   updated = true;
 
   return lbList;

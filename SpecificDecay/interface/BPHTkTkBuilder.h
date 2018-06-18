@@ -58,6 +58,8 @@ class BPHTkTkBuilder {
    */
   /// build Phi candidates
   std::vector<BPHPlusMinusConstCandPtr> build();
+  std::vector<BPHPlusMinusConstCandPtr> getpList();
+  std::vector<BPHPlusMinusConstCandPtr> getnList();
 
   /// set cuts
   void setPtMin  ( double pt  );
@@ -101,7 +103,8 @@ class BPHTkTkBuilder {
   double cSigma;
   bool updated;
 
-  std::vector<BPHPlusMinusConstCandPtr> tktkList;
+  std::vector<BPHPlusMinusConstCandPtr> ptktkList;
+  std::vector<BPHPlusMinusConstCandPtr> ntktkList;
 
 };
 

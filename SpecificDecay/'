@@ -189,26 +189,18 @@ void lbWriteSpecificDecay::beginJob() {
 
 void lbWriteSpecificDecay::produce( edm::Event& ev,
                                      const edm::EventSetup& es ) {
-    std::cout << "hi1\n";
   fill( ev, es );
-    std::cout << "hi2\n";
   bool writeEvent = lLbToTkTk.size();
-    std::cout << "hi3\n";
   if ( writeOnia     ) write( ev, lFull     ,     oniaName , writeEvent ); 
-    std::cout << "hi4\n";
   if ( writeTkTk     ) write( ev, plTkTk    , "p"+TkTkName , writeEvent ); 
-    std::cout << "hi5\n";
   if ( writeTkTk     ) write( ev, nlTkTk    , "n"+TkTkName , writeEvent ); 
-    std::cout << "hi6\n";
   if ( writeLbToTkTk ) write( ev, lLbToTkTk , LbToTkTkName , writeEvent ); 
-    std::cout << "hi end\n";
   return;
 }
 
 
 void lbWriteSpecificDecay::fill( edm::Event& ev,
                                   const edm::EventSetup& es ) {
-    std::cout << "fill 01\n";
     // clean up {{{
     lFull    .clear();
     lJPsi    .clear();
@@ -219,14 +211,12 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     pvRefMap .clear();
     ccRefMap .clear();
     // clean up end }}}
-    std::cout << "fill 02\n";
 
     // get magnetic field
     edm::ESHandle<MagneticField> magneticField;
     es.get<IdealMagneticFieldRecord>().get( magneticField );
 
     std::map<const BPHRecoCandidate*,const reco::Vertex*> oniaVtxMap;
-    std::cout << "fill 03\n";
     // find muon and get MuMu Onia full list, use them to decide primary vertex {{{
     // get object collections
     // collections are got through "BPHTokenWrapper" interface to allow
@@ -268,29 +258,29 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
         gpCandsToken.get( ev, gpCands );
         nrc = gpCands->size();
         
-        //for ( unsigned i=0; i<gpCands->size(); ++i )
-        //{
-        //    for ( unsigned j = i+1; j<gpCands->size(); ++j )
-        //    {
-        //        const reco::HitPattern& hit1 = gpCands->at(i).track()->hitPattern();
-        //        const reco::HitPattern& hit2 = gpCands->at(j).track()->hitPattern();
-        //        if ( hit1.numberOfHits(reco::HitPattern::TRACK_HITS) != hit2.numberOfHits(reco::HitPattern::TRACK_HITS) ) continue;
-        //            int ll = hit1.numberOfHits(reco::HitPattern::TRACK_HITS);
-        //            std::cout << "\ni = " << i << ", j = " << j << ", number of Hits = " << hit1.numberOfHits(reco::HitPattern::TRACK_HITS) << "\n";
-        //            for ( int l = 0; l < hit1.numberOfHits(reco::HitPattern::TRACK_HITS); ++l )
-        //                if ( hit1.getHitPattern(reco::HitPattern::TRACK_HITS,l) == hit2.getHitPattern(reco::HitPattern::TRACK_HITS,l) )
-        //                {
-        //                    --ll;
-        //                    std::cout << ", ll = " << ll;
-        //                    std::cout << ", " << hit1.getHitPattern(reco::HitPattern::TRACK_HITS,l);
-        //                }
+        for ( unsigned i=0; i<gpCands->size(); ++i )
+        {
+            for ( unsigned j = i+1; j<gpCands->size(); ++j )
+            {
+                const reco::HitPattern& hit1 = gpCands->at(i).track()->hitPattern();
+                const reco::HitPattern& hit2 = gpCands->at(j).track()->hitPattern();
+                if ( hit1.numberOfHits(reco::HitPattern::TRACK_HITS) == hit2.numberOfHits(reco::HitPattern::TRACK_HITS) )
+                {
+                    short ll = hit1.numberOfHits(reco::HitPattern::TRACK_HITS);
+                    for ( int l = 0; l < hit1.numberOfHits(reco::HitPattern::TRACK_HITS); ++l )
+                        if ( hit1.getHitPattern(reco::HitPattern::TRACK_HITS,l) == hit2.getHitPattern(reco::HitPattern::TRACK_HITS,l) )
+                        {
+                            --ll;
+                            std::cout << ", " << hit1.getHitPattern(reco::HitPattern::TRACK_HITS,l);
+                        }
 
-        //            if ( ll == 0 )
-        //                std::cout << "\nhit pattern in detail check are the same!!!!!(errors)\n";
-        //    }
+                    if ( ll == 0 )
+                        std::cout << "\nhit pattern in detail check are the same!!!!!(errors)\n";
+                }
+            }
 
-        //}
-        //std::cout << "hit pattern analysis done (one event)!\n";
+        }
+        std::cout << "hit pattern analysis done (one event)!\n";
 
     }
     if( nrc > 0 ) ;
@@ -526,7 +516,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     int nJPsi = lJPsi.size();
     delete onia; // chk pV end }}}
 
-    std::cout << "fill 04\n";
     if ( !nJPsi ) return;
     // Search for the map of lJPsi and lFull {{{
     if ( !nrc   ) return;
@@ -555,7 +544,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     }
 
     // Search for the map of lJPsi and lFull end}}}
-    std::cout << "fill 05\n";
 
     // Build TkTk {{{
     BPHTkTkBuilder* tktk = 0;
@@ -628,7 +616,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     } // set cut value end  
     unsigned nTkTk = plTkTk.size();
     // Build TkTk end }}}
-    std::cout << "fill 06\n";
 
     // Build and dump Lb->Jpsi+TkTk {{{
     if ( nTkTk && recoLbToTkTk )
@@ -677,7 +664,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
 
     }
     // Build LbToTkTk end }}}
-    std::cout << "fill 07\n";
 }
 
 

@@ -72,7 +72,7 @@ BPHTkTkBuilder::~BPHTkTkBuilder() {
 //--------------
 vector<BPHPlusMinusConstCandPtr> BPHTkTkBuilder::build() {
 
-  if ( updated ) return tktkList;
+  if ( updated ) return ptktkList;
 
   BPHRecoBuilder bTkTk( *evSetup );
   bTkTk.add( pName, pCollection, pMass, pSigma );
@@ -87,11 +87,46 @@ vector<BPHPlusMinusConstCandPtr> BPHTkTkBuilder::build() {
   bTkTk.filter( *massSel );
   bTkTk.filter( *chi2Sel );
 
-  tktkList = BPHPlusMinusCandidate::build( bTkTk, pName, nName );
+  vector<BPHPlusMinusConstCandPtr>
+  tmpList = BPHPlusMinusCandidate::build( bTkTk, pName, nName );
+
+  unsigned i = 0;
+  unsigned n = tmpList.size();
+  ptktkList.clear();
+  ntktkList.clear();
+  ptktkList.reserve( n );
+  ntktkList.reserve( n );
+  while ( i != n ) {
+    BPHPlusMinusConstCandPtr& px0 = tmpList[i++];
+    BPHPlusMinusCandidatePtr  pxb( new BPHPlusMinusCandidate( evSetup ) );
+    const
+    BPHPlusMinusCandidate* kx0 = px0.get();
+    BPHPlusMinusCandidate* kxb = pxb.get();
+    kxb->add( nName, kx0->originalReco( kx0->getDaug( pName ) ), nMass );
+    kxb->add( pName, kx0->originalReco( kx0->getDaug( nName ) ), pMass );
+
+    if ( !kx0->isValidFit() ) continue;
+    if ( !kxb->isValidFit() ) continue;
+    if ( !massSel->accept( *px0 ) ) continue;
+    if ( !massSel->accept( *pxb ) ) continue;
+    if ( !chi2Sel->accept( *px0 ) ) continue;
+    if ( !chi2Sel->accept( *pxb ) ) continue;
+
+    ptktkList.push_back( px0 );
+    ntktkList.push_back( pxb );
+  }
 
   updated = true;
-  return tktkList;
+  return ptktkList;
 
+}
+vector<BPHPlusMinusConstCandPtr> BPHTkTkBuilder::getpList() {
+  if ( !updated ) build();
+  return ptktkList;
+}
+vector<BPHPlusMinusConstCandPtr> BPHTkTkBuilder::getnList() {
+  if ( !updated ) build();
+  return ntktkList;
 }
 
 /// set cuts

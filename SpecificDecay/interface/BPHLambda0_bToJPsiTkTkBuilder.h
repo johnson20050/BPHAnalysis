@@ -49,7 +49,8 @@ class BPHLambda0_bToJPsiTkTkBuilder {
    */
   BPHLambda0_bToJPsiTkTkBuilder( const edm::EventSetup& es,
       const std::vector<BPHPlusMinusConstCandPtr>& JpsiCollection,
-      const std::vector<BPHPlusMinusConstCandPtr>& TkTkCollection );
+      const std::vector<BPHPlusMinusConstCandPtr>& pTkTkCollection,
+      const std::vector<BPHPlusMinusConstCandPtr>& nTkTkCollection);
 
   /** Destructor
    */
@@ -90,8 +91,9 @@ class BPHLambda0_bToJPsiTkTkBuilder {
   std::string tktkName;
 
   const edm::EventSetup* evSetup;
-  const std::vector<BPHPlusMinusConstCandPtr>* jpsiCollection;
-  const std::vector<BPHPlusMinusConstCandPtr>* tktkCollection;
+  const std::vector<BPHPlusMinusConstCandPtr>*  jpsiCollection;
+  const std::vector<BPHPlusMinusConstCandPtr>* ptktkCollection;
+  const std::vector<BPHPlusMinusConstCandPtr>* ntktkCollection;
 
   BPHMassSelect   *  jpsiSel;
 
@@ -101,6 +103,7 @@ class BPHLambda0_bToJPsiTkTkBuilder {
 
   bool massConstr;
   float minPDiff;
+  const double _massDiff;
 
   // if you have any change on the particle, the 'updated' will become false
   // Then when you build(), you can update the particle

@@ -25,12 +25,42 @@ process.CandidateSelectedTracks = cms.EDProducer( "ConcreteChargedCandidateProdu
 from PhysicsTools.PatAlgos.producersLayer1.genericParticleProducer_cfi import patGenericParticles
 process.patSelectedTracks = patGenericParticles.clone(src=cms.InputTag("CandidateSelectedTracks"))
 
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
-'file:///home/ltsai/Data/CMSSW_8_0_21/LbToJPsiLam0/08A76328-3362-E711-90FD-0025905A611C.root'
+#'file:///home/ltsai/Data/CMSSW_8_0_21/LbToJPsiLam0/08A76328-3362-E711-90FD-0025905A611C.root'
+"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058.20.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058.21.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058.22.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058.23.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058.24.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058.25.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058.26.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058.27.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058.28.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058.29.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_00.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_01.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_02.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_03.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_04.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_05.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_06.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_07.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_08.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_09.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_10.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_11.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_12.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_13.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_14.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_15.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_16.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_17.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_18.root",
+#"file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_19.root"
 ))
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
@@ -87,10 +117,10 @@ process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
 
 # the label of output product
     oniaName      = cms.string('oniaFitted'),
-    #TkTkName      = cms.string('TkTkFitted'),
-    #LbToTkTkName  = cms.string('LbToTkTkFitted'),
-    Lam0Name      = cms.string('Lam0Fitted'),
-    LbToLam0Name  = cms.string('LbToLam0Fitted'),
+    TkTkName      = cms.string('TkTkFitted'),
+    LbToTkTkName  = cms.string('LbToTkTkFitted'),
+    #Lam0Name      = cms.string('Lam0Fitted'),
+    #LbToLam0Name  = cms.string('LbToLam0Fitted'),
     writeVertex   = cms.bool( True ),
     writeMomentum = cms.bool( True ),
     recoSelect    = cms.VPSet(recoSelect)
@@ -98,7 +128,8 @@ process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
 
 process.out = cms.OutputModule(
     "PoolOutputModule",
-    fileName = cms.untracked.string('recoWriteSpecificDecay.root'),
+    #fileName = cms.untracked.string('recoWriteSpecificDecay.root'),
+    fileName = cms.untracked.string('recoWriteSDecay.mcLbToJPsipK_13TeV_noPU.root'),
     outputCommands = cms.untracked.vstring(
         "drop *",
         "keep *_lbWriteSpecificDecay_*_bphAnalysis",
