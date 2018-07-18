@@ -196,9 +196,9 @@ void lbWriteSpecificDecay::produce( edm::Event& ev,
     std::cout << "hi3\n";
   if ( writeOnia     ) write( ev, lFull     ,     oniaName , writeEvent ); 
     std::cout << "hi4\n";
-  if ( writeTkTk     ) write( ev, plTkTk    , "p"+TkTkName , writeEvent ); 
+  //if ( writeTkTk     ) write( ev, plTkTk    , "p"+TkTkName , writeEvent ); 
     std::cout << "hi5\n";
-  if ( writeTkTk     ) write( ev, nlTkTk    , "n"+TkTkName , writeEvent ); 
+  if ( writeTkTk     ) write( ev, lTkTk    , TkTkName , writeEvent ); 
     std::cout << "hi6\n";
   if ( writeLbToTkTk ) write( ev, lLbToTkTk , LbToTkTkName , writeEvent ); 
     std::cout << "hi end\n";
@@ -212,8 +212,8 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     // clean up {{{
     lFull    .clear();
     lJPsi    .clear();
-    plTkTk   .clear();
-    nlTkTk   .clear();
+    lTkTk    .clear();
+    //nlTkTk   .clear();
     lLbToTkTk.clear();
     jPsiOMap .clear();
     pvRefMap .clear();
@@ -590,6 +590,9 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     // Set cut value 
     // use "Name"(recorded in enum) to find particle, then there is a subMap
     // The subMap is list of the cuts used in  the particle
+    std::vector<BPHPlusMinusConstCandPtr> plTkTk;
+    std::vector<BPHPlusMinusConstCandPtr> nlTkTk;
+
     if ( tktk != 0 )
     {
         rIter = parMap.find( TkTk );
@@ -669,6 +672,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
             }
         }
         lLbToTkTk = _lb->build();
+        lTkTk = _lb->getTkTkList();
         delete   _lb;
         // set cut value end
 

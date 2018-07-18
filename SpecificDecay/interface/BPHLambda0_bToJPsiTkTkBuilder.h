@@ -60,6 +60,7 @@ class BPHLambda0_bToJPsiTkTkBuilder {
    */
   /// build Bs candidates
   std::vector<BPHRecoConstCandPtr> build();
+  std::vector<BPHPlusMinusConstCandPtr> getTkTkList();
 
   /// set cuts
   void setJPsiMassMin( double m  );
@@ -110,6 +111,7 @@ class BPHLambda0_bToJPsiTkTkBuilder {
   bool updated;
 
   std::vector<BPHRecoConstCandPtr> lbList;
+  std::vector<BPHPlusMinusConstCandPtr> ltktkList;
   TwoTrackMassKinematicConstraint* jpsiConstr;
 
 };

@@ -121,6 +121,10 @@ vector<BPHRecoConstCandPtr> BPHLambda0_bToJPsiTkTkBuilder::build() {
         if ( !mFitSel->accept( *pxb ) ) continue;
     if ( !kx0->isValidFit() ) continue;
     if ( !kxb->isValidFit() ) continue;
+    if ( !massSel->accept( *px0 ) ) continue;
+    if ( !massSel->accept( *pxb ) ) continue;
+    if ( !chi2Sel->accept( *px0 ) ) continue;
+    if ( !chi2Sel->accept( *pxb ) ) continue;
     float mass0 = kx0->currentParticle()->currentState().mass();
     float massb = kxb->currentParticle()->currentState().mass();
     // if particle and anti-particle are in Lam0 signal region, it cannot be distinguished, throwout it.
@@ -130,18 +134,24 @@ vector<BPHRecoConstCandPtr> BPHLambda0_bToJPsiTkTkBuilder::build() {
     else if
        ( fabs( mass0 - BPHParticleMasses::Lambda0_bMass ) <
          fabs( massb - BPHParticleMasses::Lambda0_bMass ) )
-         pxt = px0;
-    else pxt = pxb;
-    if ( !massSel->accept( *pxt ) ) continue;
-    if ( !chi2Sel->accept( *pxt ) ) continue;
-
-    lbList.push_back( pxt );
+       {
+           lbList.push_back( px0 );
+           ltktkList.push_back( ptktkCollection->at(iTkTk) );
+       }
+    else
+    {
+        lbList.push_back( pxb );
+        ltktkList.push_back( ntktkCollection->at(iTkTk) );
+    }
   }
   updated = true;
 
   return lbList;
 
 }
+std::vector<BPHPlusMinusConstCandPtr> BPHLambda0_bToJPsiTkTkBuilder::getTkTkList()
+{ if ( !updated ) build(); return ltktkList; }
+
 
 /// set cuts
 void BPHLambda0_bToJPsiTkTkBuilder::setJPsiMassMin( double m ) {
