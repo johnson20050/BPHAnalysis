@@ -74,8 +74,8 @@ vector<BPHPlusMinusConstCandPtr> BPHPhiToKKBuilder::build() {
                                      BPHParticleMasses::kaonMSigma );
   bPhi.filter( kPosName, *ptSel );
   bPhi.filter( kNegName, *ptSel );
-  bPhi.filter( kPosName, *etaSel );
-  bPhi.filter( kNegName, *etaSel );
+  bPhi.filter( kPosName, *etaSel);
+  bPhi.filter( kNegName, *etaSel);
 
   bPhi.filter( *massSel );
   bPhi.filter( *chi2Sel );

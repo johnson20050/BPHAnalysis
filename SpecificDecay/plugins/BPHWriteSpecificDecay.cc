@@ -200,12 +200,12 @@ void BPHWriteSpecificDecay::beginJob() {
 void BPHWriteSpecificDecay::produce( edm::Event& ev,
                                      const edm::EventSetup& es ) {
   fill( ev, es );
-  if ( writeOnia ) write( ev, lFull, oniaName );
-  if ( writeKx0  ) write( ev, lSd  ,   sdName );
-  if ( writePkk  ) write( ev, lSs  ,   ssName );
-  if ( writeBu   ) write( ev, lBu  ,   buName );
-  if ( writeBd   ) write( ev, lBd  ,   bdName );
-  if ( writeBs   ) write( ev, lBs  ,   bsName );
+  if ( writeOnia ) { write( ev, lFull, oniaName ); std::cout << " lFull written! \n"; }
+  if ( writeKx0  ) { write( ev, lSd  ,   sdName ); std::cout << " lSd   written! \n"; }
+  if ( writePkk  ) { write( ev, lSs  ,   ssName ); std::cout << " lSs   written! \n"; }
+  if ( writeBu   ) { write( ev, lBu  ,   buName ); std::cout << " lBu   written! \n"; }
+  if ( writeBd   ) { write( ev, lBd  ,   bdName ); std::cout << " lBd   written! \n"; }
+  if ( writeBs   ) { write( ev, lBs  ,   bsName ); std::cout << " lBs   written! \n"; }
   return;
 }
 
@@ -655,6 +655,7 @@ void BPHWriteSpecificDecay::fill( edm::Event& ev,
     }
     lPhi = phi->build();
     delete phi;
+    std::cout << "phi size : " << lPhi.size() << std::endl;
   }
 
   int nPhi = lPhi.size();
@@ -692,6 +693,7 @@ void BPHWriteSpecificDecay::fill( edm::Event& ev,
 
     lBs = bs->build();
     delete bs;
+    std::cout << "lBs size : " << lBs.size() << std::endl;
 
     set<BPHRecoConstCandPtr> sPhi;
     int iBs;

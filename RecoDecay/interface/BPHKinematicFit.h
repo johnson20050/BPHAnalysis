@@ -71,6 +71,9 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
   virtual const RefCountedKinematicTree& kinematicTree(
           const std::string& name, MultiTrackKinematicConstraint* kc ) const;
 
+  virtual const  RefCountedKinematicTree& seckinematicTree() const;
+  std::string getConstrName() const;
+
   /// reset the kinematic fit
   virtual void resetKinematicFit() const;
 
@@ -115,6 +118,8 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
   // mass constraint
   double massConst;
   double massSigma;
+  mutable std::string constrName;
+  mutable RefCountedKinematicTree kinTreeofConstrParticle;
 
   // map linking daughters to mass sigma
   std::map<const reco::Candidate*,double> dMSig;

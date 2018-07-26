@@ -1,0 +1,20 @@
+Tue Oct  4 02:42:31 CST 2016
+modified:
+    BPHParticleMasses.cc
+        add my particle mass, sigma, width
+        Q: I don't how to decide the sigma of the particle.
+
+Thu Oct  6 15:30:25 CST 2016
+created:
+    BPHLambda0ToPPiBuilder.cc
+    BPHLambdaxToPKBuilder.cc
+    BPHLambda0_bToJpsiLambdaxBuilder.cc
+    Q: Can I merge lambda0 and anti-lambda0?
+       I know I need to see lambda0_b and anti-lambda0_b. But if I merge
+       lambda0 and anti-lambda0, I have no ways to identify them.
+ 
+Sat Oct 15 23:03:03 CST 2016
+modified:
+    refresh the code on git-hub: There is a BPHMassSymSelect.h added
+    BPHMassesSymSelect.h is used in BPHKx0ToKPiBuilder.cc
+    Needed to modify BPHLambdaxToKPBuilder.cc && BPHLambda0ToPPiBuilder.cc

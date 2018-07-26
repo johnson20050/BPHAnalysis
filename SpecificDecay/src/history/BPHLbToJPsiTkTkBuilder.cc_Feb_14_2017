@@ -1,0 +1,294 @@
+/*
+ *  See header file for a description of this class.
+ *
+ *  $Date: 2015-07-24 11:29:20 $
+ *  $Revision: 1.1 $
+ *  \author Paolo Ronchese INFN Padova
+ *
+ */
+
+//-----------------------
+// This Class' Header --
+//-----------------------
+#include "BPHAnalysis/SpecificDecay/interface/BPHLbToJPsiTkTkBuilder.h"
+
+//-------------------------------
+// Collaborating Class Headers --
+//-------------------------------
+#include "BPHAnalysis/RecoDecay/interface/BPHRecoBuilder.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHPlusMinusCandidate.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHRecoCandidate.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHParticlePtSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHParticleEtaSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHMassSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHMassSymSelect_jpsi.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHChi2Select.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHParticleNeutralVeto.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHCompChargeSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHMassFitSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHParticleMasses.h"
+
+//---------------
+// C++ Headers --
+//---------------
+using namespace std;
+
+//-------------------
+// Initializations --
+//-------------------
+
+
+//----------------
+// Constructors --
+//----------------
+BPHLbToJPsiTkTkBuilder::BPHLbToJPsiTkTkBuilder( const edm::EventSetup& es,
+    const std::vector<BPHPlusMinusConstCandPtr>& JpsiCollection,
+    const BPHRecoBuilder::BPHGenericCollection* ProtonCollection,
+    const BPHRecoBuilder::BPHGenericCollection*   KaonCollection ):
+    jPsiName( "JPsi" ),
+  protonName( "Proton" ),
+    kaonName( "Kaon" ),     
+  
+    evSetup( &es ),
+    jpsiCollection( &  JpsiCollection ),
+  protonCollection(  ProtonCollection ),
+    kaonCollection(    KaonCollection )
+{
+    jpsiSel = new BPHMassSelect           ( 2.80, 3.40 );
+      ptSel = new BPHParticlePtSelect     ( 0.7 );
+     etaSel = new BPHParticleEtaSelect    ( 10.0 ); 
+   nVetoSel = new BPHParticleNeutralVeto;
+
+    massSel = new BPHMassSelect           ( 5.00, 6.00 );
+ massTmpSel = new BPHMassSymSelect_jpsi   ( protonName, kaonName, massSel );
+    chi2Sel = new BPHChi2Select           ( 0.02 );
+    mFitSel = new BPHMassFitSelect( jPsiName,
+                                    BPHParticleMasses::jPsiMass,
+                                    BPHParticleMasses::jPsiMWidth,
+                                    5.00, 6.00 );
+  chargeSel = new BPHCompChargeSelect     ( 0 );
+    massConstr = true;
+    minPDiff = 1.0e-4;
+    updated = false;
+}
+
+//--------------
+// Destructor --
+//--------------
+BPHLbToJPsiTkTkBuilder::~BPHLbToJPsiTkTkBuilder() {
+  delete     jpsiSel;
+  delete       ptSel;
+  delete      etaSel;
+  delete    nVetoSel;
+
+  delete     massSel;
+  delete  massTmpSel;
+  delete     chi2Sel;
+  delete     mFitSel;
+  delete   chargeSel;
+}
+
+//--------------
+// Operations --
+//--------------
+vector<BPHRecoConstCandPtr> BPHLbToJPsiTkTkBuilder::build() {
+
+    if ( updated ) return lbList;
+
+    BPHRecoBuilder bLb( *evSetup );
+    bLb.setMinPDiffererence( minPDiff );
+    bLb.add(   jPsiName, *  jpsiCollection );
+    bLb.add( protonName,  protonCollection, BPHParticleMasses::protonMass, BPHParticleMasses::protonMSigma );
+    bLb.add(   kaonName,    kaonCollection, BPHParticleMasses::  kaonMass, BPHParticleMasses::  kaonMSigma );
+
+    bLb.filter(   jPsiName, * jpsiSel );
+    bLb.filter( protonName, *   ptSel );
+    bLb.filter( protonName, *  etaSel );
+    bLb.filter( protonName, *nVetoSel );
+    bLb.filter(   kaonName, *   ptSel );
+    bLb.filter(   kaonName, *  etaSel );
+    bLb.filter(   kaonName, *nVetoSel );
+
+    bLb.filter( *massSel    );
+    bLb.filter( *massTmpSel );
+    bLb.filter( *chi2Sel    );
+    bLb.filter( *chargeSel  );
+    if ( massConstr ) bLb.filter( *mFitSel );
+
+    vector<BPHRecoConstCandPtr> tmpList = BPHRecoCandidate::build( bLb );
+
+    int ilb;
+    int nlb = tmpList.size();
+    lbList.clear();
+    lbList.reserve( nlb );
+    BPHRecoConstCandPtr ptrTempParticle( 0 );
+
+    for ( ilb = 0; ilb != nlb; ++ilb )
+    {
+        BPHRecoConstCandPtr& ptrlbOrig = tmpList[ilb];
+        BPHRecoCandidatePtr  ptrlbReco( new BPHRecoCandidate(evSetup) );
+        const
+        BPHRecoCandidate* lbOrig = ptrlbOrig.get();
+        BPHRecoCandidate* lbReco = ptrlbReco.get();
+
+
+        // search for jpsi p- K+ Candidate
+        lbReco->add(  jPsiName, ptrlbOrig->getComp( jPsiName ) );
+        lbReco->add(   kaonName, lbOrig->originalReco( lbOrig->getDaug(protonName) ), BPHParticleMasses::  kaonMass );
+        lbReco->add( protonName, lbOrig->originalReco( lbOrig->getDaug(  kaonName) ), BPHParticleMasses::protonMass );
+        
+        // select for particle with smaller mass difference
+        if ( fabs( lbOrig->composite().mass() - BPHParticleMasses::Lambda0_bMass ) <
+             fabs( lbReco->composite().mass() - BPHParticleMasses::Lambda0_bMass ) ) 
+            ptrTempParticle = ptrlbOrig;
+        else
+            ptrTempParticle = ptrlbReco;
+
+        if ( !massSel   ->accept(*ptrTempParticle) ) continue;
+        if ( !chi2Sel   ->accept(*ptrTempParticle) ) continue;
+
+        lbList.push_back(ptrTempParticle);
+    }
+
+
+//
+//  Apply kinematic constraint on the JPsi mass.
+//  The operation is already performed when apply the mass selection,
+//  so it's not repeated. The following code is left as example
+//  for similar operations
+//
+//  int iLb;
+//  int nLb = ( massConstr ? lbList.size() : 0 );
+//  for ( iLb = 0; iLb < nLb; ++iLb ) {
+//    BPHRecoCandidate* cptr( const_cast<BPHRecoCandidate*>(
+//                            lbList[iLb].get() ) );
+//    BPHRecoConstCandPtr jpsi = cptr->getComp( jPsiName );
+//    double jMass = jpsi->constrMass();
+//    if ( jMass < 0 ) continue;
+//    double sigma = jpsi->constrSigma();
+//    cptr->kinematicTree( jPsiName, jMass, sigma );
+//  }
+    updated = true;
+
+    return lbList;
+
+}
+
+/// set cuts
+void BPHLbToJPsiTkTkBuilder::setJPsiMassMin( double m ) {
+  updated = false;
+  jpsiSel->setMassMin( m );
+  return;
+}
+
+
+void BPHLbToJPsiTkTkBuilder::setJPsiMassMax( double m ) {
+  updated = false;
+  jpsiSel->setMassMax( m );
+  return;
+}
+
+
+void BPHLbToJPsiTkTkBuilder::setPtMin      ( double m ) {
+    updated = false;
+    ptSel->setPtMin( m );
+    return;
+}
+
+void BPHLbToJPsiTkTkBuilder::setEtaMax     ( double m ) {
+    updated = false;
+    etaSel->setEtaMax( m );
+    return;
+}
+
+void BPHLbToJPsiTkTkBuilder::setMassMin( double m ) {
+  updated = false;
+  massSel->setMassMin( m );
+  return;
+}
+
+
+void BPHLbToJPsiTkTkBuilder::setMassMax( double m ) {
+  updated = false;
+  massSel->setMassMax( m );
+  return;
+}
+
+
+void BPHLbToJPsiTkTkBuilder::setProbMin( double p ) {
+  updated = false;
+  chi2Sel->setProbMin( p );
+  return;
+}
+
+
+void BPHLbToJPsiTkTkBuilder::setMassFitMin( double m ) {
+  updated = false;
+  mFitSel->setMassMin( m );
+  return;
+}
+
+
+void BPHLbToJPsiTkTkBuilder::setMassFitMax( double m ) {
+  updated = false;
+  mFitSel->setMassMax( m );
+  return;
+}
+
+
+void BPHLbToJPsiTkTkBuilder::setConstr( bool flag ) {
+  updated = false;
+  massConstr = flag;
+  return;
+}
+
+/// get current cuts
+double BPHLbToJPsiTkTkBuilder::getJPsiMassMin() const {
+  return jpsiSel->getMassMin();
+}
+
+
+double BPHLbToJPsiTkTkBuilder::getJPsiMassMax() const {
+  return jpsiSel->getMassMax();
+}
+
+
+double BPHLbToJPsiTkTkBuilder::getPtMin() const {
+  return ptSel->getPtMin();
+}
+
+
+double BPHLbToJPsiTkTkBuilder::getEtaMax() const {
+  return etaSel->getEtaMax();
+}
+
+
+double BPHLbToJPsiTkTkBuilder::getMassMin() const {
+  return massSel->getMassMin();
+}
+
+
+double BPHLbToJPsiTkTkBuilder::getMassMax() const {
+  return massSel->getMassMax();
+}
+
+
+double BPHLbToJPsiTkTkBuilder::getProbMin() const {
+  return chi2Sel->getProbMin();
+}
+
+
+double BPHLbToJPsiTkTkBuilder::getMassFitMin() const {
+  return mFitSel->getMassMin();
+}
+
+
+double BPHLbToJPsiTkTkBuilder::getMassFitMax() const {
+  return mFitSel->getMassMax();
+}
+
+
+bool BPHLbToJPsiTkTkBuilder::getConstr() const {
+  return massConstr;
+}
+

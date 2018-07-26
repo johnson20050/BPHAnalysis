@@ -603,10 +603,10 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     LogTrace( "DataDump" )
            << "*********** quarkonium " << iqo << "/" << nqo << " ***********";
     const pat::CompositeCandidate& cand = oniaCands->at( iqo );
-    if ( !oniaVertexSelect->accept( cand,
-                                    BPHUserData::getByRef<reco::Vertex>( cand,
-                                    "primaryVertex" ) ) ) continue;
-    if ( !oniaDaughterSelect->accept( cand ) ) continue;
+    //if ( !oniaVertexSelect->accept( cand,
+    //                                BPHUserData::getByRef<reco::Vertex>( cand,
+    //                                "primaryVertex" ) ) ) continue;
+    //if ( !oniaDaughterSelect->accept( cand ) ) continue;
     fillHisto( "Full", cand );
     if (  phiBasicSelect->accept( cand ) ) fillHisto( "Phi"   , cand );
     if ( jPsiBasicSelect->accept( cand ) ) fillHisto( "JPsi"  , cand );
@@ -633,11 +633,11 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     LogTrace( "DataDump" )
            << "JPsi: " << jPsi;
     if ( jPsi == 0 ) continue;
-    if ( !buJPsiBasicSelect   ->accept( *jPsi ) ) continue;
-    if ( !buJPsiDaughterSelect->accept( *jPsi ) ) continue;
-    if ( !buVertexSelect->accept( cand,
-                                  BPHUserData::getByRef<reco::Vertex>( *jPsi,
-                                  "primaryVertex" ) ) ) continue;
+    //if ( !buJPsiBasicSelect   ->accept( *jPsi ) ) continue;
+    //if ( !buJPsiDaughterSelect->accept( *jPsi ) ) continue;
+    //if ( !buVertexSelect->accept( cand,
+    //                              BPHUserData::getByRef<reco::Vertex>( *jPsi,
+    //                              "primaryVertex" ) ) ) continue;
     const reco::Candidate* kptr = BPHDaughters::get( cand, 0.49, 0.50 ).front();
     if ( kptr == 0 ) continue;
     if ( kptr->pt() < buKPtMin ) continue;
@@ -669,12 +669,12 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     LogTrace( "DataDump" )
            << "Kx0: " << kx0;
     if ( kx0 == 0 ) continue;
-    if ( !bdJPsiBasicSelect   ->accept( *jPsi ) ) continue;
-    if ( !bdKx0BasicSelect    ->accept( * kx0 ) ) continue;
-    if ( !bdJPsiDaughterSelect->accept( *jPsi ) ) continue;
-    if ( !bdVertexSelect->accept( cand,
-                                  BPHUserData::getByRef<reco::Vertex>( *jPsi,
-                                  "primaryVertex" ) ) ) continue;
+    //if ( !bdJPsiBasicSelect   ->accept( *jPsi ) ) continue;
+    //if ( !bdKx0BasicSelect    ->accept( * kx0 ) ) continue;
+    //if ( !bdJPsiDaughterSelect->accept( *jPsi ) ) continue;
+    //if ( !bdVertexSelect->accept( cand,
+    //                              BPHUserData::getByRef<reco::Vertex>( *jPsi,
+    //                              "primaryVertex" ) ) ) continue;
     fillHisto( "Bd"    ,  cand );
     fillHisto( "BdJPsi", *jPsi );
     fillHisto( "BdKx0" , *kx0  );
@@ -704,12 +704,12 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     LogTrace( "DataDump" )
            << "Phi: " << phi;
     if ( phi == 0 ) continue;
-    if ( !bsJPsiBasicSelect   ->accept( *jPsi ) ) continue;
-    if ( !bsPhiBasicSelect    ->accept( * phi ) ) continue;
-    if ( !bsJPsiDaughterSelect->accept( *jPsi ) ) continue;
-    if ( !bsVertexSelect->accept( cand,
-                                  BPHUserData::getByRef<reco::Vertex>( *jPsi,
-                                  "primaryVertex" ) ) ) continue;
+    //if ( !bsJPsiBasicSelect   ->accept( *jPsi ) ) continue;
+    //if ( !bsPhiBasicSelect    ->accept( * phi ) ) continue;
+    //if ( !bsJPsiDaughterSelect->accept( *jPsi ) ) continue;
+    //if ( !bsVertexSelect->accept( cand,
+    //                              BPHUserData::getByRef<reco::Vertex>( *jPsi,
+    //                              "primaryVertex" ) ) ) continue;
     fillHisto( "Bs"    ,  cand );
     fillHisto( "BsJPsi", *jPsi );
     fillHisto( "BsPhi" , *phi  );

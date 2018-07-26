@@ -18,6 +18,7 @@ log*
 *.png
 *.pdf
 *.eps
+__init__.py
 
 # Specific file exclusion
 # [relative/path/to/file]
