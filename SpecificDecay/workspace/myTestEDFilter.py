@@ -1,3 +1,4 @@
+#!/usr/bin/env cmsRun
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("bphAnalysis")
@@ -23,17 +24,19 @@ process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
 #'file:///home/ltsai/Data/CMSSW_8_0_21/LbToJPsiLam0/08A76328-3362-E711-90FD-0025905A611C.root'
-'file:///home/ltsai/Data/8028_2016RunG_AOD_07Aug17.root'
+#'file:///home/ltsai/Data/8028_2016RunG_AOD_07Aug17.root'
+'file:///home/ltsai/Data/CMSSW_9_4_0/default/0294A5EC-3CED-E711-97F1-001E677925F0.root'
 ))
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016LegacyRepro_v4', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016LegacyRepro_v4', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '94X_dataRun2_ReReco_EOY17_v1', '')
 
 HLTName='HLT_DoubleMu4_JpsiTrk_Displaced_v*'
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
 process.hltHighLevel= hltHighLevel.clone(HLTPaths = cms.vstring(HLTName))
 
-#process.load("BPHAnalysis.SpecificDecay.testProducer_cfi")
+# preselect pat muon and pat tracks
 process.load("BPHAnalysis.PreselectFilter.FilterConf_cfi")
 
 # remove MC dependence
@@ -47,7 +50,7 @@ process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
     bsPointLabel = cms.string('offlineBeamSpot::RECO'),
     pVertexLabel = cms.string('offlinePrimaryVertices::RECO'),
     gpCandsLabel = cms.string('selectedTracks'),
-    patMuonLabel = cms.string('selectedMuons'),
+    #patMuonLabel = cms.string('selectedMuons'),
     dedxHrmLabel = cms.string('dedxHarmonic2::RECO'),
 
 # the label of output product
@@ -75,8 +78,12 @@ process.out = cms.OutputModule(
 )
 process.myfilterpath = cms.Path(
       process.hltHighLevel
-    * process.selectedTracks
-    * process.selectedMuons
+    * process.myMuonsSequence
+    * process.myTrackSequence
+#    * process.patMuons
+#    * process.selectedPatMuons
+#    * process.selectedMuons
+#    * process.selectedTracks
     * process.lbWriteSpecificDecay
 )
 

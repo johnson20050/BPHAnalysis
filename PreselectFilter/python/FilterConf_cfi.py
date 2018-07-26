@@ -2,27 +2,6 @@ import FWCore.ParameterSet.Config as cms
 
 
 #--------------------------------------------------------------------------------
-# - Track Setting
-#--------------------------------------------------------------------------------
-# prepare GenericParticle from AOD
-CandidateSelectedTracks = cms.EDProducer( "ConcreteChargedCandidateProducer",
-                #src=cms.InputTag("oniaSelectedTracks::RECO"),
-                src=cms.InputTag("generalTracks::RECO"),
-                particleType=cms.string('pi+')
-)
-from PhysicsTools.PatAlgos.producersLayer1.genericParticleProducer_cfi import patGenericParticles
-patSelectedTracks = patGenericParticles.clone(src=cms.InputTag("CandidateSelectedTracks"))
-
-
-# preselect track
-selectedTracks = cms.EDFilter(
-    "TrackProducer",
-    tracksrc = cms.InputTag("patSelectedTracks"),
-    muonsrc = cms.InputTag("selectedPatMuons")
-    )
-
-
-#--------------------------------------------------------------------------------
 # - Muon  Setting
 #--------------------------------------------------------------------------------
 # prepare pat::Muon from AOD
@@ -43,3 +22,28 @@ selectedMuons = cms.EDFilter(
     "MuonProducer",
     muonsrc = cms.InputTag("selectedPatMuons"),
     )
+
+myMuonsSequence = cms.Sequence( selectedPatMuons * selectedMuons, makePatMuonsTask )
+
+
+#--------------------------------------------------------------------------------
+# - Track Setting
+#--------------------------------------------------------------------------------
+# prepare GenericParticle from AOD
+CandidateSelectedTracks = cms.EDProducer( "ConcreteChargedCandidateProducer",
+                #src=cms.InputTag("oniaSelectedTracks::RECO"),
+                src=cms.InputTag("generalTracks::RECO"),
+                particleType=cms.string('pi+')
+)
+from PhysicsTools.PatAlgos.producersLayer1.genericParticleProducer_cfi import patGenericParticles
+patSelectedTracks = patGenericParticles.clone(src=cms.InputTag("CandidateSelectedTracks"))
+
+
+# preselect track
+selectedTracks = cms.EDFilter(
+    "TrackProducer",
+    tracksrc = cms.InputTag("patSelectedTracks"),
+    muonsrc = cms.InputTag("selectedPatMuons")
+    )
+
+myTrackSequence = cms.Sequence( CandidateSelectedTracks * patSelectedTracks * selectedTracks )

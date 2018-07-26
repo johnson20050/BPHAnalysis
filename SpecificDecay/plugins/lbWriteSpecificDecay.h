@@ -126,7 +126,6 @@ private:
     std::vector<BPHPlusMinusConstCandPtr> lFull;
     std::vector<BPHPlusMinusConstCandPtr> lJPsi;
     std::vector<BPHPlusMinusConstCandPtr> lTkTk;
-    //std::vector<BPHPlusMinusConstCandPtr> plTkTk;
     std::vector<BPHRecoConstCandPtr>      lLbToTkTk;
 
     // the connection between JPsi & lFull.

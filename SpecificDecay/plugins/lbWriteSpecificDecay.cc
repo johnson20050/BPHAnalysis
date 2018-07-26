@@ -127,8 +127,7 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
                                                                   dedxPLHLabel );
 
     if ( writeOnia     ) produces<pat::CompositeCandidateCollection>( oniaName     );
-    if ( writeTkTk     ) produces<pat::CompositeCandidateCollection>( "p"+TkTkName );
-    if ( writeTkTk     ) produces<pat::CompositeCandidateCollection>( "n"+TkTkName );
+    if ( writeTkTk     ) produces<pat::CompositeCandidateCollection>( TkTkName     );
     if ( writeLbToTkTk ) produces<pat::CompositeCandidateCollection>( LbToTkTkName );
 
 }
@@ -189,26 +188,18 @@ void lbWriteSpecificDecay::beginJob() {
 
 void lbWriteSpecificDecay::produce( edm::Event& ev,
                                      const edm::EventSetup& es ) {
-    std::cout << "hi1\n";
   fill( ev, es );
-    std::cout << "hi2\n";
   bool writeEvent = lLbToTkTk.size();
-    std::cout << "hi3\n";
   if ( writeOnia     ) write( ev, lFull     ,     oniaName , writeEvent ); 
-    std::cout << "hi4\n";
   //if ( writeTkTk     ) write( ev, plTkTk    , "p"+TkTkName , writeEvent ); 
-    std::cout << "hi5\n";
   if ( writeTkTk     ) write( ev, lTkTk    , TkTkName , writeEvent ); 
-    std::cout << "hi6\n";
   if ( writeLbToTkTk ) write( ev, lLbToTkTk , LbToTkTkName , writeEvent ); 
-    std::cout << "hi end\n";
   return;
 }
 
 
 void lbWriteSpecificDecay::fill( edm::Event& ev,
                                   const edm::EventSetup& es ) {
-    std::cout << "fill 01\n";
     // clean up {{{
     lFull    .clear();
     lJPsi    .clear();
@@ -219,14 +210,12 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     pvRefMap .clear();
     ccRefMap .clear();
     // clean up end }}}
-    std::cout << "fill 02\n";
 
     // get magnetic field
     edm::ESHandle<MagneticField> magneticField;
     es.get<IdealMagneticFieldRecord>().get( magneticField );
 
     std::map<const BPHRecoCandidate*,const reco::Vertex*> oniaVtxMap;
-    std::cout << "fill 03\n";
     // find muon and get MuMu Onia full list, use them to decide primary vertex {{{
     // get object collections
     // collections are got through "BPHTokenWrapper" interface to allow
@@ -526,7 +515,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     int nJPsi = lJPsi.size();
     delete onia; // chk pV end }}}
 
-    std::cout << "fill 04\n";
     if ( !nJPsi ) return;
     // Search for the map of lJPsi and lFull {{{
     if ( !nrc   ) return;
@@ -555,7 +543,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     }
 
     // Search for the map of lJPsi and lFull end}}}
-    std::cout << "fill 05\n";
 
     // Build TkTk {{{
     BPHTkTkBuilder* tktk = 0;
@@ -631,7 +618,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     } // set cut value end  
     unsigned nTkTk = plTkTk.size();
     // Build TkTk end }}}
-    std::cout << "fill 06\n";
 
     // Build and dump Lb->Jpsi+TkTk {{{
     if ( nTkTk && recoLbToTkTk )
@@ -681,7 +667,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
 
     }
     // Build LbToTkTk end }}}
-    std::cout << "fill 07\n";
 }
 
 
