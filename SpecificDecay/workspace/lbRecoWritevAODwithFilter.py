@@ -23,9 +23,19 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
-#'file:///home/ltsai/Data/CMSSW_8_0_21/LbToJPsiLam0/08A76328-3362-E711-90FD-0025905A611C.root'
-#'file:///home/ltsai/Data/8028_2016RunG_AOD_07Aug17.root'
-'file:///home/ltsai/Data/CMSSW_9_4_0/default/0294A5EC-3CED-E711-97F1-001E677925F0.root'
+"file:///home/ltsai/Data/CMSSW_9_4_0/default/0294A5EC-3CED-E711-97F1-001E677925F0.root",
+"file:///home/ltsai/Data/CMSSW_9_4_0/default/0E6098A1-44ED-E711-AF56-A4BF011257F8.root",
+"file:///home/ltsai/Data/CMSSW_9_4_0/default/2C5196D0-44ED-E711-BEFE-A4BF0112BC8C.root",
+"file:///home/ltsai/Data/CMSSW_9_4_0/default/344E8E0F-45ED-E711-8C1A-001E67E6F922.root",
+"file:///home/ltsai/Data/CMSSW_9_4_0/default/3A6A42D5-44ED-E711-ABE2-A4BF0112BC8C.root",
+"file:///home/ltsai/Data/CMSSW_9_4_0/default/44F7A3AF-44ED-E711-8BCB-A4BF01125660.root",
+"file:///home/ltsai/Data/CMSSW_9_4_0/default/462D37C6-44ED-E711-BB4A-A4BF01158888.root",
+"file:///home/ltsai/Data/CMSSW_9_4_0/default/6C22CCAC-44ED-E711-8569-A4BF01125660.root",
+"file:///home/ltsai/Data/CMSSW_9_4_0/default/82AA92DC-3CED-E711-B076-A4BF0112BC8C.root",
+"file:///home/ltsai/Data/CMSSW_9_4_0/default/86F445C4-44ED-E711-A839-001E677928AA.root",
+"file:///home/ltsai/Data/CMSSW_9_4_0/default/A28CD840-45ED-E711-BDF0-001E67E6A166.root",
+"file:///home/ltsai/Data/CMSSW_9_4_0/default/B620BAD0-44ED-E711-BFC7-001E67E33C10.root",
+"file:///home/ltsai/Data/CMSSW_9_4_0/default/C6161A9D-44ED-E711-AFFC-001E67792890.root",
 ))
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
@@ -50,7 +60,7 @@ process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
     bsPointLabel = cms.string('offlineBeamSpot::RECO'),
     pVertexLabel = cms.string('offlinePrimaryVertices::RECO'),
     gpCandsLabel = cms.string('selectedTracks'),
-    #patMuonLabel = cms.string('selectedMuons'),
+    patMuonLabel = cms.string('selectedMuons'),
     dedxHrmLabel = cms.string('dedxHarmonic2::RECO'),
 
 # the label of output product
@@ -66,7 +76,7 @@ process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
 
 process.out = cms.OutputModule(
     "PoolOutputModule",
-    fileName = cms.untracked.string('recoWriteSpecificDecay.root'),
+    fileName = cms.untracked.string('recoBPHanalysis.withFilter.root'),
     outputCommands = cms.untracked.vstring(
         "drop *",
         "keep *_lbWriteSpecificDecay_*_bphAnalysis",
@@ -80,10 +90,6 @@ process.myfilterpath = cms.Path(
       process.hltHighLevel
     * process.myMuonsSequence
     * process.myTrackSequence
-#    * process.patMuons
-#    * process.selectedPatMuons
-#    * process.selectedMuons
-#    * process.selectedTracks
     * process.lbWriteSpecificDecay
 )
 

@@ -194,6 +194,7 @@ void lbWriteSpecificDecay::produce( edm::Event& ev,
   //if ( writeTkTk     ) write( ev, plTkTk    , "p"+TkTkName , writeEvent ); 
   if ( writeTkTk     ) write( ev, lTkTk    , TkTkName , writeEvent ); 
   if ( writeLbToTkTk ) write( ev, lLbToTkTk , LbToTkTkName , writeEvent ); 
+  if ( lLbToTkTk.size() == 0 ) return;
   return;
 }
 
@@ -210,6 +211,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     pvRefMap .clear();
     ccRefMap .clear();
     // clean up end }}}
+    
 
     // get magnetic field
     edm::ESHandle<MagneticField> magneticField;
@@ -282,7 +284,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
         //std::cout << "hit pattern analysis done (one event)!\n";
 
     }
-    if( nrc > 0 ) ;
 
     // get pat::Muon collection (in full AOD and MiniAOD)
     edm::Handle<pat::MuonCollection> patMuon;
@@ -543,6 +544,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     }
 
     // Search for the map of lJPsi and lFull end}}}
+
 
     // Build TkTk {{{
     BPHTkTkBuilder* tktk = 0;
