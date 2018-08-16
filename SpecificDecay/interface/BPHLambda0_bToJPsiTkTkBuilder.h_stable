@@ -49,7 +49,8 @@ class BPHLambda0_bToJPsiTkTkBuilder {
    */
   BPHLambda0_bToJPsiTkTkBuilder( const edm::EventSetup& es,
       const std::vector<BPHPlusMinusConstCandPtr>& JpsiCollection,
-      const std::vector<BPHPlusMinusConstCandPtr>& TkTkCollection);
+      const std::vector<BPHPlusMinusConstCandPtr>& pTkTkCollection,
+      const std::vector<BPHPlusMinusConstCandPtr>& nTkTkCollection);
 
   /** Destructor
    */
@@ -59,6 +60,7 @@ class BPHLambda0_bToJPsiTkTkBuilder {
    */
   /// build Bs candidates
   std::vector<BPHRecoConstCandPtr> build();
+  std::vector<BPHPlusMinusConstCandPtr> getTkTkList();
 
   /// set cuts
   void setJPsiMassMin( double m  );
@@ -91,7 +93,8 @@ class BPHLambda0_bToJPsiTkTkBuilder {
 
   const edm::EventSetup* evSetup;
   const std::vector<BPHPlusMinusConstCandPtr>*  jpsiCollection;
-  const std::vector<BPHPlusMinusConstCandPtr>*  tktkCollection;
+  const std::vector<BPHPlusMinusConstCandPtr>* ptktkCollection;
+  const std::vector<BPHPlusMinusConstCandPtr>* ntktkCollection;
 
   BPHMassSelect   *  jpsiSel;
 
@@ -108,6 +111,7 @@ class BPHLambda0_bToJPsiTkTkBuilder {
   bool updated;
 
   std::vector<BPHRecoConstCandPtr> lbList;
+  std::vector<BPHPlusMinusConstCandPtr> ltktkList;
   TwoTrackMassKinematicConstraint* jpsiConstr;
 
 };

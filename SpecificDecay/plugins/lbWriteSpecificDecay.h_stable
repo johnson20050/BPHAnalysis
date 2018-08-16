@@ -95,13 +95,11 @@ private:
 
 // The label used in output product
     std::string     oniaName;
-    std::string     pTksName;
-    std::string     nTksName;
-    std::string     pL0BName;
-    std::string     nL0BName;
+    std::string     TkTkName;
+    std::string LbToTkTkName;
 
 
-    enum recoType { Onia, Psi1, Psi2, pTks, nTks, pL0B, nL0B };
+    enum recoType { Onia, Psi1, Psi2, TkTk, LbToTkTk };
     enum  parType { ptMin, etaMax,
                     mPsiMin, mPsiMax,
                     massMin, massMax, probMin, mFitMin, mFitMax,
@@ -114,27 +112,21 @@ private:
     std::map< recoType, std::map<parType,double> >  parMap;
 
 
-    bool recoOnia;
-    bool recopTks;
-    bool reconTks;
-    bool recopL0B;
-    bool reconL0B;
+    bool recoOnia     ;
+    bool recoTkTk     ;
+    bool recoLbToTkTk ;
 
-    bool writeOnia;
-    bool writepTks;
-    bool writenTks;
-    bool writepL0B;
-    bool writenL0B;
+    bool writeOnia    ;
+    bool writeTkTk    ;
+    bool writeLbToTkTk;
 
     bool writeVertex;
     bool writeMomentum;
 
     std::vector<BPHPlusMinusConstCandPtr> lFull;
     std::vector<BPHPlusMinusConstCandPtr> lJPsi;
-    std::vector<BPHPlusMinusConstCandPtr> lpTks;
-    std::vector<BPHPlusMinusConstCandPtr> lnTks;
-    std::vector<BPHRecoConstCandPtr>      lpL0B;
-    std::vector<BPHRecoConstCandPtr>      lnL0B;
+    std::vector<BPHPlusMinusConstCandPtr> lTkTk;
+    std::vector<BPHRecoConstCandPtr>      lLbToTkTk;
 
     // the connection between JPsi & lFull.
     // lFull is the mumu candidate which will be recorded in storage.
