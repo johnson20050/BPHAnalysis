@@ -9,7 +9,8 @@ recoSelect = cms.VPSet(
         massMax = cms.double( 5.50  ),
         probMin = cms.double( 0.1   ),
         constrMass  = cms.double( 3.096900 ),
-        constrSigma = cms.double( 0.000006 )
+        constrSigma = cms.double( 0.000006 ),
+        writeCandidate = cms.bool( True )
     ),
     cms.PSet( name = cms.string( 'pTks'  ),
           ptMin = cms.double(  1.0 ),
@@ -17,6 +18,7 @@ recoSelect = cms.VPSet(
         massMin = cms.double(  1.00  ),
         massMax = cms.double(  2.25  ),
         probMin = cms.double( 0.10  ),
+        writeCandidate = cms.bool( True )
     ),
     cms.PSet( name = cms.string( 'pL0B' ),
         mPsiMin = cms.double( 2.80   ),
@@ -27,7 +29,8 @@ recoSelect = cms.VPSet(
         probMin = cms.double( 0.10 ),
      massFitMin = cms.double( 5.00 ),
      massFitMax = cms.double( 6.00 ),
-        constrMJPsi = cms.bool(  True )
+        constrMJPsi = cms.bool(  True ),
+        writeCandidate = cms.bool( True )
     ),
     cms.PSet( name = cms.string( 'nTks'  ),
           ptMin = cms.double(  1.0 ),
@@ -35,6 +38,7 @@ recoSelect = cms.VPSet(
         massMin = cms.double(  1.00  ),
         massMax = cms.double(  2.25  ),
         probMin = cms.double( 0.10  ),
+        writeCandidate = cms.bool( True )
     ),
     cms.PSet( name = cms.string( 'nL0B' ),
         mPsiMin = cms.double( 2.80   ),
@@ -45,6 +49,7 @@ recoSelect = cms.VPSet(
         probMin = cms.double( 0.10 ),
      massFitMin = cms.double( 5.00 ),
      massFitMax = cms.double( 6.00 ),
-        constrMJPsi = cms.bool(  True )
+        constrMJPsi = cms.bool(  True ),
+        writeCandidate = cms.bool( True )
     ),
 )
