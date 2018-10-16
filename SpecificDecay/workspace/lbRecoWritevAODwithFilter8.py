@@ -3,8 +3,8 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("bphAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(3000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(300000) )
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('Configuration.StandardSequences.Services_cff')
@@ -22,7 +22,8 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
-process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
+process.source = cms.Source("PoolSource",
+        fileNames = cms.untracked.vstring(
 "file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058.20.root",
 "file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058.21.root",
 "file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058.22.root",
@@ -53,7 +54,10 @@ process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
 "file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_17.root",
 "file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_18.root",
 "file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_19.root",
-))
+),
+        duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
+
+)
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016LegacyRepro_v4', '')
@@ -67,8 +71,8 @@ process.hltHighLevel= hltHighLevel.clone(HLTPaths = cms.vstring(HLTName))
 process.load("BPHAnalysis.PreselectFilter.FilterConf8_cfi")
 
 ## remove MC dependence
-#from PhysicsTools.PatAlgos.tools.coreTools import *
-#removeMCMatching(process, names=['All'], outputModules=[] )
+from PhysicsTools.PatAlgos.tools.coreTools import *
+removeMCMatching(process, names=['All'], outputModules=[] )
 
 #from BPHAnalysis.SpecificDecay.newSelectForWrite_cfi import recoSelect
 from BPHAnalysis.SpecificDecay.LbrecoSelectForWrite_cfi import recoSelect
@@ -87,8 +91,11 @@ process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
     pL0BName      = cms.string('pL0BFitted'),
     nTksName      = cms.string('nTksFitted'),
     nL0BName      = cms.string('nL0BFitted'),
-    #Lam0Name      = cms.string('Lam0Fitted'),
-    #LbToLam0Name  = cms.string('LbToLam0Fitted'),
+
+    Lam0Name      = cms.string('Lam0Fitted'),
+    LbL0Name      = cms.string('LbL0Fitted'),
+    LamoName      = cms.string('LamoFitted'),
+    LbLoName      = cms.string('LbLoFitted'),
     writeVertex   = cms.bool( True ),
     writeMomentum = cms.bool( True ),
     recoSelect    = cms.VPSet(recoSelect)

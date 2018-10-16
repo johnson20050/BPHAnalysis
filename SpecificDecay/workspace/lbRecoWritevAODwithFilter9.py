@@ -3,8 +3,8 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("bphAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(300000) )
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('Configuration.StandardSequences.Services_cff')
@@ -53,7 +53,9 @@ process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
 "file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_17.root",
 "file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_18.root",
 "file:///home/ltsai/Data/mcStep3_LbTJPsipK_13TeV_withoutPileUp_180524/BPH-RunIISpring16DR80-00058_19.root",
-))
+),
+        duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
+)
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, '94X_dataRun2_ReReco_EOY17_v1', '')
@@ -85,8 +87,11 @@ process.lbWriteSpecificDecay = cms.EDProducer('lbWriteSpecificDecay',
     pL0BName      = cms.string('pL0BFitted'),
     nTksName      = cms.string('nTksFitted'),
     nL0BName      = cms.string('nL0BFitted'),
-    #Lam0Name      = cms.string('Lam0Fitted'),
-    #LbToLam0Name  = cms.string('LbToLam0Fitted'),
+
+    Lam0Name      = cms.string('Lam0Fitted'),
+    LbL0Name      = cms.string('LbL0Fitted'),
+    LamoName      = cms.string('LamoFitted'),
+    LbLoName      = cms.string('LbLoFitted'),
     writeVertex   = cms.bool( True ),
     writeMomentum = cms.bool( True ),
     recoSelect    = cms.VPSet(recoSelect)

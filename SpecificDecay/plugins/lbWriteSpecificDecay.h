@@ -100,10 +100,15 @@ private:
     std::string     pL0BName;
     std::string     nL0BName;
 
+    std::string     Lam0Name;
+    std::string     LamoName;
+    std::string     LbL0Name;
+    std::string     LbLoName;
 
-    enum recoType { Onia, Psi1, Psi2, pTks, nTks, pL0B, nL0B };
+
+    enum recoType { Onia, Psi1, Psi2, pTks, nTks, pL0B, nL0B, Lam0, Lamo, LbL0, LbLo };
     enum  parType { ptMin, etaMax,
-                    mPsiMin, mPsiMax,
+                    mPsiMin, mPsiMax, mLam0Min, mLam0Max, mTkTkMin, mTkTkMax,
                     massMin, massMax, probMin, mFitMin, mFitMax,
                     constrMass, constrSigma, constrMJPsi, writeCandidate,
                   };
@@ -119,12 +124,20 @@ private:
     bool reconTks;
     bool recopL0B;
     bool reconL0B;
+    bool recoLam0;
+    bool recoLamo;
+    bool recoLbL0;
+    bool recoLbLo;
 
     bool writeOnia;
     bool writepTks;
     bool writenTks;
     bool writepL0B;
     bool writenL0B;
+    bool writeLam0;
+    bool writeLamo;
+    bool writeLbL0;
+    bool writeLbLo;
 
     bool writeVertex;
     bool writeMomentum;
@@ -135,6 +148,10 @@ private:
     std::vector<BPHPlusMinusConstCandPtr> lnTks;
     std::vector<BPHRecoConstCandPtr>      lpL0B;
     std::vector<BPHRecoConstCandPtr>      lnL0B;
+    std::vector<BPHPlusMinusConstCandPtr> lLam0;
+    std::vector<BPHPlusMinusConstCandPtr> lLamo;
+    std::vector<BPHRecoConstCandPtr>      lLbL0;
+    std::vector<BPHRecoConstCandPtr>      lLbLo;
 
     // the connection between JPsi & lFull.
     // lFull is the mumu candidate which will be recorded in storage.

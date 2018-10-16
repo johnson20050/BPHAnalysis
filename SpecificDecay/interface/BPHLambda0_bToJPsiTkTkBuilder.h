@@ -63,6 +63,8 @@ class BPHLambda0_bToJPsiTkTkBuilder {
   /// set cuts
   void setJPsiMassMin( double m  );
   void setJPsiMassMax( double m  );
+  void setTkTkMassMin( double m  );
+  void setTkTkMassMax( double m  );
   void setMassMin    ( double m  );
   void setMassMax    ( double m  );
   void setProbMin    ( double p  );
@@ -73,6 +75,8 @@ class BPHLambda0_bToJPsiTkTkBuilder {
   /// get current cuts
   double getJPsiMassMin() const;
   double getJPsiMassMax() const;
+  double getTkTkMassMin() const;
+  double getTkTkMassMax() const;
   double getMassMin    () const;
   double getMassMax    () const;
   double getProbMin    () const;
@@ -94,6 +98,7 @@ class BPHLambda0_bToJPsiTkTkBuilder {
   const std::vector<BPHPlusMinusConstCandPtr>*  tktkCollection;
 
   BPHMassSelect   *  jpsiSel;
+  BPHMassSelect   *  tktkSel;
 
   BPHMassSelect   *  massSel;
   BPHChi2Select   *  chi2Sel;

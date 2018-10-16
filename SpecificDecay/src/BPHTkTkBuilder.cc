@@ -55,6 +55,7 @@ BPHTkTkBuilder::BPHTkTkBuilder(
   massSel = new BPHMassSelect( 1.00, 2.20 );
   chi2Sel = new BPHChi2Select( 0.005 );
   updated = false;
+  ptkCut = ntkCut = false;
 }
 
 //--------------
@@ -79,8 +80,11 @@ vector<BPHPlusMinusConstCandPtr> BPHTkTkBuilder::build() {
   bTkTk.add( nName, nCollection, nMass, nSigma );
   if ( ptSel->getPtMin() > 0 )
   {
-      bTkTk.filter( pName, * ptSel );
-      bTkTk.filter( nName, * ptSel );
+      // only put 
+      if ( ptkCut ) 
+          bTkTk.filter( pName, * ptSel );
+      if ( ntkCut )
+          bTkTk.filter( nName, * ptSel );
   }
   bTkTk.filter( pName, *etaSel );
   bTkTk.filter( nName, *etaSel );

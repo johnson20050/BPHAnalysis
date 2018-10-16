@@ -46,6 +46,7 @@ BPHLambda0_bToJPsiTkTkBuilder::BPHLambda0_bToJPsiTkTkBuilder( const edm::EventSe
    tktkCollection( & TkTkCollection ),
   _massDiff( 0.0148 ) {
   jpsiSel = new BPHMassSelect   ( 2.80, 3.40 );
+  tktkSel = new BPHMassSelect   ( 0.  , 0.   );
   massSel = new BPHMassSelect   ( 4.50, 7.00 );
   chi2Sel = new BPHChi2Select   ( 0.02 );
   ParticleMass jpsiMass( 3.0916 ); 
@@ -81,6 +82,8 @@ vector<BPHRecoConstCandPtr> BPHLambda0_bToJPsiTkTkBuilder::build() {
   bLb.add( jPsiName, *jpsiCollection );
   bLb.add( tktkName, *tktkCollection );
   bLb.filter( jPsiName, *jpsiSel  );
+  if ( this->getTkTkMassMin() > 0.0001 && this->getTkTkMassMax() > 0.0001 )
+      bLb.filter( tktkName, *tktkSel );
 
   bLb.filter( *massSel );
   bLb.filter( *chi2Sel );
@@ -106,6 +109,20 @@ void BPHLambda0_bToJPsiTkTkBuilder::setJPsiMassMin( double m ) {
 void BPHLambda0_bToJPsiTkTkBuilder::setJPsiMassMax( double m ) {
   updated = false;
   jpsiSel->setMassMax( m );
+  return;
+}
+
+
+void BPHLambda0_bToJPsiTkTkBuilder::setTkTkMassMin( double m ) {
+  updated = false;
+  tktkSel->setMassMin( m );
+  return;
+}
+
+
+void BPHLambda0_bToJPsiTkTkBuilder::setTkTkMassMax( double m ) {
+  updated = false;
+  tktkSel->setMassMax( m );
   return;
 }
 
@@ -159,6 +176,16 @@ double BPHLambda0_bToJPsiTkTkBuilder::getJPsiMassMin() const {
 
 double BPHLambda0_bToJPsiTkTkBuilder::getJPsiMassMax() const {
   return jpsiSel->getMassMax();
+}
+
+
+double BPHLambda0_bToJPsiTkTkBuilder::getTkTkMassMin() const {
+  return tktkSel->getMassMax();
+}
+
+
+double BPHLambda0_bToJPsiTkTkBuilder::getTkTkMassMax() const {
+  return tktkSel->getMassMax();
 }
 
 

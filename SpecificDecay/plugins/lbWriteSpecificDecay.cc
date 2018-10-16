@@ -68,6 +68,10 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     SET_PAR( string, pL0BName, ps );
     SET_PAR( string, nTksName, ps );
     SET_PAR( string, nL0BName, ps );
+    SET_PAR( string, LbL0Name, ps );
+    SET_PAR( string, LbLoName, ps );
+    SET_PAR( string, Lam0Name, ps );
+    SET_PAR( string, LamoName, ps );
     SET_PAR( bool  ,writeMomentum, ps );
     SET_PAR( bool  ,writeVertex  , ps );
 
@@ -78,11 +82,19 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     rMap["nTks"] = nTks;
     rMap["pL0B"] = pL0B;
     rMap["nL0B"] = nL0B;
+    rMap["Lam0"] = Lam0;
+    rMap["Lamo"] = Lamo;
+    rMap["LbL0"] = LbL0;
+    rMap["LbLo"] = LbLo;
 
     pMap["ptMin"      ] = ptMin;
     pMap["etaMax"     ] = etaMax;
     pMap["mPsiMin"    ] = mPsiMin;
     pMap["mPsiMax"    ] = mPsiMax;
+    pMap["mLam0Min"   ] = mLam0Min;
+    pMap["mLam0Max"   ] = mLam0Max;
+    pMap["mTkTkMin"   ] = mTkTkMin;
+    pMap["mTkTkMax"   ] = mTkTkMax;
     pMap["massMin"    ] = massMin;
     pMap["massMax"    ] = massMax;
     pMap["probMin"    ] = probMin;
@@ -97,9 +109,12 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     recoOnia  = true;
     recopTks  = writepTks =  false;
     recopL0B  = writepL0B =  false;
-    //recopL0B  = writepL0B =   true;
     reconTks  = writenTks =  false;
     reconL0B  = writenL0B =  false;
+    recoLam0  = writeLam0 =  false;
+    recoLamo  = writeLamo =  false;
+    recoLbL0  = writeLbL0 =  false;
+    recoLbLo  = writeLbLo =  false;
 
     writeOnia = true;
 
@@ -115,6 +130,10 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     if ( writepL0B ) writeOnia = writepTks   = true;
     if (  reconL0B )  recoOnia =  reconTks   = true;
     if ( writenL0B ) writeOnia = writenTks   = true;
+    if (  recoLbL0 )  recoOnia =  recoLam0   = true;
+    if ( writeLbL0 ) writeOnia = writeLam0   = true;
+    if (  recoLbLo )  recoOnia =  recoLamo   = true;
+    if ( writeLbLo ) writeOnia = writeLamo   = true;
 
     // Get data by label/token
     if ( useBS ) consume< reco::BeamSpot                       >( bsPointToken,
@@ -140,8 +159,12 @@ lbWriteSpecificDecay::lbWriteSpecificDecay( const edm::ParameterSet& ps ) {
     if ( writeOnia ) produces<pat::CompositeCandidateCollection>( oniaName );
     if ( writepTks ) produces<pat::CompositeCandidateCollection>( pTksName );
     if ( writepL0B ) produces<pat::CompositeCandidateCollection>( pL0BName );
-    if ( writepTks ) produces<pat::CompositeCandidateCollection>( nTksName );
-    if ( writepL0B ) produces<pat::CompositeCandidateCollection>( nL0BName );
+    if ( writenTks ) produces<pat::CompositeCandidateCollection>( nTksName );
+    if ( writenL0B ) produces<pat::CompositeCandidateCollection>( nL0BName );
+    if ( writeLbL0 ) produces<pat::CompositeCandidateCollection>( LbL0Name );
+    if ( writeLbL0 ) produces<pat::CompositeCandidateCollection>( Lam0Name );
+    if ( writeLbLo ) produces<pat::CompositeCandidateCollection>( LbLoName );
+    if ( writeLbLo ) produces<pat::CompositeCandidateCollection>( LamoName );
 
 }
 
@@ -167,6 +190,10 @@ void lbWriteSpecificDecay::fillDescriptions(
     desc.add<string>( "nTksName", "nTksCand" );
     desc.add<string>( "pL0BName", "pL0BFitted" );
     desc.add<string>( "nL0BName", "nL0BFitted" );
+    desc.add<string>( "Lam0Name", "Lam0Fitted" );
+    desc.add<string>( "LamoName", "LamoFitted" );
+    desc.add<string>( "LbL0Name", "LbL0Fitted" );
+    desc.add<string>( "LbLoName", "LbLoFitted" );
     
 
     desc.add<bool>  ( "writeVertex"  , true );
@@ -177,6 +204,8 @@ void lbWriteSpecificDecay::fillDescriptions(
     dpar.add<double>(         "etaMax", -2.0e35 );
     dpar.add<double>(        "mPsiMin", -2.0e35 );
     dpar.add<double>(        "mPsiMax", -2.0e35 );
+    dpar.add<double>(       "mLam0Min", -2.0e35 );
+    dpar.add<double>(       "mLam0Max", -2.0e35 );
     dpar.add<double>(       "mTkTkMin", -2.0e35 );
     dpar.add<double>(       "mTkTkMax", -2.0e35 );
     dpar.add<double>(        "massMin", -2.0e35 );
@@ -204,12 +233,20 @@ void lbWriteSpecificDecay::beginJob() {
 void lbWriteSpecificDecay::produce( edm::Event& ev,
                                      const edm::EventSetup& es ) {
   fill( ev, es );
-  bool writeEvent = lpL0B.size();
-  if ( writeOnia ) write( ev, lFull, oniaName , writeEvent ); 
-  if ( writepTks ) write( ev, lpTks, pTksName , writeEvent ); 
-  if ( writenTks ) write( ev, lnTks, nTksName , writeEvent ); 
-  if ( writepL0B ) write( ev, lpL0B, pL0BName , writeEvent ); 
-  if ( writenL0B ) write( ev, lnL0B, nL0BName , writeEvent ); 
+  bool WriteEvent = lpL0B.size() || lnL0B.size() || lLbL0.size() || lLbLo.size();
+  if ( writeOnia ) write( ev, lFull, oniaName , WriteEvent ); 
+
+  // #Lambda^0_b -> J/#psi + p + K
+  if ( writepTks ) write( ev, lpTks, pTksName , WriteEvent ); 
+  if ( writenTks ) write( ev, lnTks, nTksName , WriteEvent ); 
+  if ( writepL0B ) write( ev, lpL0B, pL0BName , WriteEvent ); 
+  if ( writenL0B ) write( ev, lnL0B, nL0BName , WriteEvent ); 
+
+  // #Lambda^0_b -> J/#psi + #Lambda^0
+  if ( writeLbL0 ) write( ev, lLbL0, LbL0Name , WriteEvent );
+  if ( writeLbL0 ) write( ev, lLam0, Lam0Name , WriteEvent );
+  if ( writeLbLo ) write( ev, lLbLo, LbLoName , WriteEvent );
+  if ( writeLbLo ) write( ev, lLamo, LamoName , WriteEvent );
   return;
 }
 
@@ -223,6 +260,10 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     lnTks    .clear();
     lpL0B    .clear();
     lnL0B    .clear();
+    lLbL0    .clear();
+    lLbLo    .clear();
+    lLam0    .clear();
+    lLamo    .clear();
     jPsiOMap .clear();
     pvRefMap .clear();
     ccRefMap .clear();
@@ -536,8 +577,6 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
     // Search for the map of lJPsi and lFull {{{
     if ( !nrc   ) return;
 
-
-
     int ij;
     int io;
     int nj = lJPsi.size();
@@ -597,6 +636,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
         // The subMap is list of the cuts used in  the particle
         if ( tktk != 0 )
         {
+            tktk->setpTkCut( true );
             rIter = parMap.find( pTks );
     
             // if find something
@@ -712,6 +752,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
         // The subMap is list of the cuts used in  the particle
         if ( tktk != 0 )
         {
+            tktk->setnTkCut( true );
             rIter = parMap.find( nTks );
     
             // if find something
@@ -791,6 +832,246 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
         }
         // Build pL0B end }}}
     } // build Lb->Jpsi+TkTk, TkTk->pKaon+nProton end }}}
+    { // build Lb->Jpsi+Lam0 Lam0->p pi {{{
+        // Build Lam0{{{
+        BPHTkTkBuilder* tktk = 0;
+        std::string pName = "Proton";
+        std::string nName = "Pion";
+        double pMass = BPHParticleMasses::protonMass;
+        double nMass = BPHParticleMasses::  pionMass;
+        double pSigma= BPHParticleMasses::protonMSigma;
+        double nSigma= BPHParticleMasses::  pionMSigma;
+    
+        if ( recoLam0 )
+        {
+            if      ( usePF ) tktk = new BPHTkTkBuilder( es,
+                        BPHRecoBuilder::createCollection( pfCands ),
+                        BPHRecoBuilder::createCollection( pfCands ),
+                        pName, pMass, pSigma,
+                        nName, nMass, nSigma
+                        );
+            else if ( usePC ) tktk = new BPHTkTkBuilder( es,
+                        BPHRecoBuilder::createCollection( pcCands ),
+                        BPHRecoBuilder::createCollection( pcCands ),
+                        pName, pMass, pSigma,
+                        nName, nMass, nSigma
+                        );
+            else if ( useGP ) tktk = new BPHTkTkBuilder( es,
+                        BPHRecoBuilder::createCollection( gpCands ),
+                        BPHRecoBuilder::createCollection( gpCands ),
+                        pName, pMass, pSigma,
+                        nName, nMass, nSigma
+                        );
+        }
+        // Set cut value 
+        // use "Name"(recorded in enum) to find particle, then there is a subMap
+        // The subMap is list of the cuts used in  the particle
+        if ( tktk != 0 )
+        {
+            tktk->setpTkCut( true );
+            rIter = parMap.find( Lam0 );
+    
+            // if find something
+            if ( rIter != rIend )
+            {
+                const map<parType,double>& _parMap = rIter->second;
+                map<parType,double>::const_iterator _parIter = _parMap.begin();
+                map<parType,double>::const_iterator _parIend = _parMap.end();
+                while ( _parIter != _parIend )
+                {
+                    // set cut value by switch
+                    const map<parType,double>::value_type& _parEntry = *_parIter++;
+                    parType _parId      = _parEntry.first;
+                    double  _parValue   = _parEntry.second;
+                    switch( _parId )
+                    {
+                        case ptMin          : tktk->setPtMin       ( _parValue ); break;
+                        case etaMax         : tktk->setEtaMax      ( _parValue ); break;
+                        case probMin        : tktk->setProbMin     ( _parValue ); break;
+                        case mLam0Min       : tktk->setMassMin     ( _parValue ); break;
+                        case mLam0Max       : tktk->setMassMax     ( _parValue ); break;
+                        case writeCandidate : writepTks =          ( _parValue > 0 ); break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            // set cut value end
+
+            lLam0 = tktk->build();
+            delete   tktk;
+        }
+        
+        unsigned nLam0 = lLam0.size();
+        // Build Lam0 end }}}
+    
+        // Build and dump Lb->Jpsi+Lam0 {{{
+        if ( nLam0 && recoLbL0 )
+        {
+            BPHLambda0_bToJPsiTkTkBuilder* _lb = new BPHLambda0_bToJPsiTkTkBuilder( es, lJPsi, lLam0 );
+            // Set cut value 
+            // use "Name"(recorded in enum) to find particle, then there is a subMap
+            // The subMap is list of the cuts used in  the particle
+            rIter = parMap.find( LbL0 );
+    
+            // if find something
+            if ( rIter != rIend )
+            {
+                const map<parType,double>& _parMap = rIter->second;
+                map<parType,double>::const_iterator _parIter = _parMap.begin();
+                map<parType,double>::const_iterator _parIend = _parMap.end();
+                while ( _parIter != _parIend )
+                {
+                    // set cut value by switch
+                    const map<parType,double>::value_type& _parEntry = *_parIter++;
+                    parType _parId      = _parEntry.first;
+                    double  _parValue   = _parEntry.second;
+                    switch( _parId )
+                    {
+                        case mPsiMin        : _lb->setJPsiMassMin ( _parValue ); break;
+                        case mPsiMax        : _lb->setJPsiMassMax ( _parValue ); break;
+                        case mLam0Min       : _lb->setTkTkMassMin ( _parValue ); break;
+                        case mLam0Max       : _lb->setTkTkMassMax ( _parValue ); break;
+                        case massMin        : _lb->setMassMin     ( _parValue ); break;
+                        case massMax        : _lb->setMassMax     ( _parValue ); break;
+                        case probMin        : _lb->setProbMin     ( _parValue ); break;
+    
+                        case mFitMin        : _lb->setMassFitMin  ( _parValue ); break;
+                        case mFitMax        : _lb->setMassFitMax  ( _parValue ); break;
+                        case constrMJPsi    : _lb->setConstr      ( _parValue ); break;
+                        case writeCandidate : writepL0B =     ( _parValue > 0 ); break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            // set cut value end
+
+            lLbL0 = _lb->build();
+            delete   _lb;
+        }
+        // Build LbL0 end }}}
+    } // build Lb->Jpsi+Lam0, Lam0->p pi end }}}
+    { // build Lb->Jpsi+Lamo Lamo->pi p {{{
+        // Build Lamo{{{
+        BPHTkTkBuilder* tktk = 0;
+        std::string pName = "Pion";
+        std::string nName = "Proton";
+        double pMass = BPHParticleMasses::  pionMass;
+        double nMass = BPHParticleMasses::protonMass;
+        double pSigma= BPHParticleMasses::  pionMSigma;
+        double nSigma= BPHParticleMasses::protonMSigma;
+    
+        if ( recoLamo )
+        {
+            if      ( usePF ) tktk = new BPHTkTkBuilder( es,
+                        BPHRecoBuilder::createCollection( pfCands ),
+                        BPHRecoBuilder::createCollection( pfCands ),
+                        pName, pMass, pSigma,
+                        nName, nMass, nSigma
+                        );
+            else if ( usePC ) tktk = new BPHTkTkBuilder( es,
+                        BPHRecoBuilder::createCollection( pcCands ),
+                        BPHRecoBuilder::createCollection( pcCands ),
+                        pName, pMass, pSigma,
+                        nName, nMass, nSigma
+                        );
+            else if ( useGP ) tktk = new BPHTkTkBuilder( es,
+                        BPHRecoBuilder::createCollection( gpCands ),
+                        BPHRecoBuilder::createCollection( gpCands ),
+                        pName, pMass, pSigma,
+                        nName, nMass, nSigma
+                        );
+        }
+        // Set cut value 
+        // use "Name"(recorded in enum) to find particle, then there is a subMap
+        // The subMap is list of the cuts used in  the particle
+        if ( tktk != 0 )
+        {
+            tktk->setnTkCut( true );
+            rIter = parMap.find( Lamo );
+    
+            // if find something
+            if ( rIter != rIend )
+            {
+                const map<parType,double>& _parMap = rIter->second;
+                map<parType,double>::const_iterator _parIter = _parMap.begin();
+                map<parType,double>::const_iterator _parIend = _parMap.end();
+                while ( _parIter != _parIend )
+                {
+                    // set cut value by switch
+                    const map<parType,double>::value_type& _parEntry = *_parIter++;
+                    parType _parId      = _parEntry.first;
+                    double  _parValue   = _parEntry.second;
+                    switch( _parId )
+                    {
+                        case ptMin          : tktk->setPtMin       ( _parValue ); break;
+                        case etaMax         : tktk->setEtaMax      ( _parValue ); break;
+                        case probMin        : tktk->setProbMin     ( _parValue ); break;
+                        case mLam0Min       : tktk->setMassMin     ( _parValue ); break;
+                        case mLam0Max       : tktk->setMassMax     ( _parValue ); break;
+                        case writeCandidate : writepTks =          ( _parValue > 0 ); break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            // set cut value end
+
+            lLamo = tktk->build();
+            delete   tktk;
+        }
+        
+        unsigned nLamo = lLamo.size();
+        // Build Lamo end }}}
+    
+        // Build and dump Lb->Jpsi+Lamo {{{
+        if ( nLamo && recoLbLo )
+        {
+            BPHLambda0_bToJPsiTkTkBuilder* _lb = new BPHLambda0_bToJPsiTkTkBuilder( es, lJPsi, lLam0 );
+            // Set cut value 
+            // use "Name"(recorded in enum) to find particle, then there is a subMap
+            // The subMap is list of the cuts used in  the particle
+            rIter = parMap.find( LbLo );
+    
+            // if find something
+            if ( rIter != rIend )
+            {
+                const map<parType,double>& _parMap = rIter->second;
+                map<parType,double>::const_iterator _parIter = _parMap.begin();
+                map<parType,double>::const_iterator _parIend = _parMap.end();
+                while ( _parIter != _parIend )
+                {
+                    // set cut value by switch
+                    const map<parType,double>::value_type& _parEntry = *_parIter++;
+                    parType _parId      = _parEntry.first;
+                    double  _parValue   = _parEntry.second;
+                    switch( _parId )
+                    {
+                        case mPsiMin        : _lb->setJPsiMassMin ( _parValue ); break;
+                        case mPsiMax        : _lb->setJPsiMassMax ( _parValue ); break;
+                        case mLam0Min       : _lb->setTkTkMassMin ( _parValue ); break;
+                        case mLam0Max       : _lb->setTkTkMassMax ( _parValue ); break;
+                        case massMin        : _lb->setMassMin     ( _parValue ); break;
+                        case massMax        : _lb->setMassMax     ( _parValue ); break;
+                        case probMin        : _lb->setProbMin     ( _parValue ); break;
+    
+                        case mFitMin        : _lb->setMassFitMin  ( _parValue ); break;
+                        case mFitMax        : _lb->setMassFitMax  ( _parValue ); break;
+                        case constrMJPsi    : _lb->setConstr      ( _parValue ); break;
+                        case writeCandidate : writepL0B =     ( _parValue > 0 ); break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            // set cut value end
+
+            lLbLo = _lb->build();
+            delete   _lb;
+        }
+        // Build LbLo end }}}
+    } // build Lb->Jpsi+Lamo, Lamo->pi p end }}}
 }
 
 
@@ -811,6 +1092,10 @@ void lbWriteSpecificDecay::setRecoParameters( const edm::ParameterSet& ps ) {
         case nTks : reconTks  = true; writenTks   = writeCandidate; break;
         case pL0B : recopL0B  = true; writepL0B   = writeCandidate; break;
         case nL0B : reconL0B  = true; writenL0B   = writeCandidate; break;
+        case Lam0 : recoLam0  = true; writeLam0   = writeCandidate; break;
+        case Lamo : recoLamo  = true; writeLamo   = writeCandidate; break;
+        case LbL0 : recoLbL0  = true; writeLbL0   = writeCandidate; break;
+        case LbLo : recoLbLo  = true; writeLbLo   = writeCandidate; break;
     }
 
 

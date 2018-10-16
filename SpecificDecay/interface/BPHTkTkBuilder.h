@@ -66,6 +66,8 @@ class BPHTkTkBuilder {
   void setMassMax( double m   );
   void setProbMin( double p   );
   void setConstr ( double mass, double sigma );
+  void setpTkCut ( bool flag ) { ptkCut = flag; }
+  void setnTkCut ( bool flag ) { ntkCut = flag; }
 
   /// get current cuts
   double getPtMin  () const;
@@ -100,6 +102,7 @@ class BPHTkTkBuilder {
   double cMass;
   double cSigma;
   bool updated;
+  bool ptkCut, ntkCut;
 
   std::vector<BPHPlusMinusConstCandPtr> tktkList;
 
