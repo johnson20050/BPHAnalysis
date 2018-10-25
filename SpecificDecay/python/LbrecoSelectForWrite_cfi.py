@@ -63,8 +63,8 @@ recoSelect = cms.VPSet(
     cms.PSet( name = cms.string( 'LbL0' ),
         mPsiMin = cms.double( 3.096 - 0.150 ),
         mPsiMax = cms.double( 3.096 + 0.150 ),
-        mLam0Min= cms.double( 1.115683 - 0.009 ),
-        mLam0Max= cms.double( 1.115683 + 0.009 ),
+        mLam0Min= cms.double( 1.115683 - 0.1 ),
+        mLam0Max= cms.double( 1.115683 + 0.1 ),
         # ptMin is proton pt cut
         massMin = cms.double( 5.00 ),
         massMax = cms.double( 6.00 ),
@@ -85,8 +85,8 @@ recoSelect = cms.VPSet(
     cms.PSet( name = cms.string( 'LbLo' ),
         mPsiMin = cms.double( 3.096 - 0.150 ),
         mPsiMax = cms.double( 3.096 + 0.150 ),
-        mLam0Min= cms.double( 1.115683 - 0.009 ),
-        mLam0Max= cms.double( 1.115683 + 0.009 ),
+        mLam0Min= cms.double( 1.115683 - 0.1 ),
+        mLam0Max= cms.double( 1.115683 + 0.1 ),
         # ptMin is proton pt cut
         massMin = cms.double( 5.00 ),
         massMax = cms.double( 6.00 ),

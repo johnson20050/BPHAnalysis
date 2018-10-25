@@ -243,10 +243,10 @@ void lbWriteSpecificDecay::produce( edm::Event& ev,
   if ( writenL0B ) write( ev, lnL0B, nL0BName , WriteEvent ); 
 
   // #Lambda^0_b -> J/#psi + #Lambda^0
-  if ( writeLbL0 ) write( ev, lLbL0, LbL0Name , WriteEvent );
   if ( writeLbL0 ) write( ev, lLam0, Lam0Name , WriteEvent );
-  if ( writeLbLo ) write( ev, lLbLo, LbLoName , WriteEvent );
   if ( writeLbLo ) write( ev, lLamo, LamoName , WriteEvent );
+  if ( writeLbL0 ) write( ev, lLbL0, LbL0Name , WriteEvent );
+  if ( writeLbLo ) write( ev, lLbLo, LbLoName , WriteEvent );
   return;
 }
 
@@ -890,7 +890,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
                         case probMin        : tktk->setProbMin     ( _parValue ); break;
                         case mLam0Min       : tktk->setMassMin     ( _parValue ); break;
                         case mLam0Max       : tktk->setMassMax     ( _parValue ); break;
-                        case writeCandidate : writepTks =          ( _parValue > 0 ); break;
+                        case writeCandidate : writeLam0 =          ( _parValue > 0 ); break;
                         default:
                             break;
                     }
@@ -939,7 +939,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
                         case mFitMin        : _lb->setMassFitMin  ( _parValue ); break;
                         case mFitMax        : _lb->setMassFitMax  ( _parValue ); break;
                         case constrMJPsi    : _lb->setConstr      ( _parValue ); break;
-                        case writeCandidate : writepL0B =     ( _parValue > 0 ); break;
+                        case writeCandidate : writeLbL0 =     ( _parValue > 0 ); break;
                         default:
                             break;
                     }
@@ -1010,7 +1010,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
                         case probMin        : tktk->setProbMin     ( _parValue ); break;
                         case mLam0Min       : tktk->setMassMin     ( _parValue ); break;
                         case mLam0Max       : tktk->setMassMax     ( _parValue ); break;
-                        case writeCandidate : writepTks =          ( _parValue > 0 ); break;
+                        case writeCandidate : writeLamo =          ( _parValue > 0 ); break;
                         default:
                             break;
                     }
@@ -1059,7 +1059,7 @@ void lbWriteSpecificDecay::fill( edm::Event& ev,
                         case mFitMin        : _lb->setMassFitMin  ( _parValue ); break;
                         case mFitMax        : _lb->setMassFitMax  ( _parValue ); break;
                         case constrMJPsi    : _lb->setConstr      ( _parValue ); break;
-                        case writeCandidate : writepL0B =     ( _parValue > 0 ); break;
+                        case writeCandidate : writeLbLo =     ( _parValue > 0 ); break;
                         default:
                             break;
                     }
