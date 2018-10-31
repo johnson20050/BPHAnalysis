@@ -30,8 +30,9 @@ typedef std::vector < myMuon > myMuonList;
 //------------------------------------------------------------------------------
 //   Class Definition
 //------------------------------------------------------------------------------
-class TrackProducer:public edm::stream::EDFilter <> {
-  public:
+class TrackProducer:public edm::stream::EDFilter <>
+{
+public:
     explicit TrackProducer(const edm::ParameterSet &);
     ~TrackProducer();
     static void fillDescriptions(edm::ConfigurationDescriptions & descriptions);
@@ -40,7 +41,7 @@ class TrackProducer:public edm::stream::EDFilter <> {
     bool IsSelectedTrack(const myTrack &) const;
     bool IsVetoTrack(const myTrack &) const;
     bool IsMuonTrack(const myTrack & tk, const myMuonList & muList) const;
-  private:
+private:
     virtual bool filter(edm::Event &, const edm::EventSetup &) override;
     bool hasBfield() const { return ownBfield; }
     bool hasTkGeometry() const { return ownTkGeometry; }
@@ -72,9 +73,9 @@ class TrackProducer:public edm::stream::EDFilter <> {
 //------------------------------------------------------------------------------
 
 TrackProducer::TrackProducer(const edm::ParameterSet & iConfig):
-_bsToken( consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("bssrc"))),
-_muonToken(consumes < myMuonList > (iConfig.getParameter < edm::InputTag > ("muonsrc"))),
-_tkToken(consumes < myTrackList > (iConfig.getParameter < edm::InputTag > ("tracksrc"))),
+    _bsToken( consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("bssrc"))),
+    _muonToken(consumes < myMuonList > (iConfig.getParameter < edm::InputTag > ("muonsrc"))),
+    _tkToken(consumes < myTrackList > (iConfig.getParameter < edm::InputTag > ("tracksrc"))),
     ownBfield(false), ownTkGeometry(false), ownBS(false)
 {
     produces < myTrackList > ();
@@ -83,9 +84,8 @@ _tkToken(consumes < myTrackList > (iConfig.getParameter < edm::InputTag > ("trac
     tkNhitsCut = iConfig.getParameter < int >("tkNhitsCut");
     impactParameterSigCut = iConfig.getParameter < double >("impactParameterSigCut");
     std::vector < std::string > qual = iConfig.getParameter < std::vector < std::string > >("trackQualities");
-    for (unsigned int ndx = 0; ndx < qual.size(); ndx++) {
+    for (unsigned int ndx = 0; ndx < qual.size(); ndx++)
         qualities.push_back(reco::TrackBase::qualityByName(qual[ndx]));
-    }
 }
 
 TrackProducer::~TrackProducer()
@@ -113,12 +113,10 @@ bool TrackProducer::filter(edm::Event & iEvent, const edm::EventSetup & iSetup)
     selectedTracks->reserve(_tkHandle->size());
 
     // Object selection
-    for (const myTrack & tk:*(_tkHandle.product())) 
+    for (const myTrack & tk:*(_tkHandle.product()))
     {
-        if (IsVetoTrack(tk))
-            continue;
-        if (IsMuonTrack(tk, muList))
-            continue;
+        if (IsVetoTrack(tk)) continue;
+        if (IsMuonTrack(tk, muList)) continue;
         if (IsSelectedTrack(tk))
             selectedTracks->push_back(tk);
     }
@@ -138,7 +136,6 @@ bool TrackProducer::filter(edm::Event & iEvent, const edm::EventSetup & iSetup)
 //------------------------------------------------------------------------------
 
 bool TrackProducer::IsSelectedTrack(const myTrack & tk) const
-//bool TrackProducer::IsSelectedTrack( const myTrack& tk, const reco::BeamSpot& bs ) const
 {
     //if (tk.pt()<0.8)                                return false;
     //if (tk.track()->hitPattern().numberOfValidStripHits()<4) return false;
@@ -149,11 +146,15 @@ bool TrackProducer::IsSelectedTrack(const myTrack & tk) const
 
     // if 'trackQualities' are set, check the trackRef quality. Or skip such check.
     bool quality_ok = true;
-    if (qualities.size() != 0) 
+    if (qualities.size() != 0)
     {
         quality_ok = false;
-        for (unsigned int ndx_ = 0; ndx_ < qualities.size(); ndx_++) 
-            if (tmpRef->quality(qualities[ndx_])) { quality_ok = true; break; }
+        for (unsigned int ndx_ = 0; ndx_ < qualities.size(); ndx_++)
+            if (tmpRef->quality(qualities[ndx_]))
+            {
+                quality_ok = true;
+                break;
+            }
     }
     if (!quality_ok) return false;
     if (tmpRef->normalizedChi2() > tkChi2Cut) return false;
@@ -165,8 +166,8 @@ bool TrackProducer::IsSelectedTrack(const myTrack & tk) const
     TrajectoryStateClosestToBeamLine tscb(blsBuilder(initialFTS, beamspot));
 
     if (!tscb.isValid()) return false;
-    
-    // cut for displaced track 
+
+    // cut for displaced track
     if (tscb.transverseImpactParameter().significance() < impactParameterSigCut) return false;
 
     return true;
@@ -186,11 +187,13 @@ bool TrackProducer::IsVetoTrack(const myTrack & tk) const
 bool TrackProducer::IsMuonTrack(const myTrack & tk, const myMuonList & muList) const
 {
     bool isMuonTrack = false;
-  for (const myMuon & mu:muList) {
+    for (const myMuon & mu:muList)
+    {
         if (mu.track().isNonnull())
             continue;
         if (fabs(tk.pt() - mu.track()->pt()) < 0.00001 &&
-            fabs(tk.eta() - mu.track()->eta()) < 0.00001 && fabs(tk.phi() - mu.track()->phi()) < 0.00001) {
+                fabs(tk.eta() - mu.track()->eta()) < 0.00001 && fabs(tk.phi() - mu.track()->phi()) < 0.00001)
+        {
             isMuonTrack = true;
             break;
         }

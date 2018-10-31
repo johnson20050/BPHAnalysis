@@ -46,7 +46,6 @@ selectedTracks = cms.EDFilter(
     tracksrc = cms.InputTag("patSelectedTracks"),
     muonsrc = cms.InputTag("selectedPatMuons"),
 
-
     # cuts :
     # Select tracks using TrackBase::TrackQuality.
     # Select ALL tracks by leaving this vstring empty, which
