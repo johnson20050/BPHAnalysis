@@ -105,7 +105,8 @@ process.out = cms.OutputModule(
         "keep *_lbWriteSpecificDecay_*_bphAnalysis",
         "keep *_offlineBeamSpot_*_RECO",
         "keep *_offlinePrimaryVertices_*_RECO",
-        "keep *_genParticles__HLT"
+        "keep *_genParticles__HLT",
+        "keep *_TriggerResults__HLT",
     ),
     SelectEvents = cms.untracked.PSet( SelectEvents = cms.vstring('myfilterpath') )
 )

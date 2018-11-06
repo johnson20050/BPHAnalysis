@@ -16,7 +16,7 @@ recoSelect = cms.VPSet(
           ptMin = cms.double(  0.8 ),
          etaMax = cms.double(  2.5 ),
         massMin = cms.double(  1.00  ),
-        massMax = cms.double(  2.50  ),
+        massMax = cms.double(  4.00  ),
         probMin = cms.double( 0.01  ),
         writeCandidate = cms.bool( True )
     ),
@@ -28,7 +28,7 @@ recoSelect = cms.VPSet(
         massMax = cms.double( 6.00 ),
         probMin = cms.double( 0.02 ),
      massFitMin = cms.double( 5.40 ),
-     massFitMax = cms.double( 5.60 ),
+     massFitMax = cms.double( 5.90 ),
         constrMJPsi = cms.bool(  True ),
         writeCandidate = cms.bool( True )
     ),
@@ -36,7 +36,7 @@ recoSelect = cms.VPSet(
           ptMin = cms.double(  0.8 ),
          etaMax = cms.double(  2.5 ),
         massMin = cms.double(  1.00  ),
-        massMax = cms.double(  2.50  ),
+        massMax = cms.double(  4.00  ),
         probMin = cms.double( 0.01  ),
         writeCandidate = cms.bool( True )
     ),
