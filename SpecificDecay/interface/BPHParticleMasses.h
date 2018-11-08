@@ -52,6 +52,8 @@ class BPHParticleMasses {
   static const double   lambdaxMass;
   static const double      penQMass;
   static const double Lambda0_bMass;
+  static const double        bdMass;
+  static const double        bsMass;
   
   static const double        elMSigma;
   static const double      muonMSigma;
@@ -73,6 +75,8 @@ class BPHParticleMasses {
   static const double   lambdaxMWidth;
   static const double      penQMWidth;
   static const double Lambda0_bMWidth;
+  static const double        bdMWidth;
+  static const double        bsMWidth;
 
  private:
 

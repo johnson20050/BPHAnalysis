@@ -43,6 +43,8 @@ const double BPHParticleMasses::  lambda0Mass = 1.115683;
 const double BPHParticleMasses::  lambdaxMass = 1.405;   
 const double BPHParticleMasses::     penQMass = 4.380;
 const double BPHParticleMasses::Lambda0_bMass = 5.61951;
+const double BPHParticleMasses::       bdMass = 5.27953;
+const double BPHParticleMasses::       bsMass = 5.3663;
 
 const double BPHParticleMasses::      elMSigma = 0.000000011e-03;
 const double BPHParticleMasses::    muonMSigma = 0.0000000035;
@@ -65,3 +67,5 @@ const double BPHParticleMasses::  lambda0MWidth = 0.05;//asdf
 const double BPHParticleMasses::  lambdaxMWidth = 0.05;//asdf
 const double BPHParticleMasses::     penQMWidth = 0.05;//asdf
 const double BPHParticleMasses::Lambda0_bMWidth = 0.05;
+const double BPHParticleMasses::       bdMWidth = 0.5;
+const double BPHParticleMasses::       bsMWidth = 0.05;
