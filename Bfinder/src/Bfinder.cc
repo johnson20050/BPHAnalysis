@@ -858,7 +858,7 @@ void Bfinder::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                             //////////////////////////////////////////////////////////////////////////
                             mass_window[0] = 4.6;
                             mass_window[1] = 6.7;
-                            if(Bchannel_[7] == 1){
+                            if(Bchannel_[2] == 1){
                                 BranchOut2MuX_XtoTkTk(
                                     BInfo,
                                     input_tracks,
@@ -874,7 +874,7 @@ void Bfinder::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                                     0.3,
                                     PROTON_MASS,
                                     PION_MASS,
-                                    8,
+                                    3,
                                     1
                                 );
                             }
@@ -884,7 +884,7 @@ void Bfinder::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                             //////////////////////////////////////////////////////////////////////////
                             mass_window[0] = 4.6    ;
                             mass_window[1] = 6.7;
-                            if(Bchannel_[8] == 1){
+                            if(Bchannel_[3] == 1){
                                 BranchOut2MuX_XtoTkTk(
                                     BInfo,
                                     input_tracks,
@@ -900,7 +900,7 @@ void Bfinder::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                                     0.3,
                                     PION_MASS,
                                     PROTON_MASS,
-                                    9,
+                                    4,
                                     1
                                 );
                             }
